@@ -12,13 +12,14 @@ using System;
 
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-logger.Debug("init main");
+
 try
 {
     var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
     var environment = builder.Environment;
 
+    configuration.AddEnvironmentVariables();
     // add key valut...
 
     // Add services to the container.
@@ -43,7 +44,7 @@ try
 
     if (!environment.IsEnvironment("Local"))
     {
-        // use console logger
+        // ...
     }
     else
     {
@@ -61,7 +62,7 @@ try
     else
     {
         app.ConfigureStackifyLogging(configuration);
-        app.UseExceptionHandler("/Error");
+        app.UseExceptionHandler("/Home/Error");
         app.UseHsts();
     }
 
