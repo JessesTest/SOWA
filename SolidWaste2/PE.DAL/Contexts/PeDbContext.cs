@@ -15,11 +15,6 @@ namespace PE.DAL.Contexts
         public virtual DbSet<Email> Emails { get; set; }
         public virtual DbSet<Phone> Phones { get; set; }
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder)
-
-        //    // ...
-        //}
+        public PeDbContext(DbContextOptions<PeDbContext> options) : base(options) { }
     }
 }
