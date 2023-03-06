@@ -1,16 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Identity.DM;
 
-namespace Identity.DM;
-
-public class AspNetRole
+public partial class AspNetRole
 {
-    [Key]
-    [StringLength(128)]
-    public string Id { get; set; }
+    public AspNetRole()
+    {
+        AspNetRoleClaims = new HashSet<AspNetRoleClaim>();
+        Users = new HashSet<AspNetUser>();
+    }
 
-    [Required]
-    [StringLength(256)]
-    public string Name { get; set; }
-    
-    public virtual ICollection<AspNetUser> AspNetUsers { get; set; }
+    public string Id { get; set; } = null!;
+    public string? Name { get; set; }
+    public string? NormalizedName { get; set; }
+    public string? ConcurrencyStamp { get; set; }
+
+    public virtual ICollection<AspNetRoleClaim> AspNetRoleClaims { get; set; }
+
+    public virtual ICollection<AspNetUser> Users { get; set; }
 }

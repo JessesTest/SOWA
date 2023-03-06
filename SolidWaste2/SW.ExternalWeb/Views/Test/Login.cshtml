@@ -1,0 +1,23 @@
+﻿@model Microsoft.AspNetCore.Identity.SignInResult
+@{
+}
+<table>
+    <tbody>
+        <tr>
+            <td>Succeeded</td>
+            <td>@Model.Succeeded</td>
+        </tr>
+        <tr>
+            <td>IsLockedOut</td>
+            <td>@Model.IsLockedOut</td>
+        </tr>
+        <tr>
+            <td>IsNotAllowed</td>
+            <td>@Model.IsNotAllowed</td>
+        </tr>
+        <tr>
+            <td>RequiresTwoFactor</td>
+            <td>@Model.RequiresTwoFactor</td>
+        </tr>
+    </tbody>
+</table>

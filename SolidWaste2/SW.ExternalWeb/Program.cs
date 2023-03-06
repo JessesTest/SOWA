@@ -1,6 +1,8 @@
 using Common.Extensions;
 using Identity.BL.Extensions;
 using Identity.DAL.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
 using PE.BL.Extensions;
@@ -8,6 +10,7 @@ using PE.DAL.Extensions;
 using StackifyLib;
 using SW.BLL.Extensions;
 using SW.DAL.Extensions;
+using SW.ExternalWeb.Identity;
 using System;
 
 
@@ -32,6 +35,7 @@ try
             mvcOptions.EnableEndpointRouting = false;
         });
 
+    // our services
     builder.Services
         .AddCommonServices(configuration)
         .AddPersonEntityDbContext(configuration)
@@ -41,6 +45,19 @@ try
         .AddSolidWasteDbContext(configuration)
         .AddSolidWasteServices();
 
+    // Session state
+    builder.Services
+        .AddDistributedMemoryCache()
+        .AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromHours(12);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
+
+    // identity
+    builder.Services
+        .AddIdentity(configuration.GetConnectionString("Identity"));
 
     if (!environment.IsEnvironment("Local"))
     {
@@ -74,7 +91,7 @@ try
     //app.UseAuthentication()
     app.UseAuthorization();
 
-    //app.UseSession()
+    app.UseSession();   // after UseRouting() and before Map...()
 
     app.MapRazorPages();
     app.MapDefaultControllerRoute();
