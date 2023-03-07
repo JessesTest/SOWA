@@ -1,4 +1,5 @@
-﻿using Common.Services.Blob;
+﻿using Common.Services.AddressValidation;
+using Common.Services.Blob;
 using Common.Services.Email;
 using Common.Services.Sms;
 using Common.Web.Services.Common;
@@ -18,7 +19,8 @@ public static class ServiceCollectionExtensions
             .AddTwilioService(configuration)
             .AddAzureServices(configuration)
             .AddBlobStorageService(configuration)
-            .AddGraphService(configuration);
+            .AddGraphService(configuration)
+            .AddGisAddressService(configuration);
     }
 
     public static IServiceCollection AddSendGridService(this IServiceCollection services)
@@ -55,4 +57,16 @@ public static class ServiceCollectionExtensions
             .Configure<AuthSettings>(configuration.GetSection(authSection))
             .AddHttpContextAccessor()
             .AddTransient<IGraphService, GraphService>();
+
+    public static IServiceCollection AddGisAddressService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddTransient<IAddressValidationService, GisAddressService>()
+            .AddHttpClient("GisAddress", client =>
+            {
+                client.BaseAddress = new Uri(configuration["GisAddress:Url"]);
+            });
+
+        return services;
+    }
 }
