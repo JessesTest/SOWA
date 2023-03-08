@@ -1,5 +1,6 @@
 ﻿@model SW.ExternalWeb.Identity.ApplicationUser
 @{
+    ViewData["Title"] = "Find User Test";
 }
 
 @if (Model is null)
@@ -30,3 +31,5 @@ else
         </tbody>
     </table>
 }
+
+<p><a asp-action="Index">Back</a></p>
