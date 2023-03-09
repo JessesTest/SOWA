@@ -1,0 +1,35 @@
+﻿@model SW.ExternalWeb.Identity.ApplicationUser
+@{
+    ViewData["Title"] = "Find User Test";
+}
+
+@if (Model is null)
+{
+    <p>User not found</p>
+}
+else
+{
+    <table>
+        <caption>User Result</caption>
+        <tbody>
+            <tr>
+                <td>Email</td>
+                <td>@Model.Email</td>
+            </tr>
+            <tr>
+                <td>Id</td>
+                <td>@Model.Id</td>
+            </tr>
+            <tr>
+                <td>UserId</td>
+                <td>@Model.UserId</td>
+            </tr>
+            <tr>
+                <td>UserName</td>
+                <td>@Model.UserName</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+<p><a asp-action="Index">Back</a></p>

@@ -1,6 +1,8 @@
 using Common.Extensions;
 using Identity.BL.Extensions;
 using Identity.DAL.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
 using PE.BL.Extensions;
@@ -8,17 +10,19 @@ using PE.DAL.Extensions;
 using StackifyLib;
 using SW.BLL.Extensions;
 using SW.DAL.Extensions;
+using SW.ExternalWeb.Identity;
 using System;
 
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-logger.Debug("init main");
+
 try
 {
     var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
     var environment = builder.Environment;
 
+    configuration.AddEnvironmentVariables();
     // add key valut...
 
     // Add services to the container.
@@ -31,6 +35,7 @@ try
             mvcOptions.EnableEndpointRouting = false;
         });
 
+    // our services
     builder.Services
         .AddCommonServices(configuration)
         .AddPersonEntityDbContext(configuration)
@@ -40,10 +45,23 @@ try
         .AddSolidWasteDbContext(configuration)
         .AddSolidWasteServices();
 
+    // Session state
+    builder.Services
+        .AddDistributedMemoryCache()
+        .AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromHours(12);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
+
+    // identity
+    builder.Services
+        .AddIdentity(configuration.GetConnectionString("Identity"));
 
     if (!environment.IsEnvironment("Local"))
     {
-        // use console logger
+        // ...
     }
     else
     {
@@ -61,7 +79,7 @@ try
     else
     {
         app.ConfigureStackifyLogging(configuration);
-        app.UseExceptionHandler("/Error");
+        app.UseExceptionHandler("/Home/Error");
         app.UseHsts();
     }
 
@@ -73,7 +91,7 @@ try
     //app.UseAuthentication()
     app.UseAuthorization();
 
-    //app.UseSession()
+    app.UseSession();   // after UseRouting() and before Map...()
 
     app.MapRazorPages();
     app.MapDefaultControllerRoute();

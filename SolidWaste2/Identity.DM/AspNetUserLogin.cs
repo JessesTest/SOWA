@@ -1,25 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿namespace Identity.DM;
 
-namespace Identity.DM;
-
-public class AspNetUserLogin
+public partial class AspNetUserLogin
 {
-    [Key]
-    [Column(Order = 1)]
-    [StringLength(128)]
-    public string LoginProvider { get; set; }
+    public string LoginProvider { get; set; } = null!;
+    public string ProviderKey { get; set; } = null!;
+    public string? ProviderDisplayName { get; set; }
+    public string UserId { get; set; } = null!;
 
-    [Key]
-    [Column(Order = 2)]
-    [StringLength(128)]
-    public string ProviderKey { get; set; }
-
-    [Key]
-    [Column(Order = 3)]
-    [ForeignKey("User")]
-    [StringLength(128)]
-    public string UserId { get; set; }
-
-    public AspNetUser User { get; set; }
+    public virtual AspNetUser User { get; set; } = null!;
 }

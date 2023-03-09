@@ -40,5 +40,7 @@ namespace SW.DAL.Contexts
         public virtual DbSet<WarningLetter> WarningLetters { get; set; }
         public virtual DbSet<WorkOrder> WorkOrders { get; set; }
         public virtual DbSet<WorkOrderLegacy> WorkOrderLegacies { get; set; }
+
+        public SwDbContext(DbContextOptions<SwDbContext> options) : base(options) { }
     }
 }
