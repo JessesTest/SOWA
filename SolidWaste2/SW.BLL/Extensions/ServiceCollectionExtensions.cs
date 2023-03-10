@@ -1,15 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SW.BLL.Services;
 
 namespace SW.BLL.Extensions;
 
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddSolidWasteServices(this IServiceCollection services)
-        => services;
+        => services
+            .AddTransient<ICustomerService, CustomerService>();
 
 }

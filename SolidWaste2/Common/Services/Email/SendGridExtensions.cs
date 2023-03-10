@@ -1,4 +1,6 @@
-﻿namespace Common.Services.Email;
+﻿using Twilio.Rest.Api.V2010.Account.Usage.Record;
+
+namespace Common.Services.Email;
 
 public static class SendGridExtensions
 {
@@ -44,5 +46,29 @@ public static class SendGridExtensions
             TextContent = textContent,
             To = new[] { to }
         });
+    }
+
+    public static SendEmailDto SetFrom(this SendEmailDto dto, string email, string name = null)
+    {
+        dto.From = new SendGridEmailAddress(email, name);
+
+        return dto;
+    }
+
+    public static SendEmailDto AddTo(this SendEmailDto dto, string email, string name = null)
+    {
+        ICollection<SendGridEmailAddress> tos;
+
+        if (dto.To == null)
+        {
+            tos = new List<SendGridEmailAddress>();
+            dto.To = tos;
+        }
+        else
+        {
+            tos = (ICollection<SendGridEmailAddress>)dto.To;
+        }
+        tos.Add(new SendGridEmailAddress(email, name));
+        return dto;
     }
 }

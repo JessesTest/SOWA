@@ -68,7 +68,7 @@ namespace PE.DM
 
         public bool Override { get; set; }
 
-        public Geography Location { get; set; }
+        //public Geography Location { get; set; }
 
 
         public override bool Equals(object obj)
