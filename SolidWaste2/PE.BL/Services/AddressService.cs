@@ -1,51 +1,72 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PE.DAL.Contexts;
 using PE.DM;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PE.BL.Services
+namespace PE.BL.Services;
+
+public class AddressService : IAddressService
 {
-    public class AddressService : IAddressService
+    private readonly IDbContextFactory<PeDbContext> contextFactory;
+
+    public AddressService(IDbContextFactory<PeDbContext> contextFactory)
     {
-        private readonly IDbContextFactory<PeDbContext> contextFactory;
+        this.contextFactory = contextFactory;
+    }
 
-        public AddressService(IDbContextFactory<PeDbContext> dbFactory)
-        {
-            this.contextFactory = dbFactory;
-        }
+    public async Task Add(Address address)
+    {
+        address.AddDateTime = DateTime.Now;
 
-        public Task Add(Address address)
-        {
-            throw new NotImplementedException();
-        }
+        using var db = contextFactory.CreateDbContext();
+        db.Addresses.Add(address);
+        await db.SaveChangesAsync();
+    }
 
-        public Task<ICollection<Address>> GetAll(bool includeDeleted)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<ICollection<Address>> GetAll(bool includeDeleted)
+    {
+        using var db = contextFactory.CreateDbContext();
+        return await db.Addresses
+            .AsNoTracking()
+            .ToListAsync();
+    }
 
-        public Task<Address> GetById(int id)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<Address> GetById(int id)
+    {
+        using var db = contextFactory.CreateDbContext();
+        return await db.Addresses
+            .Where(e => e.Id == id)
+            .AsNoTracking()
+            .SingleOrDefaultAsync();
+    }
 
-        public Task<ICollection<Address>> GetByPerson(int personId, bool includeDeleted)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<ICollection<Address>> GetByPerson(int personId, bool includeDeleted)
+    {
+        using var db = contextFactory.CreateDbContext();
+        IQueryable<Address> query = db.Addresses.Where(e => e.PersonEntityID == personId);
+        if (!includeDeleted)
+            query = query.Where(e => e!.Delete);
 
-        public Task Remove(Address address)
-        {
-            throw new NotImplementedException();
-        }
+        return await query
+            .AsNoTracking()
+            .ToListAsync();
+    }
 
-        public Task Update(Address address)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task Remove(Address address)
+    {
+        address.DelDateTime = DateTime.Now;
+        address.Delete = true;
+
+        using var db = contextFactory.CreateDbContext();
+        db.Addresses.Update(address);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task Update(Address address)
+    {
+        address.ChgDateTime = DateTime.Now;
+
+        using var db = contextFactory.CreateDbContext();
+        db.Addresses.Update(address);
+        await db.SaveChangesAsync();
     }
 }

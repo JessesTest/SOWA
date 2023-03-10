@@ -10,8 +10,4 @@ public interface IPhoneService
     Task Add(Phone phone);
     Task Update(Phone phone);
     Task Remove(Phone phone);
-
-    Task SetDefaultPhone(int personEntityId, int phoneId);
-    Task SetDefaultEmail(int personEntityId, int emailId);
-    Task SetDefaultAddress(int personEntityId, int addressId);
 }

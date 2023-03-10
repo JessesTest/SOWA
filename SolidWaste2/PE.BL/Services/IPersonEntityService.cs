@@ -9,4 +9,9 @@ public interface IPersonEntityService
     Task Add(PersonEntity personEntity);
     Task Update(PersonEntity personEntity);
     Task Remove(PersonEntity personEntity);
+    Task<PersonEntity> GetBySystemAndCode(string system, int code);
+
+    Task SetDefaultPhone(int personEntityId, int phoneId);
+    Task SetDefaultEmail(int personEntityId, int emailId);
+    Task SetDefaultAddress(int personEntityId, int addressId);
 }

@@ -1,51 +1,75 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PE.DAL.Contexts;
 using PE.DM;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PE.BL.Services
+namespace PE.BL.Services;
+
+public class EmailService : IEmailService
 {
-    public class EmailService : IEmailService
+    private readonly IDbContextFactory<PeDbContext> contextFactory;
+
+    public EmailService(IDbContextFactory<PeDbContext> contextFactory)
     {
-        private readonly IDbContextFactory<PeDbContext> contextFactory;
+        this.contextFactory = contextFactory;
+    }
 
-        public EmailService(IDbContextFactory<PeDbContext> contextFactory)
-        {
-            this.contextFactory = contextFactory;
-        }
+    public async Task Add(Email email)
+    {
+        email.AddDateTime = DateTime.Now;
 
-        public void Add(Email email)
-        {
-            throw new NotImplementedException();
-        }
+        using var db = contextFactory.CreateDbContext();
+        db.Emails.Add(email);
+        await db.SaveChangesAsync();
+    }
 
-        public Task<ICollection<Email>> GetAll(bool includeDeleted)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<ICollection<Email>> GetAll(bool includeDeleted)
+    {
+        using var db = contextFactory.CreateDbContext();
+        return await db.Emails
+            .AsNoTracking()
+            .ToListAsync();
+    }
 
-        public Task<Email> GetById(int id)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<Email> GetById(int id)
+    {
+        using var db = contextFactory.CreateDbContext();
+        return await db.Emails
+            .Where(e => e.Id == id)
+            .AsNoTracking()
+            .SingleOrDefaultAsync();
+    }
 
-        public Task<ICollection<Email>> GetByPerson(int personId, bool includeDeleted)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<ICollection<Email>> GetByPerson(int personId, bool includeDeleted)
+    {
+        using var db = contextFactory.CreateDbContext();
+        IQueryable<Email> query = db.Emails
+            .Where(e => e.PersonEntityID == personId)
+            .Include(e => e.Code);
 
-        public void Remove(Email email)
-        {
-            throw new NotImplementedException();
-        }
+        if (!includeDeleted)
+            query = query.Where(e => !e.Delete);
 
-        public void Update(Email email)
-        {
-            throw new NotImplementedException();
-        }
+        return await query
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task Remove(Email email)
+    {
+        email.Delete = true;
+        email.DelDateTime = DateTime.Now;
+
+        using var db = contextFactory.CreateDbContext();
+        db.Emails.Update(email);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task Update(Email email)
+    {
+        email.ChgDateTime = DateTime.Now;
+
+        using var db = contextFactory.CreateDbContext();
+        db.Emails.Update(email);
+        await db.SaveChangesAsync();
     }
 }
