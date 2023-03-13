@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Identity.DAL\Identity.DAL.csproj" />
+    <ProjectReference Include="..\PE.BL\PE.BL.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,114 @@
+﻿@model SW.ExternalWeb.Models.Account.RegisterViewModel
+@{
+    ViewBag.Title = "Register";
+}
+
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-md-6 col-xs-12">
+            @*<div class="row form-group">
+                    <div class="col-xs-12">
+                        <h2>Create a new account</h2>
+                        @Html.ValidationSummary("", new { @class = "text-danger" })
+                    </div>
+                </div>*@
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.UserName, new { @class = "content-label" })
+                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.Email, new { @class = "content-label" })
+                    (Email address will need to be confirmed)
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.Code, new { @class = "content-label" })
+                    <a class="questionbutton" href="#pinFinderpopup" id="pinFinder">(?)</a>
+                    @Html.TextBoxFor(m => m.Code, new { @class = "form-control text-uppercase" })
+                    @Html.ValidationMessageFor(m => m.Code, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.FullName, new { @class = "content-label" })
+                    <a class="questionbutton" href="#fullNameFinderpopup" id="pinFinder">(?)</a>
+                    @Html.TextBoxFor(m => m.FullName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.Password, new { @class = "content-label" })
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.ConfirmPassword, new { @class = "content-label" })
+                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div id="registerImage" class="col-md-12 hidden-sm hidden-xs">
+                    <img url="~/images/backgrounds/toppartialCityofTopekaBlankBillExample.png" />
+                </div>
+                <div class="col-md-12 hidden-sm hidden-xs">
+                    <div class="row">
+                        <div class="col-md-12" align="center">
+                            <hr style="margin-bottom: 5px; margin-top: 5px;" />
+                            <text style="font-size: 18px;">Problems Registering?</text>
+                            <hr style="margin-top: 5px;" />
+                            If the top of your bill looks similar to this, click <a href="http://www.topeka.org/PayOnline/">here</a> to be redirected to the City of Topeka's bill payment page.
+                            <hr />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12" style="margin-bottom: 5px;">
+                    <input type="submit" class="btn btn-primary btn-block btn-lg" value="Register" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section head
+{
+    <link rel="stylesheet" href="~/Content/font-awesome.min.css" />
+}
+
+<div id="pinFinderpopup" class="questionbuttonoverlay">
+    <div class="popup">
+        <a class="close" href="#" style="font-size: 5em">&times;</a>
+        <div class="blankbillcontent">
+            <img id="blankbillimage" src="~/Content/images/backgrounds/BlankBillExample.png" />
+            PIN number will be located on your bill.
+        </div>
+    </div>
+</div>
+
+<div id="fullNameFinderpopup" class="questionbuttonoverlay">
+    <div class="popup">
+        <a class="close" href="#" style="font-size: 5em">&times;</a>
+        <div class="blankbillcontent">
+            <img id="blankbillimage" src="~/Content/images/backgrounds/FullName.png" />
+            PIN number will be located on your bill.
+        </div>
+    </div>
+</div>
+
+
+
+@* jQuery validation *@

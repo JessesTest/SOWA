@@ -1,67 +1,46 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SW.DM;
 
 public class ServiceAddress
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public ServiceAddress()
+    {
+        BillServiceAddresses = new HashSet<BillServiceAddress>();
+        Containers = new HashSet<Container>();
+        ServiceAddressNotes = new HashSet<ServiceAddressNote>();
+        TransactionHoldings = new HashSet<TransactionHolding>();
+        Transactions = new HashSet<Transaction>();
+        WorkOrders = new HashSet<WorkOrder>();
+    }
 
-    [ForeignKey("Customer"), Column(Order = 0)]
     public string CustomerType { get; set; }
-    [ForeignKey("Customer"), Column(Order = 1)]
     public int CustomerId { get; set; }
-    public Customer Customer { get; set; }
-
-    // not used
-    [StringLength(50)]
+    public int Id { get; set; }
     public string ServiceType { get; set; }
-
-    [StringLength(50)]
     public string LocationNumber { get; set; }
-
-    [StringLength(50)]
     public string LocationName { get; set; }
-
-    [StringLength(50)]
     public string LocationContact { get; set; }
-
     public DateTime EffectiveDate { get; set; }
-
     public DateTime? CancelDate { get; set; }
-
-    public int PEAddressId { get; set; }
-
-    [StringLength(100)]
+    public int PeaddressId { get; set; }
     public string Email { get; set; }
-
-    [StringLength(20)]
     public string Phone { get; set; }
-
-    public virtual IList<ServiceAddressNote> Notes { get; set; }
-
-    public virtual IList<Container> Containers { get; set; }
-
-    public virtual IList<BillServiceAddress> Bills { get; set; }
-
     public bool DeleteFlag { get; set; }
-
     public DateTime AddDateTime { get; set; }
-
-    [StringLength(255)]
     public string AddToi { get; set; }
-
     public DateTime? ChgDateTime { get; set; }
-
-    [StringLength(255)]
     public string ChgToi { get; set; }
-
     public DateTime? DelDateTime { get; set; }
-
-    [StringLength(255)]
     public string DelToi { get; set; }
+
+    public virtual Customer Customer { get; set; }
+    public virtual ICollection<BillServiceAddress> BillServiceAddresses { get; set; }
+    public virtual ICollection<Container> Containers { get; set; }
+    public virtual ICollection<ServiceAddressNote> ServiceAddressNotes { get; set; }
+    public virtual ICollection<TransactionHolding> TransactionHoldings { get; set; }
+    public virtual ICollection<Transaction> Transactions { get; set; }
+    public virtual ICollection<WorkOrder> WorkOrders { get; set; }
 
     [NotMapped]
     public PE.DM.Address PEAddress { get; set; }

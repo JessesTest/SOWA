@@ -1,8 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Common.Services.Email;
+using Common.Web.Extensions.Alerts;
+using Identity.BL.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using PE.BL.Services;
+using SW.BLL.Services;
 using SW.ExternalWeb.Identity;
 using SW.ExternalWeb.Models.Account;
+using System.Text;
 
 namespace SW.ExternalWeb.Controllers
 {
@@ -10,18 +18,35 @@ namespace SW.ExternalWeb.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly IPersonEntityService personEntityService;
+        private readonly IUserService userService;
+        private readonly IUserNotificationService userNotificationService;
+        private readonly ICustomerService customerService;
+        private readonly ISendGridService sendGridService;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IPersonEntityService personEntityService,
+            IUserService userService,
+            IUserNotificationService userNotificationService,
+            ICustomerService customerService,
+            ISendGridService sendGridService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            this.personEntityService = personEntityService;
+            this.userService = userService;
+            this.userNotificationService = userNotificationService;
+            this.customerService = customerService;
+            this.sendGridService = sendGridService;
         }
 
-        #region Login
+        #region Login & 2FA
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Login()
+        public IActionResult Login()
         {
             if (User != null && User.Identity.IsAuthenticated)
                 return RedirectToAction("BillSummary", "Home");
@@ -32,7 +57,7 @@ namespace SW.ExternalWeb.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -70,7 +95,7 @@ namespace SW.ExternalWeb.Controllers
             }
             else if (result.RequiresTwoFactor)
             {
-                return RedirectToAction("SendCode");
+                return RedirectToAction(nameof(SendCode), new { UserId = user.Id });
             }
             else
             {
@@ -79,6 +104,427 @@ namespace SW.ExternalWeb.Controllers
             }
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendCode()
+        {
+            var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+                return RedirectToAction(nameof(Login))
+                    .WithWarning("Account", "Not a two factor user");
+
+            var userFactors = await userManager.GetValidTwoFactorProvidersAsync(user);
+            var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
+            return View(new SendCodeViewModel { Providers = factorOptions });
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendCode(SendCodeViewModel model)
+        {
+            var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+                return RedirectToAction(nameof(Login))
+                    .WithWarning("Account", "Not a two factor user");
+
+            if (!ModelState.IsValid)
+            {
+                var userFactors = await userManager.GetValidTwoFactorProvidersAsync(user);
+                var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
+                model.Providers = factorOptions;
+                return View(model);
+            }
+
+            var token = await userManager.GenerateTwoFactorTokenAsync(user, model.SelectedProvider);
+
+            if(model.SelectedProvider == "Email")
+            {
+                await userNotificationService.SendEmail2FA(user.Email, token);
+                return RedirectToAction("VerifyCode", model);
+            }
+
+            ModelState.AddModelError(nameof(model.SelectedProvider), $"Invalid provider {model.SelectedProvider}");
+            return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyCode(string selectedProvider, string returnUrl)
+        {
+            var twoFAUser = await signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (twoFAUser == null)
+                return RedirectToAction(nameof(Login))
+                    .WithWarning("Account", "Not a two factor user");
+
+            return View(new VerifyCodeViewModel { Provider = selectedProvider, ReturnUrl = returnUrl });
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyCode(VerifyCodeViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var result = await signInManager.TwoFactorSignInAsync(model.Provider, model.Code, false, model.RememberBrowser);
+            if (result.Succeeded)
+            {
+                return Redirect(model.ReturnUrl ?? "~/");
+            }
+            else if (result.IsLockedOut)
+            {
+                return View("Lockout");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Invalid code.");
+                return View(model);
+            }
+        }
+
+        #endregion
+
+        #region Register
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            string systemCode = model.Code.Substring(0, 2).ToUpper();
+            if (!int.TryParse(model.Code.Substring(2), out int account))
+            {
+                ModelState.AddModelError("Code", "PIN is not in the correct format.");
+                return View(model);
+            }
+            bool process = false;
+
+            var pe = await personEntityService.GetBySystemAndCode(systemCode, account);
+            if (pe != null)
+            {
+                if (pe.FullName.ToUpper().Trim() == model.FullName.ToUpper().Trim())
+                {
+                    process = true;
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Name on Bill field is CASE SENSITIVE and must match both the case and spelling on the bill.");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "PIN does not exist or name does not match");
+            }
+
+            if (process && ModelState.IsValid)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = model.UserName?.ToUpper().Trim(),
+                    Email = model.Email?.ToLower().Trim(),
+                    UserId = pe.Id ,
+                    NormalizedEmail = model.Email?.ToUpper().Trim(),
+                    NormalizedUserName = model.UserName?.ToUpper().Trim()
+                };
+                var userList = await userManager.Users.Where(u => u.UserId == pe.Id).ToListAsync();
+
+                if (userList.Any())
+                {
+                    ModelState.AddModelError("", "There is already a user registered for this account");
+                }
+                else
+                {
+                    var result = await userManager.CreateAsync(user, model.Password);
+                    if (result.Succeeded)
+                    {
+                        var uri = new Uri(Request.Host.Value);
+                        var scheme = uri.Scheme;
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account", null, scheme);
+                        _ = userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
+
+                        ModelState.AddModelError("success", "Thank you for registering. You will need to confirm your email before logging in.");
+                        return RedirectToAction("Login", "Account");
+                    }
+
+                    AddErrors(result);
+                }
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(int userId, string code)
+        {
+            var result = await userService.ConfirmEmail(userId, code);
+
+            return View(result ? "ConfirmEmail" : "Error");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ResendEmailConfirmation()
+        {
+            var model = new EmailConfirmationViewModel();
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ResendEmailConfirmation(EmailConfirmationViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(nameof(ResendEmailConfirmation), model);
+                }
+                var user = await userManager.FindByEmailAsync(model.Email);
+                if (user == null || user.EmailConfirmed)
+                {
+                    ModelState.AddModelError(nameof(model.Email), $"Unconfimed email {model.Email} was not found.");
+                    return View(model);
+                }
+                var uri = new Uri(Request.Host.Value);
+                var scheme = uri.Scheme;
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, scheme);
+                _ = userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
+
+                ModelState.AddModelError("success", "You will need to confirm your email before logging in.");
+                return RedirectToAction("Login", "Account");
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("", e.Message);
+                return View(nameof(ResendEmailConfirmation), model);
+            }
+        }
+
+        #endregion
+
+        #region Password Reset
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if(!ModelState.IsValid)
+                return View("ForgotPasswordConfirmation");
+
+            var users = await userService.FindAllByEmail(model.Email);
+
+            if (!users.Any())
+            {
+                // Don't reveal that the user does not exist or is not confirmed
+                return View("ForgotPasswordConfirmation");
+            }
+
+            var userPotatoes = new List<ResetPasswordPotato>();
+            foreach (var aspnetuser in users)
+            {
+                var identityUser = await userManager.FindByIdAsync(aspnetuser.Id);
+                var code = await userManager.GeneratePasswordResetTokenAsync(identityUser);
+                var customer = await customerService.GetCustomerByPE(aspnetuser.UserId);
+                userPotatoes.Add(new ResetPasswordPotato()
+                {
+                    Url = Url.Action("ResetPassword", "Account", new { userId = aspnetuser.Id, code }, "https"),
+                    AccountNumber = customer.CustomerId.ToString(),
+                    UserName = aspnetuser.UserName
+                });
+            }
+            var sb = new StringBuilder(4096);
+            sb.AppendLine("<div style=\"background-color:#909EB8\">");
+            sb.AppendLine("     <div align=\"center\">");
+            sb.AppendLine("         <div style=\"background-color:#344479; min-height:100px; padding-left: 20px; padding-right: 20px; padding-top: 28px; height: 100px; min-width: 700px; display:table; overflow:hidden;\">");
+            sb.AppendLine("             <div style=\"display: table-cell; vertical-align: middle; font-size: 40px; color:white; font-family: Verdana;\">");
+            sb.AppendLine("                 <div align=\"center\">");
+            sb.AppendLine("                     Shawnee County Solid Waste");
+            sb.AppendLine("                 </div>");
+            sb.AppendLine("             </div>");
+            sb.AppendLine("         </div>");
+            sb.AppendLine("     </div>");
+            sb.AppendLine("     <div align=\"center\">");
+            sb.AppendLine("        <div style=\"padding: 20px 20px 20px 20px; background-color: #D4D4D4; width: 700px;\">");
+            sb.AppendLine("            <div style=\"padding: 20px 20px 20px 20px; background-color: #FFFFFF;\">");
+            sb.AppendLine("                <div style=\"display: block; margin-bottom: 20px;\">");
+            sb.AppendLine("                    Your account has requested a password reset. Please click on the link below to reset your password:");
+            sb.AppendLine("                </div>");
+            sb.AppendLine("<div width=\"600px\">");
+            sb.AppendLine("<table border=\"1|0\" width=\"500px\" align=\"center\" cellpadding=\"5\" bordercolor=\"#344479\">");
+            sb.AppendLine("<th bgcolor=\"#6495ED\">");
+            sb.AppendLine("Account Number");
+            sb.AppendLine("</th>");
+            sb.AppendLine("<th bgcolor=\"#6495ED\">");
+            sb.AppendLine("User Name");
+            sb.AppendLine("</th>");
+            sb.AppendLine("<th bgcolor=\"#6495ED\">");
+            sb.AppendLine("");
+            sb.AppendLine("</th>");
+            // Once you get to the part that shows the detail for each user, start using the foreach loop
+            foreach (var p in userPotatoes)
+            {
+
+                sb.AppendLine("<tr align=\"center\">");
+                sb.AppendLine("<td bgcolor=\"#6495ED\">");
+                sb.AppendLine(p.AccountNumber);
+                sb.AppendLine("</td>");
+                sb.AppendLine("<td bgcolor=\"#6495ED\">");
+                sb.AppendLine(p.UserName);
+                sb.AppendLine("</td>");
+                sb.AppendLine("<td bgcolor=\"#6495ED\">");
+                sb.AppendLine("<div style=\"text-align=center; padding-top:10px; padding-bottom:10px\">");
+                sb.AppendLine("<div align=\"center\">");
+                sb.AppendLine($"<a style=\"padding: 8px 15px 8px 15px; text-align: center; background-color: #6EBF4A; color: #FFFFFF; font-weight:bold; text-decordation: none;\" href=\"{p.Url}\">");
+                sb.AppendLine("Reset this Account");
+                sb.AppendLine("</a>");
+                sb.AppendLine("</div>");
+                sb.AppendLine("</div>");
+                sb.AppendLine("</td>");
+                sb.AppendLine("</tr>");
+
+                // Show a line for each user in the list that displays their Username, AccountNumber, and a link to reset that account
+            }
+            sb.AppendLine("</table>");
+            sb.AppendLine("</div>");
+            sb.AppendLine("                 </div>");
+            sb.AppendLine("         <div align=\"center\" style=\"padding-top:20px\">");
+            sb.AppendLine("             <div style=\"font-size:12px;\">");
+            sb.AppendLine("                 DO NOT REPLY TO THIS EMAIL. If you've received this email in error, please notify us by telephone at 785.233.4774 or by email at solidwaste@snco.us.");
+            sb.AppendLine("         </div>");
+            sb.AppendLine("     </div>");
+            sb.AppendLine("<hr>");
+            sb.AppendLine("     <div width=\"700px\">");
+            sb.AppendLine("         Visit the Shawnee County Website at http://www.snco.us");
+            sb.AppendLine("     </div>");
+            sb.AppendLine("     <div width=\"700px\">");
+            sb.AppendLine("         Questions? Contact Solid Waste at 785.233.4774 (voice) 785.291.4928(fax)");
+            sb.AppendLine("     </div>");
+            sb.AppendLine("</div>");
+            sb.AppendLine("</div>");
+
+            var email = new SendEmailDto
+            {
+                HtmlContent = sb.ToString(),
+                Subject = "Reset Your Password",
+            }
+            .SetFrom("no-reply.scsw@sncoapps.us")
+            .AddTo(model.Email);
+
+            _ = sendGridService.SendSingleEmail(email);
+
+            return View("ForgotPasswordConfirmation");
+        }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<ActionResult> ResetPassword(string userId, string code)
+        {
+            if (code == null || userId == null)
+                return View("Error");
+
+            var user = await userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return View("Error");
+
+            var vm = new ResetPasswordViewModel
+            {
+                UserId = user.Id,
+                Code = code
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return RedirectToAction("ResetPasswordConfirmation", "Account");
+            }
+            var result = await userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("ResetPasswordConfirmation", "Account");
+            }
+            AddErrors(result);
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+
+        #endregion
+
+        #region Logoff
+
+        [HttpGet]
+        public async Task<ActionResult> LogOff()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                await signInManager.SignOutAsync();
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        #endregion
+
+        #region Util
+
+        private void AddErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+        }
+
         #endregion
     }
 }
+
