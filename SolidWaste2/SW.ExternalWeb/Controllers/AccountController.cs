@@ -346,7 +346,7 @@ namespace SW.ExternalWeb.Controllers
             {
                 var identityUser = await userManager.FindByIdAsync(aspnetuser.Id);
                 var code = await userManager.GeneratePasswordResetTokenAsync(identityUser);
-                var customer = await customerService.GetCustomerByPE(aspnetuser.UserId);
+                var customer = await customerService.GetByPE(aspnetuser.UserId);
                 userPotatoes.Add(new ResetPasswordPotato()
                 {
                     Url = Url.Action("ResetPassword", "Account", new { userId = aspnetuser.Id, code }, "https"),

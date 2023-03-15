@@ -15,6 +15,7 @@ public class PhoneService : IPhoneService
 
     public async Task Add(Phone phone)
     {
+        phone.Delete = false;
         phone.AddDateTime = DateTime.Now;
 
         using var db = contextFactory.CreateDbContext();
@@ -25,7 +26,8 @@ public class PhoneService : IPhoneService
     public async Task<ICollection<Phone>> GetAll(bool includeDeleted)
     {
         using var db = contextFactory.CreateDbContext();
-        IQueryable<Phone> query = db.Phones;
+        IQueryable<Phone> query = db.Phones
+            .Include(e => e.Code);
 
         if (!includeDeleted)
             query = query.Where(e => !e.Delete);
@@ -40,6 +42,7 @@ public class PhoneService : IPhoneService
         using var db = contextFactory.CreateDbContext();
         return await db.Phones
             .Where(e => e.Id == id)
+            .Include(e => e.Code)
             .AsNoTracking()
             .SingleOrDefaultAsync();
     }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SW.BLL.Extensions;
 using SW.DAL.Contexts;
 using SW.DM;
 
@@ -24,13 +25,10 @@ public class CustomerService : ICustomerService
     public async Task<Customer> GetById(int id)
     {
         using var db = dbFactory.CreateDbContext();
-        return await db.Customers
-            .Where(c => c.CustomerId == id || c.LegacyCustomerId == id)
-            .AsNoTracking()
-            .SingleAsync();
+        return await db.GetCustomerById(id);
     }
 
-    public async Task<Customer> GetCustomerByPE(int peId)
+    public async Task<Customer> GetByPE(int peId)
     {
         using var db = dbFactory.CreateDbContext();
         return await db.Customers
@@ -90,8 +88,8 @@ public class CustomerService : ICustomerService
         using var db = dbFactory.CreateDbContext();
         int? maxCustomerId = await db.Customers
             .Where(e => e.CustomerType == customerType)
-            .Select(e => e.CustomerId)
             .OrderByDescending(id => id)
+            .Select(e => e.CustomerId)
             .FirstOrDefaultAsync();
 
         if (maxCustomerId is null)
