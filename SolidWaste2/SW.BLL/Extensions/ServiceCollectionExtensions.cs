@@ -7,6 +7,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddSolidWasteServices(this IServiceCollection services)
         => services
-            .AddTransient<ICustomerService, CustomerService>();
+            .AddTransient<ICustomerService, CustomerService>()
+            .AddTransient<ITransactionService, TransactionService>();
 
 }

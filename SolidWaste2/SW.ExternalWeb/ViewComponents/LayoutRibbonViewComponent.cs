@@ -3,40 +3,49 @@ using Microsoft.AspNetCore.Mvc;
 using SW.ExternalWeb.Identity;
 using SW.ExternalWeb.Models;
 using Common.Extensions;
+using PE.BL.Services;
+using SW.BLL.Services;
 
 namespace SW.ExternalWeb.ViewComponents
 {
     public class LayoutRibbonViewComponent : ViewComponent
     {
+        private readonly ICustomerService _customerService;
+        private readonly IPersonEntityService _personEntityService;
+        private readonly ITransactionService _transactionService;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public LayoutRibbonViewComponent(UserManager<ApplicationUser> userManager)
+        public LayoutRibbonViewComponent(ICustomerService customerService, IPersonEntityService personEntityService, ITransactionService transactionService, UserManager<ApplicationUser> userManager)
         {
+            _customerService = customerService;
+            _personEntityService = personEntityService;
+            _transactionService = transactionService;
             _userManager = userManager;
         }
 
         public async Task<IViewComponentResult> InvokeAsync(string controller, string action)
         {
-            var vm = new RibbonViewModel();
-
-            var user = _userManager.FindByIdAsync(UserClaimsPrincipal.GetUserId());
-            if (user == null)
+            var vm = new RibbonViewModel
             {
-                vm.CurrentController = controller;
-                vm.CurrentAction = action;
-                return View("LayoutRibbonBlank", vm);
-            }
+                CurrentAction = action,
+                CurrentController = controller
+            };
 
-            // needs to be updated with new business logic
-            //PE.BL.BusinessLayer pebl = new PE.BL.BusinessLayer();
-            //PE.DM.PersonEntity person = pebl.GetPersonEntityById(user.UserId);
-            //SW_BL.BusinessLayer swbl = new SW_BL.BusinessLayer();
-            //SW_DM.Customer customer = swbl.GetCustomerByPE(person.Id);
-            //vm.AccountNumber = customer.CustomerID.ToString();
-            //vm.PastDueBalance = swbl.GetPastDueAmount(customer.CustomerID).ToString();
-            //vm.UserName = person.FullName;
-            vm.CurrentController = controller;
-            vm.CurrentAction = action;
+            var user = await _userManager.FindByIdAsync(UserClaimsPrincipal.GetUserId());
+            if (user == null)
+                return View("LayoutRibbonBlank", vm);
+
+            var person = await _personEntityService.GetById(user.UserId);
+            if (person == null)
+                return View("LayoutRibbonBlank", vm);
+
+            var customer = await _customerService.GetCustomerByPE(person.Id);
+            if (customer == null)
+                return View("LayoutRibbonBlank", vm);
+
+            vm.AccountNumber = customer.CustomerId.ToString();
+            vm.PastDueBalance = (await _transactionService.GetPastDueAmount(customer.CustomerId)).ToString();
+            vm.UserName = person.FullName;
 
             return View("LayoutRibbon", vm);
         }
