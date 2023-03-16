@@ -3,17 +3,17 @@ using SW.BLL.DTOs;
 using SW.BLL.Extensions;
 using SW.DAL.Contexts;
 using SW.DM;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SW.BLL.Services;
 
 public class TransactionService : ITransactionService
 {
     private readonly IDbContextFactory<SwDbContext> dbFactory;
-
-    public TransactionService(IDbContextFactory<SwDbContext> contextFactory)
-    {
-        this.dbFactory = contextFactory;
-    }
 
     internal async Task<bool> TransactionExists(int transactionId)
     {
@@ -275,7 +275,12 @@ public class TransactionService : ITransactionService
         await db.SaveChangesAsync();
     }
 
-    #region Utility 
+    public TransactionService(IDbContextFactory<SwDbContext> dbFactory)
+    {
+        this.dbFactory = dbFactory;
+    }
+
+    #region Utility
 
     internal async Task<Customer> GetCustomerById(int id)
     {
@@ -296,7 +301,7 @@ public class TransactionService : ITransactionService
 
     #endregion
 
-    #region Transaction 
+    #region Transaction
 
     public async Task<Transaction> GetLatesetTransaction(int customerId)
     {
@@ -313,7 +318,7 @@ public class TransactionService : ITransactionService
 
     #endregion
 
-    #region Delinquency 
+    #region Delinquency
 
     public async Task<decimal> GetRemainingBalanceFromLastBill(int customerId)
     {
@@ -439,13 +444,13 @@ public class TransactionService : ITransactionService
                     d.PastDue90Days = 0;
             }
 
-            // check & service call should be moved to controller where this method is being called from? 
-            //var pebl = new PE.BL.BusinessLayer(); 
-            //if (d.IsDelinquent) 
-            //{ 
-            //    d.PersonEntity = pebl.GetPersonEntityById(c.PE); 
-            //    list.Add(d); 
-            //} 
+            // check & service call should be moved to controller where this method is being called from?
+            //var pebl = new PE.BL.BusinessLayer();
+            //if (d.IsDelinquent)
+            //{
+            //    d.PersonEntity = pebl.GetPersonEntityById(c.PE);
+            //    list.Add(d);
+            //}
         }
 
         return list;
