@@ -15,6 +15,7 @@ public class AddressService : IAddressService
 
     public async Task Add(Address address)
     {
+        address.Delete = false;
         address.AddDateTime = DateTime.Now;
 
         using var db = contextFactory.CreateDbContext();
@@ -25,9 +26,13 @@ public class AddressService : IAddressService
     public async Task<ICollection<Address>> GetAll(bool includeDeleted)
     {
         using var db = contextFactory.CreateDbContext();
-        return await db.Addresses
-            .AsNoTracking()
-            .ToListAsync();
+        IQueryable<Address> query = db.Addresses
+            .Include(e => e.Code);
+
+        if (!includeDeleted)
+            query = query.Where(e => !e.Delete);
+
+        return await query.AsNoTracking().ToListAsync();
     }
 
     public async Task<Address> GetById(int id)
@@ -35,6 +40,7 @@ public class AddressService : IAddressService
         using var db = contextFactory.CreateDbContext();
         return await db.Addresses
             .Where(e => e.Id == id)
+            .Include(e => e.Code)
             .AsNoTracking()
             .SingleOrDefaultAsync();
     }
@@ -42,7 +48,10 @@ public class AddressService : IAddressService
     public async Task<ICollection<Address>> GetByPerson(int personId, bool includeDeleted)
     {
         using var db = contextFactory.CreateDbContext();
-        IQueryable<Address> query = db.Addresses.Where(e => e.PersonEntityID == personId);
+        IQueryable<Address> query = db.Addresses
+            .Where(e => e.PersonEntityID == personId)
+            .Include(e => e.Code);
+
         if (!includeDeleted)
             query = query.Where(e => e!.Delete);
 

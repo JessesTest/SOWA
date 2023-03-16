@@ -1,7 +1,6 @@
 using Common.Extensions;
 using Identity.BL.Extensions;
 using Identity.DAL.Extensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
@@ -11,7 +10,6 @@ using StackifyLib;
 using SW.BLL.Extensions;
 using SW.DAL.Extensions;
 using SW.ExternalWeb.Identity;
-using System;
 
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
@@ -43,7 +41,7 @@ try
         .AddIdentityDbContext(configuration)
         .AddIdentityServices()
         .AddSolidWasteDbContext(configuration)
-        .AddSolidWasteServices();
+        .AddSolidWasteServices(configuration);
 
     // Session state
     builder.Services

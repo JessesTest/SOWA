@@ -8,7 +8,7 @@ public interface ICustomerService
     Task Add(Customer customer);
     Task<ICollection<Customer>> GetAll();
     Task<Customer> GetById(int id);
-    Task<Customer> GetCustomerByPE(int peId);
+    Task<Customer> GetByPE(int peId);
     Task<int> GetNextCustomerNumber(string customerType);
     Task Update(Customer customer);
 }
