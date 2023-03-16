@@ -39,7 +39,7 @@ namespace SW.ExternalWeb.ViewComponents
             if (person == null)
                 return View("LayoutRibbonBlank", vm);
 
-            var customer = await _customerService.GetCustomerByPE(person.Id);
+            var customer = await _customerService.GetByPE(person.Id);
             if (customer == null)
                 return View("LayoutRibbonBlank", vm);
 
