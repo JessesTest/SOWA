@@ -11,4 +11,5 @@ public interface IEmailService
     Task Add(Email email);
     Task Update(Email email);
     Task Remove(Email email);
+    Task SetDefault(int personId, int emailId);
 }

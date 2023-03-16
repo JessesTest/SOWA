@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PE.BL.Extensions;
 using PE.DAL.Contexts;
 using PE.DM;
 
@@ -40,6 +42,10 @@ public class PersonEntityService : IPersonEntityService
         using var db = contextFactory.CreateDbContext();
         return await db.People
             .Where(e => e.Id == id)
+            .Include(e => e.Code)
+            .Include(e => e.Addresses)
+            .Include(e => e.Emails)
+            .Include(e => e.Phones)
             .AsNoTracking()
             .SingleOrDefaultAsync();
     }
@@ -56,6 +62,21 @@ public class PersonEntityService : IPersonEntityService
 
     public async Task Update(PersonEntity personEntity)
     {
+        if (!personEntity.NameTypeFlag)
+        {
+            if (!string.IsNullOrWhiteSpace(personEntity.FullName))
+            {
+                string[] parsedName = NameUtility.ParseName(personEntity.FullName);
+                personEntity.FirstName = parsedName[0];
+                personEntity.MiddleName = parsedName[1];
+                personEntity.LastName = parsedName[2];
+            }
+            else
+            {
+                personEntity.FullName = NameUtility.FormatName(personEntity.FirstName, personEntity.MiddleName, personEntity.LastName);
+            }
+        }
+
         personEntity.ChgDateTime = DateTime.Now;
 
         using var db = contextFactory.CreateDbContext();

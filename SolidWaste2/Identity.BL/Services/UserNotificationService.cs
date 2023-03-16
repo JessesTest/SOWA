@@ -29,7 +29,6 @@ namespace Identity.BL.Services
             using var db = contextFactory.CreateDbContext();
             var user = await db.AspNetUsers
                 .Where(u => u.UserId == userId)
-                .AsNoTracking()
                 .SingleOrDefaultAsync();
 
             if (string.IsNullOrWhiteSpace(user.EmailConfirmationCode))
@@ -48,8 +47,8 @@ namespace Identity.BL.Services
                 HtmlContent = GenerateConfirmEmailBody(url),
                 Subject = "Please confirm your email with Shawnee County Solid Waste"
             }
-                .SetFrom(from)
-                .AddTo(user.Email);
+            .SetFrom(from)
+            .AddTo(user.Email);
 
             await emailService.SendSingleEmail(emailDto);
         }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PE.BL.Services;
 using SW.BLL.DTOs;
 using SW.DAL.Contexts;
 using SW.DM;
@@ -13,32 +14,13 @@ namespace SW.BLL.Services;
 public class TransactionService : ITransactionService
 {
     private readonly IDbContextFactory<SwDbContext> dbFactory;
+    private readonly IPersonEntityService _personEntityService;
 
-    public TransactionService(IDbContextFactory<SwDbContext> dbFactory)
+    public TransactionService(IDbContextFactory<SwDbContext> dbFactory, IPersonEntityService personEntityService)
     {
         this.dbFactory = dbFactory;
+        _personEntityService = personEntityService;
     }
-
-    #region Utility
-
-    internal async Task<Customer> GetCustomerById(int id)
-    {
-        using var db = dbFactory.CreateDbContext();
-        return await db.Customers
-            .Where(c => c.CustomerId == id || c.LegacyCustomerId == id)
-            .AsNoTracking()
-            .SingleAsync();
-    }
-
-    internal async Task<ICollection<Customer>> GetAllCustomers()
-    {
-        using var db = dbFactory.CreateDbContext();
-        return await db.Customers
-            .AsNoTracking()
-            .ToListAsync();
-    }
-
-    #endregion
 
     #region Transaction
 
@@ -46,7 +28,10 @@ public class TransactionService : ITransactionService
     {
         using var db = dbFactory.CreateDbContext();
 
-        var customer = await GetCustomerById(customerId);
+        var customer = await db.Customers
+            .Where(c => c.CustomerId == customerId || c.LegacyCustomerId == customerId)
+            .AsNoTracking()
+            .SingleAsync();
 
         return await db.Transactions
             .Where(t => t.CustomerId == customer.CustomerId && !t.DeleteFlag)
@@ -103,8 +88,11 @@ public class TransactionService : ITransactionService
 
         var endDate = date.Date.AddDays(1);
         var startDate = date.Date.AddDays(-days);
-        Customer customer = await GetCustomerById(customerId);
         string[] billTypes = { "MB", "FB", "MBR" };
+        var customer = await db.Customers
+            .Where(c => c.CustomerId == customerId || c.LegacyCustomerId == customerId)
+            .AsNoTracking()
+            .SingleAsync();
 
         var bill = await db.Transactions
             .Where(t => t.CustomerId == customer.CustomerId
@@ -148,8 +136,12 @@ public class TransactionService : ITransactionService
 
     public async Task<ICollection<CustomerDelinquency>> GetAllDelinquencies()
     {
+        using var db = dbFactory.CreateDbContext();
+
         var list = new List<CustomerDelinquency>();
-        var customers = await GetAllCustomers();
+        var customers = await db.Customers
+            .AsNoTracking()
+            .ToListAsync();
 
         foreach (var c in customers)
         {
@@ -183,13 +175,11 @@ public class TransactionService : ITransactionService
                     d.PastDue90Days = 0;
             }
 
-            // check & service call should be moved to controller where this method is being called from?
-            //var pebl = new PE.BL.BusinessLayer();
-            //if (d.IsDelinquent)
-            //{
-            //    d.PersonEntity = pebl.GetPersonEntityById(c.PE);
-            //    list.Add(d);
-            //}
+            if (d.IsDelinquent)
+            {
+                d.PersonEntity = await _personEntityService.GetById(c.Pe);
+                list.Add(d);
+            }
         }
 
         return list;

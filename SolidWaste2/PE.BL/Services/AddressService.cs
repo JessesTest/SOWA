@@ -35,6 +35,7 @@ public class AddressService : IAddressService
         using var db = contextFactory.CreateDbContext();
         return await db.Addresses
             .Where(e => e.Id == id)
+            .Include(e => e.Code)
             .AsNoTracking()
             .SingleOrDefaultAsync();
     }
@@ -42,7 +43,10 @@ public class AddressService : IAddressService
     public async Task<ICollection<Address>> GetByPerson(int personId, bool includeDeleted)
     {
         using var db = contextFactory.CreateDbContext();
-        IQueryable<Address> query = db.Addresses.Where(e => e.PersonEntityID == personId);
+        IQueryable<Address> query = db.Addresses
+            .Where(e => e.PersonEntityID == personId)
+            .Include(e => e.Code);
+
         if (!includeDeleted)
             query = query.Where(e => e!.Delete);
 
@@ -68,5 +72,32 @@ public class AddressService : IAddressService
         using var db = contextFactory.CreateDbContext();
         db.Addresses.Update(address);
         await db.SaveChangesAsync();
+    }
+
+    public async Task SetDefault(int personId, int addressId)
+    {
+        using var db = contextFactory.CreateDbContext();
+
+        var defaultAddress = await GetById(addressId);
+
+        if (defaultAddress == null)
+            throw new Exception(string.Format("Address Id '{0}' was not found.", addressId));
+        if (defaultAddress.PersonEntityID != personId)
+            throw new Exception("Address PersonEntityId mismatch");
+        if (defaultAddress.Delete)
+            throw new Exception("Address was deleted");
+
+        var defaultAddresses = await db.Addresses
+            .Where(a => a.PersonEntityID == personId && a.IsDefault)
+            .ToListAsync();
+
+        foreach (var address in defaultAddresses)
+        {
+            address.IsDefault = false;
+            await Update(address);
+        }
+
+        defaultAddress.IsDefault = true;
+        await Update(defaultAddress);
     }
 }
