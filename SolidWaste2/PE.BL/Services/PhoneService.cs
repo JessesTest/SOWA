@@ -50,7 +50,9 @@ public class PhoneService : IPhoneService
     public async Task<ICollection<Phone>> GetByPerson(int personId, bool includeDeleted)
     {
         using var db = contextFactory.CreateDbContext();
-        var query = db.Phones.Where(e => e.PersonEntityID == personId);
+        IQueryable<Phone> query = db.Phones
+            .Where(e => e.PersonEntityID == personId)
+            .Include(e => e.Code);
 
         if (!includeDeleted)
             query = query.Where(e => !e.Delete);
@@ -77,5 +79,32 @@ public class PhoneService : IPhoneService
         using var db = contextFactory.CreateDbContext();
         db.Phones.Update(phone);
         await db.SaveChangesAsync();
+    }
+
+    public async Task SetDefault(int personId, int phoneId)
+    {
+        using var db = contextFactory.CreateDbContext();
+
+        var defaultPhone = await GetById(phoneId);
+
+        if (defaultPhone == null)
+            throw new Exception(string.Format("Phone Id '{0}' was not found.", phoneId));
+        if (defaultPhone.PersonEntityID != personId)
+            throw new Exception("Phone PersonEntityId mismatch");
+        if (defaultPhone.Delete)
+            throw new Exception("Phone was deleted");
+
+        var defaultPhones = await db.Phones
+            .Where(p => p.PersonEntityID == personId && p.IsDefault)
+            .ToListAsync();
+
+        foreach(var phone in defaultPhones)
+        {
+            phone.IsDefault = false;
+            await Update(phone);
+        }
+
+        defaultPhone.IsDefault = true;
+        await Update(defaultPhone);
     }
 }

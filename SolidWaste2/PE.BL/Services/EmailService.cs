@@ -79,4 +79,31 @@ public class EmailService : IEmailService
         db.Emails.Update(email);
         await db.SaveChangesAsync();
     }
+
+    public async Task SetDefault(int personId, int emailId)
+    {
+        using var db = contextFactory.CreateDbContext();
+
+        var defaultEmail = await GetById(emailId);
+
+        if (defaultEmail == null)
+            throw new Exception(string.Format("Email Id '{0}' was not found.", emailId));
+        if (defaultEmail.PersonEntityID != personId)
+            throw new Exception("Email PersonEntityId mismatch");
+        if (defaultEmail.Delete)
+            throw new Exception("Email was deleted");
+
+        var defaultEmails = await db.Emails
+            .Where(e => e.PersonEntityID == personId && e.IsDefault)
+            .ToListAsync();
+
+        foreach (var email in defaultEmails)
+        {
+            email.IsDefault = false;
+            await Update(email);
+        }
+
+        defaultEmail.IsDefault = true;
+        await Update(defaultEmail);
+    }
 }
