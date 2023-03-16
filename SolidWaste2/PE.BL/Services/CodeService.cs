@@ -27,6 +27,7 @@ public class CodeService : ICodeService
     {
         using var db = contextFactory.CreateDbContext();
         return await db.Codes
+            .Where(e => !e.Delete)
             .AsNoTracking()
             .ToListAsync();
     }

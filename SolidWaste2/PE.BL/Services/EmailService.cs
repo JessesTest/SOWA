@@ -15,6 +15,7 @@ public class EmailService : IEmailService
 
     public async Task Add(Email email)
     {
+        email.Delete = false;
         email.AddDateTime = DateTime.Now;
 
         using var db = contextFactory.CreateDbContext();
@@ -25,9 +26,14 @@ public class EmailService : IEmailService
     public async Task<ICollection<Email>> GetAll(bool includeDeleted)
     {
         using var db = contextFactory.CreateDbContext();
-        return await db.Emails
-            .AsNoTracking()
-            .ToListAsync();
+        IQueryable<Email> query = db.Emails
+            .Include(e => e.Code);
+
+        if (!includeDeleted)
+            query = query.Where(e => !e.Delete);
+
+        return await query.AsNoTracking().ToListAsync();
+
     }
 
     public async Task<Email> GetById(int id)
