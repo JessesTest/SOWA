@@ -14,6 +14,7 @@ namespace SW.BLL.Services
 
         // Transaction 
         Task<Transaction> GetLatesetTransaction(int customerId);
+        Task<ICollection<TransactionListingItem>> GetListingByCustomer(int customerId, bool includeDeleted = false);
 
         // Delinquency 
         Task<decimal> GetRemainingBalanceFromLastBill(int customerId);
