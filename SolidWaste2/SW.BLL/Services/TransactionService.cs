@@ -477,7 +477,8 @@ public class TransactionService : ITransactionService
             .Select(e => new TransactionListingItem
              {
                  AddDateTime = e.AddDateTime,
-                 Comment = e.Comment,
+                 CodeDescription = e.TransactionCode.Description,
+                 TransactionComment = e.Comment,
                  TransactionAmount = e.TransactionAmt,
                  TransactionBalance = e.TransactionBalance,
                  TransactionCode = e.TransactionCode.Code,
