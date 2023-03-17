@@ -13,7 +13,7 @@ public static class UserExtensions
         // http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier
         // http://schemas.microsoft.com/identity/claims/objectidentifier
 
-        return user?.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
+        return user?.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
     }
 
     public static string GetName(this ClaimsPrincipal user)

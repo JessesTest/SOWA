@@ -7,5 +7,6 @@ public class TransactionListingItem
     public DateTime AddDateTime { get; set; }
     public decimal TransactionAmount { get; set; }
     public decimal TransactionBalance { get; set; }
-    public string Comment { get; set; }
+    public string TransactionComment { get; set; }
+    public string CodeDescription { get; set; }
 }
