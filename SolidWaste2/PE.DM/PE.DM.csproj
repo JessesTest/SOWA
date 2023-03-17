@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Spatial" Version="7.14.1" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.15.0" />
   </ItemGroup>
 
 </Project>

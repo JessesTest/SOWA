@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddSolidWasteServices(this IServiceCollection services, IConfiguration configuration)
         => services
+            .AddTransient<IBillBlobService, BillBlobService>()
             .AddTransient<IBillMasterService, BillMasterService>()
             .AddTransient<ICustomerService, CustomerService>()
             .AddTransient<IKanPayService, KanPayService>()
