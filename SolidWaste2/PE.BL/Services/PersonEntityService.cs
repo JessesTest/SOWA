@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using PE.DAL.Contexts;
 using PE.DM;
 using System.Text;
@@ -216,27 +215,6 @@ public class PersonEntityService : IPersonEntityService
         await db.SaveChangesAsync();
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public async Task<string> GetNextAccountNumber()
     {
         using var db = contextFactory.CreateDbContext();
@@ -257,6 +235,8 @@ public class PersonEntityService : IPersonEntityService
 
         return (int.Parse(seed) + increment).ToString();
     }
+
+    #region Utility
 
     private static string[] ParseName(string name)
     {
@@ -345,4 +325,6 @@ public class PersonEntityService : IPersonEntityService
 
         return sb.ToString();
     }
+
+    #endregion
 }

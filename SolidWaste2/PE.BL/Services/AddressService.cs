@@ -53,7 +53,7 @@ public class AddressService : IAddressService
             .Include(e => e.Code);
 
         if (!includeDeleted)
-            query = query.Where(e => e!.Delete);
+            query = query.Where(e => !e.Delete);
 
         return await query
             .AsNoTracking()
@@ -77,5 +77,32 @@ public class AddressService : IAddressService
         using var db = contextFactory.CreateDbContext();
         db.Addresses.Update(address);
         await db.SaveChangesAsync();
+    }
+
+    public async Task SetDefault(int personId, int addressId)
+    {
+        using var db = contextFactory.CreateDbContext();
+
+        var defaultAddress = await GetById(addressId);
+
+        if (defaultAddress == null)
+            throw new Exception(string.Format("Address Id '{0}' was not found.", addressId));
+        if (defaultAddress.PersonEntityID != personId)
+            throw new Exception("Address PersonEntityId mismatch");
+        if (defaultAddress.Delete)
+            throw new Exception("Address was deleted");
+
+        var defaultAddresses = await db.Addresses
+            .Where(a => a.PersonEntityID == personId && a.IsDefault)
+            .ToListAsync();
+
+        foreach (var address in defaultAddresses)
+        {
+            address.IsDefault = false;
+            await Update(address);
+        }
+
+        defaultAddress.IsDefault = true;
+        await Update(defaultAddress);
     }
 }

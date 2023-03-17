@@ -10,4 +10,5 @@ public interface IPhoneService
     Task Add(Phone phone);
     Task Update(Phone phone);
     Task Remove(Phone phone);
+    Task SetDefault(int personId, int phoneId);
 }

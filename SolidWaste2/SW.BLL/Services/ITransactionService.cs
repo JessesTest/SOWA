@@ -5,15 +5,12 @@ namespace SW.BLL.Services
 {
     public interface ITransactionService
     {
+        // Transaction
         Task AddTransaction(Transaction transaction);
-        Task<ICollection<Transaction>> GetByCustomer(int customerId);
+        Task<ICollection<Transaction>> GetByCustomer(int customerId, bool includeDeleted);
         Task<decimal> GetCurrentBalance(int customerId);
         Task<Transaction> GetLatest(int customerId);
         Task<Transaction> GetById(int transactionId);
-        Task AddKanpayTransaction(Transaction transaction, TransactionKanPayFee fee, int kanpayid, string user);
-
-        // Transaction 
-        Task<Transaction> GetLatesetTransaction(int customerId);
         Task<ICollection<TransactionListingItem>> GetListingByCustomer(int customerId, bool includeDeleted = false);
 
         // Delinquency 
@@ -27,5 +24,8 @@ namespace SW.BLL.Services
         Task<decimal> GetCounselorsBalance(int customerId);
         Task<ICollection<CustomerDelinquency>> GetAllDelinquencies();
         Task<ICollection<Transaction>> GetPayments(DateTime thruDate, Transaction bill);
+
+        // KanPay
+        Task AddKanpayTransaction(Transaction transaction, TransactionKanPayFee fee, int kanpayid, string user);
     }
 }
