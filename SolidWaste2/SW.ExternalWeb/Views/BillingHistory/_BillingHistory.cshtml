@@ -1,0 +1,55 @@
+﻿@model SW.ExternalWeb.Models.BillingHistory.BillingHistoryViewModel
+
+<div class="row">
+    <div class="col-xs-12" style="text-align:center;">
+        Click Monthly Bill Date to View Individual Bill
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <table id="Transactions" class="table table-striped table-bordered" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Add Date</th>
+                    <th>Transaction Code | Description</th>
+                    <th>Balance Forward</th>
+                    <th>Transaction Amount</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Transactions.Count; i++)
+                {
+                    @Html.HiddenFor(model => model.Transactions[i].TransactionID)
+                    <tr>
+                        <td>
+                            <div style="display:none;">
+                                @(Model.Transactions[i].AddDateTime.ToString("yyyy/MM/dd"))
+                            </div>
+                            @if ((Model.Transactions[i].TransactionCode == "MB" || Model.Transactions[i].TransactionCode == "MBR" || Model.Transactions[i].TransactionCode == "FB") && Model.Transactions[i].AddDateTime >= Convert.ToDateTime("2016-07-01"))
+                            {
+                                <a href="@Url.Action("DownloadBill", "BillingHistory", new { TransactionID = Model.Transactions[i].TransactionID })" class="text-ul"> @(Model.Transactions[i].AddDateTime.ToString("yyyy/MM/dd"))</a>
+                            }
+                            else
+                            {
+                                @(Model.Transactions[i].AddDateTime.ToString("yyyy/MM/dd"))
+                            }
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Transactions[i].Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Transactions[i].BalanceForward)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Transactions[i].TransactionAmount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Transactions[i].TransactionBalance)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

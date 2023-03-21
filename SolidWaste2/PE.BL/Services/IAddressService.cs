@@ -10,4 +10,5 @@ public interface IAddressService
     Task Add(Address address);
     Task Update(Address address);
     Task Remove(Address address);
+    Task SetDefault(int personId, int addressId);
 }

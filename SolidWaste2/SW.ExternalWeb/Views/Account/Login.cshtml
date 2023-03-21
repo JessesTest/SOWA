@@ -1,0 +1,70 @@
+﻿@model SW.ExternalWeb.Models.Account.LoginViewModel
+@{
+    ViewBag.Title = "Log in";
+}
+
+@using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, true, new { role = "form" })) 
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-5">
+            @if (Model.EmailIsUnconfirmed)
+            {
+                <div class="row form-group">
+                    <div class="col-xs-12">
+                        @Html.ActionLink("Click Here To Resend Email Confirmation", "ResendEmailConfirmation", new { }, new { @class = "btn btn-danger btn-block btn-lg" })
+                    </div>
+                </div>
+            }
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.UserName, new { @class = "content-label" })
+                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", tabindex = '1' })
+                    @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="row form-group">
+                    <div class="col-xs-6">
+                        <div class="row">
+                            @Html.LabelFor(m => m.Password, new { @class = "content-label" })
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="row">
+                            <input id="showpassword" type="checkbox" onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'" , style="float:right;">
+                            <label labelfor="showpassword" style="float:right;">Show Password &nbsp;</label>
+                        </div>
+                    </div>
+                    <div class="col-xs-12">
+                        <div class="row">
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", @id = "password", tabindex = '2' })
+                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    <input type="submit" value="Log in" class="btn btn-primary btn-block btn-lg" tabindex="3" />
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.ActionLink("Register a new user?", "Register") |
+                    @Html.ActionLink("Forget your password?", "ForgotPassword")
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    For questions regarding your account please call (785) 233-4774
+                </div>
+            </div>
+        </div>
+        <div id="loginImage" class="col-xs-12 col-sm-12 col-md-6 col-lg-5">
+            @* Side Content Here *@
+        </div>
+    </div>
+}
+
+@* jQuery validation *@

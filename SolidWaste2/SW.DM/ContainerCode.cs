@@ -1,38 +1,29 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SW.DM;
+﻿namespace SW.DM;
 
 public class ContainerCode
 {
-    [Key]
-    [Column(Order = 0)]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int ContainerCodeID { get; set; }
+    public ContainerCode()
+    {
+        ContainerRates = new HashSet<ContainerRate>();
+        ContainerSubtypes = new HashSet<ContainerSubtype>();
+        Containers = new HashSet<Container>();
+        TransactionCodeRules = new HashSet<TransactionCodeRule>();
+    }
 
-    [StringLength(1)]
+    public int ContainerCodeId { get; set; }
     public string Type { get; set; }
-    
-    [StringLength(50)]
     public string Description { get; set; }
-
-    [StringLength(8)]
     public string BillingFrequency { get; set; }
-
     public bool DeleteFlag { get; set; }
-
     public DateTime AddDateTime { get; set; }
-
-    [StringLength(255)]
     public string AddToi { get; set; }
-
-    public DateTime? ChgDateTime { get; set; }        
-
-    [StringLength(255)]
+    public DateTime? ChgDateTime { get; set; }
     public string ChgToi { get; set; }
-
     public DateTime? DelDateTime { get; set; }
-
-    [StringLength(255)]
     public string DelToi { get; set; }
+
+    public virtual ICollection<ContainerRate> ContainerRates { get; set; }
+    public virtual ICollection<ContainerSubtype> ContainerSubtypes { get; set; }
+    public virtual ICollection<Container> Containers { get; set; }
+    public virtual ICollection<TransactionCodeRule> TransactionCodeRules { get; set; }
 }

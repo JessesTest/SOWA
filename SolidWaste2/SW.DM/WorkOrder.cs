@@ -1,90 +1,38 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SW.DM;
+﻿namespace SW.DM;
 
 public class WorkOrder
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Display(Name = "Work Order Number")]
-    public int WorkOrderId { get; set; }
-
-    [Column(TypeName = "date")]
-    public DateTime? TransDate { get; set; }
-
-    [Column(TypeName = "date")]
-    public DateTime? ResolveDate { get; set; }
-
-    [StringLength(4)]
-    public string DriverInitials { get; set; }
-
-    [ForeignKey("Customer"), Column(Order = 1)]
-    public int? CustomerId { get; set; }
-    public Customer Customer { get; set; }
-
-    [ForeignKey("Customer"), Column(Order = 0)]
     public string CustomerType { get; set; }
-
-    [StringLength(64)]
+    public int? CustomerId { get; set; }
+    public int WorkOrderId { get; set; }
+    public DateTime? TransDate { get; set; }
+    public DateTime? ResolveDate { get; set; }
+    public string DriverInitials { get; set; }
     public string CustomerName { get; set; }
-
-    [StringLength(128)]
     public string CustomerAddress { get; set; }
-
+    public int? ServiceAddressId { get; set; }
+    public int? ContainerId { get; set; }
+    public string ContainerCode { get; set; }
+    public string ContainerRoute { get; set; }
+    public decimal? ContainerSize { get; set; }
+    public bool ContainerPickupMon { get; set; }
+    public bool ContainerPickupTue { get; set; }
+    public bool ContainerPickupWed { get; set; }
+    public bool ContainerPickupThu { get; set; }
+    public bool ContainerPickupFri { get; set; }
+    public bool ContainerPickupSat { get; set; }
+    public string RepairsNeeded { get; set; }
+    public string ResolutionNotes { get; set; }
+    public bool DelFlag { get; set; }
+    public string AddToi { get; set; }
+    public string ChgToi { get; set; }
+    public string DelToi { get; set; }
+    public DateTime? AddDateTime { get; set; }
+    public DateTime? ChgDateTime { get; set; }
+    public DateTime? DelDateTime { get; set; }
     public bool RecyclingFlag { get; set; }
 
-    public int? ServiceAddressId { get; set; }
-    [ForeignKey("ServiceAddressId")]
-    public ServiceAddress ServiceAddress { get; set; }
-
-    public int? ContainerId { get; set; }
-    [ForeignKey("ContainerId")]
-    public Container Container { get; set; }
-
-    [StringLength(1)]
-    public string ContainerCode { get; set; }
-
-    [StringLength(5)]
-    public string ContainerRoute { get; set; }
-
-    public decimal? ContainerSize { get; set; }
-
-    public bool ContainerPickupMon { get; set; }
-
-    public bool ContainerPickupTue { get; set; }
-
-    public bool ContainerPickupWed { get; set; }
-
-    public bool ContainerPickupThu { get; set; }
-
-    public bool ContainerPickupFri { get; set; }
-
-    public bool ContainerPickupSat { get; set; }
-
-    [StringLength(256)]
-    public string RepairsNeeded { get; set; }
-    
-    [StringLength(256)]
-    public string ResolutionNotes { get; set; }
-
-    public bool DelFlag { get; set; }
-
-    [StringLength(64)]
-    public string AddToi { get; set; }
-    
-    [StringLength(64)]
-    public string ChgToi { get; set; }
-    
-    [StringLength(64)]
-    public string DelToi { get; set; }
-    
-    [Column(TypeName = "datetime2")]
-    public DateTime? AddDateTime { get; set; }
-    
-    [Column(TypeName = "datetime2")]
-    public DateTime? ChgDateTime { get; set; }
-    
-    [Column(TypeName = "datetime2")]
-    public DateTime? DelDateTime { get; set; }
+    public virtual Container Container { get; set; }
+    public virtual Customer Customer { get; set; }
+    public virtual ServiceAddress ServiceAddress { get; set; }
 }

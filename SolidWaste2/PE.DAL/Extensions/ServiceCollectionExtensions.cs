@@ -13,8 +13,8 @@ namespace PE.DAL.Extensions
             string connectionStringName = "PersonEntity")
 
             => services.AddDbContextFactory<PeDbContext>(options => options.UseSqlServer(
-                    configuration.GetConnectionString(connectionStringName),
-                    opt => opt.UseNetTopologySuite()    // for geography
+                    configuration.GetConnectionString(connectionStringName)
+                    //, opt => opt.UseNetTopologySuite()    // for geography
                 ));
     }
 }

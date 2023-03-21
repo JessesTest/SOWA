@@ -1,0 +1,31 @@
+﻿@model SW.ExternalWeb.Models.Account.SendCodeViewModel
+@{
+    ViewBag.Title = "Send Verification Code";
+}
+
+@using (Html.BeginForm("SendCode", "Account", new { ReturnUrl = Model.ReturnUrl }, FormMethod.Post, true, new { role = "form" })) 
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-5">
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    <h2>Send Verification Code</h2>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.SelectedProvider, new { @class = "content-label" })
+                    @Html.DropDownListFor(m => m.SelectedProvider, Model.Providers, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    <input type="submit" value="Submit" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* jQuery validation *@

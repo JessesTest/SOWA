@@ -11,7 +11,6 @@ using StackifyLib;
 using SW.BLL.Extensions;
 using SW.DAL.Extensions;
 using SW.ExternalWeb.Identity;
-using System;
 
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
@@ -23,7 +22,7 @@ try
     var environment = builder.Environment;
 
     configuration.AddEnvironmentVariables();
-    // add key valut...
+    // add key vault...
 
     // Add services to the container.
     builder.Services
@@ -43,7 +42,7 @@ try
         .AddIdentityDbContext(configuration)
         .AddIdentityServices()
         .AddSolidWasteDbContext(configuration)
-        .AddSolidWasteServices();
+        .AddSolidWasteServices(configuration);
 
     // Session state
     builder.Services
@@ -57,11 +56,18 @@ try
 
     // identity
     builder.Services
-        .AddIdentity(configuration.GetConnectionString("Identity"));
+        .AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("Identity"))
+        );
+    builder.Services
+        //.AddIdentity(configuration.GetConnectionString("Identity"))
+        .AddIdentity<ApplicationUser, IdentityRole>()
+        .AddEntityFrameworkStores<ApplicationDbContext>();
 
     if (!environment.IsEnvironment("Local"))
     {
-        // ...
+        builder.Services
+            .AddDatabaseDeveloperPageExceptionFilter();
     }
     else
     {
@@ -88,7 +94,7 @@ try
 
     app.UseRouting();
 
-    //app.UseAuthentication()
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.UseSession();   // after UseRouting() and before Map...()
