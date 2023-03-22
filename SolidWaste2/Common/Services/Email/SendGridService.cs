@@ -2,11 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Common.Services.Email;
 
@@ -14,6 +10,8 @@ public class SendGridService : ISendGridService
 {
     private readonly string _apiKey;
     private readonly ILogger<SendGridService> _logger;
+    private readonly string _defaultFrom;
+    private readonly string _defaultSubject;
 
     public SendGridService(IConfiguration configuration, ILogger<SendGridService> logger)
     {
@@ -22,6 +20,9 @@ public class SendGridService : ISendGridService
 
         if (string.IsNullOrWhiteSpace(_apiKey))
             _logger.LogError("Missing SendGrid key");
+
+        _defaultFrom = configuration.GetValue<string>("SendGrid:DefaultFrom");
+        _defaultSubject = configuration.GetValue<string>("SendGrid:DefaultSubject");
     }
 
     private static string GetApiKey(IConfiguration configuration)
@@ -83,13 +84,21 @@ public class SendGridService : ISendGridService
             }
         }
 
-        message.SetFrom(dto.From.Address, dto.From.Name);
+        if (dto.From != null)
+            message.SetFrom(dto.From.Address, dto.From.Name);
+        else
+            message.SetFrom(_defaultFrom);
+
         if(dto.ReplyTo!= null)
         {
             message.SetReplyTo(new EmailAddress(dto.ReplyTo.Address, dto.ReplyTo.Name));
         }
 
-        message.SetSubject(dto.Subject);
+        if (!string.IsNullOrWhiteSpace(dto.Subject))
+            message.SetSubject(dto.Subject);
+        else
+            message.SetSubject(_defaultSubject);
+
         if (!string.IsNullOrWhiteSpace(dto.TextContent))
             message.AddContent("text/plain", dto.TextContent);
 

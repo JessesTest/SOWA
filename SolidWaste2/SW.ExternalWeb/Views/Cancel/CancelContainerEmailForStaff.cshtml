@@ -1,0 +1,63 @@
+﻿@model SW.ExternalWeb.Models.Cancel.CancelEmailViewModel
+<html>
+<body>
+    <p>Customer initiated cancel of container.</p>
+    <table>
+        <tr>
+            <td>Container End Service Date</td>
+            <td>
+                @string.Format("{0:d}", Model.Containers.First().CancelDate.Value)
+            </td>
+        </tr>
+        <tr>
+            <td>Account Name</td>
+            <td>@Model.Person.FullName</td>
+        </tr>
+        <tr>
+            <td>Account Number</td>
+            <td>@string.Format("{0}{1:000000}", Model.Customer.CustomerType, Model.Customer.CustomerId)</td>
+        </tr>
+        <tr>
+            <td>Billing Address</td>
+            <td>
+                @Model.Address.Number
+                @Model.Address.Direction
+                @Model.Address.StreetName
+                @Model.Address.Suffix
+                @Model.Address.Apt
+                <br />
+                @Model.Address.City
+                @Model.Address.State
+                @Model.Address.Zip
+            </td>
+        </tr>
+        <tr>
+            <td>Service Address</td>
+            <td>
+                @Model.ServiceAddress.PEAddress.Number
+                @Model.ServiceAddress.PEAddress.Direction
+                @Model.ServiceAddress.PEAddress.StreetName
+                @Model.ServiceAddress.PEAddress.Suffix
+                @Model.ServiceAddress.PEAddress.Apt
+            </td>
+        </tr>
+        <tr>
+            <td>Container</td>
+            @{
+                var c = Model.Containers.First();
+                <td>
+                    @c.ContainerCode.Description
+                    @c.ContainerSubtype.Description
+                    @c.ActualSize
+                    @(c.MonService ? "M" : ".")
+                    @(c.TueService ? "T" : ".")
+                    @(c.WedService ? "W" : ".")
+                    @(c.ThuService ? "T" : ".")
+                    @(c.FriService ? "F" : ".")
+                    @(c.SatService ? "S" : ".")
+                </td>
+            }
+        </tr>
+    </table>
+</body>
+</html>
