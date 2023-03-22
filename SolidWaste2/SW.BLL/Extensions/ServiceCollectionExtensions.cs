@@ -10,9 +10,11 @@ public static class ServiceCollectionExtensions
         => services
             .AddTransient<IBillBlobService, BillBlobService>()
             .AddTransient<IBillMasterService, BillMasterService>()
+            .AddTransient<IContainerService, ContainerService>()
             .AddTransient<ICustomerService, CustomerService>()
             .AddTransient<IKanPayService, KanPayService>()
             .AddTransient<IPaymentPlanService, PaymentPlanService>()
+            .AddTransient<IServiceAddressService, ServiceAddressService>()
             .AddTransient<ITransactionService, TransactionService>()
 
             .Configure<KanPaySettings>(configuration.GetSection("KanPay"));

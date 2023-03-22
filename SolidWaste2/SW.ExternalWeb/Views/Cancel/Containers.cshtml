@@ -1,0 +1,33 @@
+﻿@model ICollection<SW.DM.Container>
+<div>
+    <h3>Select a container to cancel:</h3>
+    <table>
+        <tr>
+            <td><input type="radio" name="ContainerId" id="ContainerId_0" value="-1" class="sw-container" />&nbsp;</td>
+            <td><label for="ContainerId_0">Cancel the service address.</label></td>
+        </tr>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td><input type="radio" name="ContainerId" id="ContainerId_@c.Id" value="@c.Id" class="sw-container" /></td>
+                <td>
+                    <label for="ContainerId_@c.Id">
+                        @c.ContainerCode.Description
+                        @c.ContainerSubtype.Description
+                        @c.ActualSize
+                        @(c.MonService ? "M" : ".")
+                        @(c.TueService ? "T" : ".")
+                        @(c.WedService ? "W" : ".")
+                        @(c.ThuService ? "T" : ".")
+                        @(c.FriService ? "F" : ".")
+                        @(c.SatService ? "S" : ".")
+                    </label>
+                    @if (c.CancelDate.HasValue)
+                    {
+                        <div>Cancel Date: @string.Format("{0:d}", c.CancelDate.Value)</div>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+</div>

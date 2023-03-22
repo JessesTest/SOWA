@@ -1,0 +1,26 @@
+﻿@model IEnumerable<SW.DM.ServiceAddress>
+
+<div>
+    <h3>Select a service address:</h3>
+    <table>
+        @foreach (var sa in Model)
+        {
+            <tr>
+                <td style="vertical-align:top">
+                    <input type="radio" name="ServiceAddressId" value="@sa.Id" id="ServiceAddress_@sa.Id" class="sw-service-address" />
+                    &nbsp;
+                </td>
+                <td>
+                    <label for="ServiceAddress_@sa.Id">
+                        @sa.PEAddress.Number @sa.PEAddress.Direction @sa.PEAddress.StreetName @sa.PEAddress.Suffix @sa.PEAddress.Apt<br />
+                        @sa.PEAddress.City @sa.PEAddress.State @sa.PEAddress.Zip
+                    </label>
+                    @if (sa.CancelDate.HasValue)
+                    {
+                        <div>@string.Format("Cancel Date: {0:d}", sa.CancelDate.Value)</div>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+</div>
