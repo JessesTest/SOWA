@@ -1,0 +1,104 @@
+﻿@model SW.ExternalWeb.Models.Cancel.CancelViewModel
+@{
+    ViewBag.Title = "Cancel Service";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(m => m.AccountNumber)
+    @Html.HiddenFor(m => m.BillingAddress1)
+    @Html.HiddenFor(m => m.BillingAddress2)
+    @*@Html.HiddenFor(m => m.CancelDate)*@
+    @*@Html.HiddenFor(m => m.ContainerId)*@
+    @Html.HiddenFor(m => m.Phone)
+    @*@Html.HiddenFor(m => m.ServiceAddressId)*@
+    <div>
+        <h3>Cancel Service</h3>
+        <p>It may take up until two business days to process your request for cancelation.  If we have any questions we will attemmpt to contact you at phone number @Model.Phone</p>
+        <h3>Account Number: @Model.AccountNumber</h3>
+        <p>The address where we will mail your final bill is displayed below:</p>
+        <p>@Model.BillingAddress1<br />@Model.BillingAddress2</p>
+        <p>If you are moving, please contact USPS to setup a forwarding address.</p>
+
+        <p>
+            <h3>Choose the date to stop service: </h3>
+            @Html.TextBoxFor(m => m.CancelDate, "{0:d}", new { @class = "datepicker14" }) <label for="CancelDate"><b style="font-size:1.5em"><i class="fa fa-calendar icon"></i></b></label>
+            <br />
+            <span asp-validation-for="CancelDate"></span>
+        </p>
+
+        <div class="sw-service-addresses"></div>
+        &nbsp;
+        <div class="sw-containers"></div>
+        &nbsp;
+        <div class="sw-submit">
+            <button type="submit">Submit</button>
+        </div>
+    </div>
+}
+<br />
+<br />
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        console.log("scripting");  // ...
+
+        $(document).ready(function () {
+
+            console.log("ready");
+
+            $(".datepicker14").datepicker({
+                minDate: new Date("@string.Format("{0:d}", DateTime.Now)"),
+                maxDate: new Date("@string.Format("{0:d}", DateTime.Now.AddDays(14))")
+            });
+            $(".sw-submit").hide();
+
+            console.log("hidden");  // ...
+
+            $.ajax({
+                url: '@Url.Action("ServiceAddresses", "Cancel")',
+                method: "POST",
+                success: function (response) {
+                    console.log("addresses success");
+                    $(".sw-service-addresses").html(response);
+                },
+                error: function () {
+                    console.log("addresses error")
+                    $(".sw-service-addresses").html("<p>Error</p>");
+                }
+            });
+
+
+            $(document).on("click", ".sw-service-address", function (e) {
+
+                console.log("click sw-service-address");  // ...
+
+                $.ajax(
+                    '@Url.Action("Containers")',
+                    {
+                        method: "POST",
+                        data: { serviceAddressId: e.currentTarget.value },
+                        success: function (data) {
+                            $(".sw-containers").html(data);
+                            $(".sw-submit").hide();
+                            console.log("containers success");  // ...
+                        },
+                        error: function () {
+                            console.log("containers error");  // ...
+                            alert("There was an error retrieving the list of containers");
+                        }
+                    });
+
+            });
+
+            $(document).on("click", ".sw-container", function (e) {
+
+                console.log("click sw-container");  // ...
+
+                $(".sw-submit").show();
+            });
+        });
+    </script>
+}

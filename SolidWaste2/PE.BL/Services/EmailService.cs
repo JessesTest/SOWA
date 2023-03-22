@@ -87,11 +87,11 @@ public class EmailService : IEmailService
         var defaultEmail = await GetById(emailId);
 
         if (defaultEmail == null)
-            throw new Exception(string.Format("Email Id '{0}' was not found.", emailId));
+            throw new ArgumentException("Email Id not found.", nameof(emailId));
         if (defaultEmail.PersonEntityID != personId)
-            throw new Exception("Email PersonEntityId mismatch");
+            throw new InvalidOperationException("Email PersonEntityId mismatch");
         if (defaultEmail.Delete)
-            throw new Exception("Email was deleted");
+            throw new ArgumentException("Email was deleted", nameof(emailId));
 
         var defaultEmails = await db.Emails
             .Where(e => e.PersonEntityID == personId && e.IsDefault)

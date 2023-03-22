@@ -1,6 +1,7 @@
 using Common.Extensions;
 using Identity.BL.Extensions;
 using Identity.DAL.Extensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
@@ -21,7 +22,7 @@ try
     var environment = builder.Environment;
 
     configuration.AddEnvironmentVariables();
-    // add key valut...
+    // add key vault...
 
     // Add services to the container.
     builder.Services
@@ -55,11 +56,18 @@ try
 
     // identity
     builder.Services
-        .AddIdentity(configuration.GetConnectionString("Identity"));
+        .AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("Identity"))
+        );
+    builder.Services
+        //.AddIdentity(configuration.GetConnectionString("Identity"))
+        .AddIdentity<ApplicationUser, IdentityRole>()
+        .AddEntityFrameworkStores<ApplicationDbContext>();
 
     if (!environment.IsEnvironment("Local"))
     {
-        // ...
+        builder.Services
+            .AddDatabaseDeveloperPageExceptionFilter();
     }
     else
     {
@@ -86,7 +94,7 @@ try
 
     app.UseRouting();
 
-    //app.UseAuthentication()
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.UseSession();   // after UseRouting() and before Map...()

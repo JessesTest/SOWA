@@ -31,7 +31,11 @@ namespace SW.ExternalWeb.ViewComponents
                 CurrentController = controller
             };
 
-            var user = await _userManager.FindByIdAsync(UserClaimsPrincipal.GetUserId());
+            var ucpId = UserClaimsPrincipal?.GetUserId();
+            if (string.IsNullOrWhiteSpace(ucpId))
+                return View("LayoutRibbonBlank", vm);
+
+            var user = await _userManager.FindByIdAsync(ucpId);
             if (user == null)
                 return View("LayoutRibbonBlank", vm);
 

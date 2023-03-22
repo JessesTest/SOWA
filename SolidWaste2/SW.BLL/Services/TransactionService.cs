@@ -463,4 +463,28 @@ public class TransactionService : ITransactionService
     }
 
     #endregion
+
+    public async Task<ICollection<TransactionListingItem>> GetListingByCustomer(int customerId, bool includeDeleted = false)
+    {
+        using var db = dbFactory.CreateDbContext();
+        IQueryable<Transaction> query = db.Transactions
+            .Where(e => e.CustomerId == customerId);
+
+        if (!includeDeleted)
+            query = query.Where(e => !e.DeleteFlag);
+
+        return await query
+            .Select(e => new TransactionListingItem
+             {
+                 AddDateTime = e.AddDateTime,
+                 CodeDescription = e.TransactionCode.Description,
+                 TransactionComment = e.Comment,
+                 TransactionAmount = e.TransactionAmt,
+                 TransactionBalance = e.TransactionBalance,
+                 TransactionCode = e.TransactionCode.Code,
+                 TransactionID = e.Id
+             })
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
