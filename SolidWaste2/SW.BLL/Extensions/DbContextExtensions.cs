@@ -68,12 +68,17 @@ namespace SW.BLL.Extensions
         public static Task<PaymentPlan> GetActivePaymentPlanByCustomer(this SwDbContext db, int customerId, bool includeDetails = true)
         {
             var query = db.PaymentPlans
-                .Where(e => e.CustomerId == customerId && !e.DelFlag && e.Status == "Active");
+                .Where(pp => pp.CustomerId == customerId)
+                .Where(pp => pp.Customer.PaymentPlan)
+                .Where(pp => !pp.DelFlag)
+                .Where(pp => !pp.Canceled);
 
             if (includeDetails)
                 query = query.Include(e => e.Details);
 
-            return query.AsNoTracking().SingleOrDefaultAsync();
+            return query
+                .AsNoTracking()
+                .SingleOrDefaultAsync();
         }
 
         #endregion
