@@ -56,7 +56,7 @@ public class BillingHistoryController : Controller
             }).ToList()
         };
 
-        return View(model);
+        return PartialView(model);
     }
 
     [HttpGet]
@@ -68,6 +68,9 @@ public class BillingHistoryController : Controller
         var customerId = customer.CustomerId;
 
         var bill_blob_record = await billBlobService.GetByTransactionId(TransactionID);
+
+        if (bill_blob_record == null)
+            return NotFound();
 
         if (bill_blob_record.CustomerId != customerId)
         {

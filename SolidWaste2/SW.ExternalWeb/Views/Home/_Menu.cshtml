@@ -1,0 +1,403 @@
+﻿@model SW.ExternalWeb.Models.AccountHomeMenuViewModel
+<div id="largescreens" class="hidden-xs hidden-sm">
+    <div class="row">
+        <div class="col-lg-9 col-xs-8">
+            <div class="row">
+                <div class="col-xs-6">
+                    <h2>Billing and Payments</h2>
+                </div>
+            </div>
+            <div class="row" style="padding-right:12px">
+                <div class="col-xs-9">
+                    <h3 style="font-weight:bold; text-align:left; vertical-align:bottom; padding-bottom:0px;">Account Number: @Model.AccountNumber</h3>
+                </div>
+            </div>
+
+            <div class="col-xs-12" style="border-top:3px solid black; background-color: gainsboro; background-clip:padding-box;  padding-bottom: 10px; padding-top: 10px; padding-right:20px">
+                <div class="row">
+                    <div class="col-xs-5">
+                        Most Recent Monthly Bill: @Model.MostRecentBillAmt.ToString("c")
+                    </div>
+                </div>
+                <div class="row" style="padding-bottom: 10px">
+                    <div class="col-xs-5">
+                        Payments Since Last Bill: @Model.ActivitySinceLastBill.ToString("c")
+                    </div>
+                </div>
+                @{
+                    string color = Model.PastDueBalance > 0 ? "color: red;" : string.Empty;
+                }
+                <div class="row" style="border-top:3px solid black;">
+                    <div class="col-xs-7" style="font-size:large; vertical-align:central; padding-top:15px;">
+                        Account Balance as of @DateTime.Now.ToShortDateString(): @Model.CurrentBalance.ToString("c")
+                    </div>
+                    <div class="col-xs-5" style="font-size:large; text-align:right; vertical-align:central; padding-top:15px; @color">
+                        Payment Due By: @Model.DueDate.ToShortDateString()
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 paymentwidget">
+            @using (Html.BeginForm("Index", "KanPay", FormMethod.Post))
+            {
+                <div class="row paymentwidgetheaderbg">
+                    <div class="col-xs-9">
+                        <div class="row paymentwidgetheadertitle">
+                            Quick Pay
+                        </div>
+                    </div>
+                    <div class="col-xs-3">
+                        <div class="row paymentwidgetheadertitle" id="paymentwidgetbackbutton" hidden="hidden">
+                            <a href="" style="margin-left:-20px; font-size: 16px;">&#60;Back</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row paymentwidgetoptions">
+                    <div class="col-xs-12">
+                        <div class="row input-group" id="paymentwidgettextboxgroup">
+                            @if (Model.CurrentBalance > 0 && Model.PPFlag != true)
+                            {
+                                <label>Payment Amount ($USD):</label>
+                                <div class="input-group">
+                                    <span class="bg-success input-group-addon">$</span>
+                                    @Html.TextBoxFor(m => m.KanPayPayment, new { @readonly = "readonly", @class = "paymentwidgettextbox form-control", @id = "paymentwidgettextbox", @style = "color: black", @Value = Html.ValueFor(m => m.CurrentBalance).ToString() })
+                                </div>
+                            }
+                            else if (Model.CurrentBalance > 0 && Model.PPFlag == true)
+                            {
+                                <label>Payment Amount ($USD):</label>
+                                <div class="input-group">
+                                    <span class="bg-success input-group-addon">$</span>
+                                    @Html.TextBoxFor(m => m.KanPayPayment, new { @readonly = "readonly", @class = "paymentwidgettextbox form-control", @id = "paymentwidgettextbox", @style = "color: black", @Value = Html.ValueFor(m => m.CurrentBalance).ToString() })
+                                </div>
+                            }
+                            else if (Model.CurrentBalance <= 0)
+                            {
+                                <label>Payment Amount ($USD):</label>
+                                <div class="input-group">
+                                    <span class="bg-success input-group-addon">$</span>
+                                    @Html.TextBoxFor(m => m.KanPayPayment, new { @disabled = "disabled", @class = "paymentwidgettextbox form-control", @id = "paymentwidgettextbox", @style = "color: black", @Value = Html.ValueFor(m => m.CurrentBalance).ToString() })
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="row paymentwidgetoptions">
+                    <div class="col-xs-12">
+                        <div class="row" id="paymentwidgetgroup2" hidden="hidden">
+                            <div class="col-xs-12">
+                                <div class="row" id="enteredpaymentvalue">
+                                    Payment Amount: @Model.CurrentBalance
+                                </div>
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="row">
+                                    <div class="radio">
+                                        <label>
+                                            @Html.RadioButtonFor(m => m.KanPayPaymentChoice, "CC", new { @checked = "checked", @class = "paymentwidgetradiobutton" })
+                                            Credit Card
+                                            @if (Model.CustomerType == "C" || Model.CustomerType == "H")
+                                            {
+                                                <text> (+2.5% Fee) </text>
+                                            }
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            @Html.RadioButtonFor(m => m.KanPayPaymentChoice, "ACH", new { @class = "paymentwidgetradiobutton" })
+                                            E-Check
+                                            @if (Model.CustomerType == "R")
+                                            {
+                                                <text> (+$1.25 Fee) </text>
+                                            }
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    By clicking "Make Payment" you will be leaving snco.us
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" id="paymentwidgetradiobuttongroup">
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" id="fullpaymentoption" class="paymentwidgetradiobutton" name="payamountchoice" checked="checked" />
+                                    Pay Full Balance
+                                </label>
+                            </div>
+                            @if (Model.PPFlag == true)
+                            {
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" id="paymentplanoption" class="paymentwidgetradiobutton" name="payamountchoice" />
+                                        Payment Plan Amt Due
+                                    </label>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" id="pastduepaymentoption" class="paymentwidgetradiobutton" name="payamountchoice" />
+                                        Pay Past Due Balance
+                                    </label>
+                                </div>
+                            }
+
+
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12">
+                        <div class="row">
+                            @if (@Model.CurrentBalance > 0)
+                            {
+                                <div class="col-xs-12">
+                                    <div class="row" id="paymentwidgetmakepaymentbuttonrow">
+                                        <input type="button" id="paymentwidgetmakepaymentbutton" value="Next" class="btn btn-success btn-block" />
+                                    </div>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="row" id="paymentwidgetmakepaymentbuttonfinalrow" hidden="hidden">
+                                        <input type="submit" id="paymentwidgetmakepaymentbuttonfinal" value="Make Payment" class="btn btn-success btn-block" hidden="hidden" />
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="button" value="Zero Balance" class="btn btn-success btn-block disabled" />
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row" style="padding-top:20px">
+        <div class="col-xs-12">
+            @if (Model.CurrentController == "Home" && Model.CurrentAction == "BillSummary")
+            {
+                <a href="@Url.Action("BillSummary", "Home")" class="activefeaturesbuttonhome">
+                    Bill Summary
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("BillSummary", "Home")" class="featuresbuttonhome">
+                    Bill Summary
+                </a>
+            }
+            @if (Model.CurrentController == "Home" && Model.CurrentAction == "BillHistory")
+            {
+                <a href="@Url.Action("BillHistory", "Home")" class="activefeaturesbuttonhome">
+                    Transaction History
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("BillHistory", "Home")" class="featuresbuttonhome">
+                    Transaction History
+                </a>
+            }
+            @*@if (Model.CurrentController == "Home" && Model.CurrentAction == "ServiceDetail")
+            {
+            <a href="@Url.Action("ServiceDetail", "Home")" class="activefeaturesbuttonhome">
+            Service Details
+            </a>
+            }
+            else
+            {
+            <a href="@Url.Action("ServiceDetail", "Home")" class="featuresbuttonhome">
+            Service Details
+            </a>
+            }*@
+            <div style="border-bottom: 2px solid #344479; display:block"></div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:15px">
+    </div>
+</div>
+
+@*<div id="pinFinderpopup" class="questionbuttonoverlay">
+        <div class="popup">
+            <a class="close" href="#" style="font-size: 5em">&times;</a>
+            <div class="blankbillcontent">
+                <img id="blankbillimage" src="~/Content/images/backgrounds/TOS_overlay.png" />
+            </div>
+        </div>
+    </div>*@
+
+<div id="smallscreens" class="hidden-lg hidden-md hidden-xs">
+    <div class="row">
+        <div class="col-xs-8">
+            <h2>Billing and Payments</h2>
+        </div>
+        @*<div class="col-xs-4">
+        <a href="@Url.Action("Index", "KanPay")" class="btn btn-success" style="float:right; font-size:13px">
+        Make Payment
+        </a>
+        </div>*@
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <h3 style="font-weight:bold; text-align:left; vertical-align:bottom; padding-bottom:0px; padding-left:20px">Account Number: @Model.AccountNumber</h3>
+        </div>
+    </div>
+
+    <div class="col-xs-12" style="border-top:3px solid black; padding-top:0px; background-color: gainsboro; background-clip:padding-box;  padding-bottom: 10px; padding-top: 10px; padding-right:20px">
+        <div class="row">
+            <div class="col-xs-6">
+                Most Recent Bill:
+            </div>
+            <div class="col-xs-6" style="text-align:right">
+                @Model.MostRecentBillAmt.ToString("c")
+            </div>
+        </div>
+        <div class="row" style="padding-bottom: 10px">
+            <div class="col-xs-6">
+                Activity Since Last Bill:
+            </div>
+            <div class="col-xs-6" style="text-align:right">
+                @Model.ActivitySinceLastBill.ToString("c")
+            </div>
+        </div>
+
+        <div class="row" style="border-top:3px solid black;">
+            <div class="col-xs-6" style="font-size:large; vertical-align:central; padding-top:15px">
+                Account Balance:
+            </div>
+            <div class="col-xs-6" style="font-size:large; text-align:right; vertical-align:central; padding-top:15px">
+                @Model.CurrentBalance.ToString("c")
+            </div>
+        </div>
+
+        @if (@Model.PastDueBalance > 0)
+        {
+            <div class="row">
+                <div class="col-xs-6" style="font-size:large; vertical-align:central; padding-top:15px; color:red">
+                    Payment Due By:
+                </div>
+                <div class="col-xs-6" style="font-size:large; text-align:right; vertical-align:central; padding-top:15px; color:red">
+                    @Model.DueDate.ToShortDateString()
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-xs-6" style="font-size:large; vertical-align:central; padding-top:15px;">
+                    Payment Due By:
+                </div>
+                <div class="col-xs-6" style="font-size:large; text-align:right; vertical-align:central; padding-top:15px;">
+                    @Model.DueDate.ToShortDateString()
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col-xs-12">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2></h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12" style="font-size:medium">
+                @Html.ActionLink("Billing/Payment History", "Index", "BillingHistory")
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12" style="font-size:medium">
+                @Html.ActionLink("Service Detail", "Index", "Cancel")
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <hr style="border-bottom:1px solid #344479; margin-left:20px; margin-right:20px;" />
+        </div>
+    </div>
+</div>
+
+
+<div id="xsscreens" class="hidden-lg hidden-md hidden-sm">
+    <div class="row">
+        <div class="col-xs-12">
+            <h2>Billing and Payments</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <h3 style="font-weight:bold; text-align:left; vertical-align:bottom; padding-bottom:0px; padding-left:20px">Account Number: @Model.AccountNumber</h3>
+        </div>
+    </div>
+    <div class="col-xs-12" style="border-top:3px solid black; padding-top:0px; background-color: gainsboro; background-clip:padding-box;  padding-bottom: 10px; padding-top: 10px; padding-right:20px">
+        <div class="row">
+            <div class="col-xs-7">
+                Most Recent Bill:
+            </div>
+            <div class="col-xs-5" style="text-align:right">
+                @Model.MostRecentBillAmt.ToString("c")
+            </div>
+        </div>
+        <div class="row" style="padding-bottom: 10px">
+            <div class="col-xs-8">
+                Activity Since Last Bill:
+            </div>
+            <div class="col-xs-4" style="text-align:right">
+                @Model.ActivitySinceLastBill.ToString("c")
+            </div>
+        </div>
+
+        <div class="row" style="border-top:3px solid black;">
+            <div class="col-xs-6" style="font-size:large; vertical-align:central; padding-top:15px">
+                Balance:
+            </div>
+            <div class="col-xs-6" style="font-size:large; text-align:right; vertical-align:central; padding-top:15px">
+                @Model.CurrentBalance.ToString("c")
+            </div>
+        </div>
+        @if (@Model.CurrentBalance > 0)
+        {
+            <div class="row" style="color:red">
+                <div class="col-xs-6" style="font-size:large; vertical-align:central; padding-top:15px">
+                    Due By:
+                </div>
+                <div class="col-xs-6" style="font-size:large; text-align:right; vertical-align:central; padding-top:15px">
+                    @Model.DueDate.ToShortDateString()
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-xs-6" style="font-size:large; vertical-align:central; padding-top:15px">
+                    Due By:
+                </div>
+                <div class="col-xs-6" style="font-size:large; text-align:right; vertical-align:central; padding-top:15px">
+                    @Model.DueDate.ToShortDateString()
+                </div>
+            </div>
+        }
+    </div>
+    <div class="row">
+        <div class="col-xs-12" style="font-size:medium; padding-top:10px">
+            @Html.ActionLink("Billing/Payment History", "Index", "BillingHistory")
+        </div>
+    </div>
+    <div class="row" style="padding-bottom:15px">
+        <div class="col-xs-12" style="font-size:medium">
+            @Html.ActionLink("Service Detail", "Index", "Cancel")
+        </div>
+    </div>
+    @*<div class="col-xs-12">
+    <a href="@Url.Action("Index", "KanPay")" class="btn btn-success" style="font-size:13px; display:block; margin: 0 auto">
+    Make Payment
+    </a>
+    </div>*@
+    <div class="row">
+        <div class="col-xs-12">
+            <hr style="border-bottom:1px solid #344479; margin-left:20px; margin-right:20px;" />
+        </div>
+    </div>
+</div>

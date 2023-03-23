@@ -1,0 +1,52 @@
+﻿@model int
+@using System.Configuration;
+@{
+    ViewBag.Title = "Account Home";
+}
+
+@if (Model == 0)
+{
+    return;
+}
+
+<div class="row">
+    <div class="col-xs-12" id="home-menu-target">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12" id="service-detail-target">
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+
+        $.ajax({
+            url: '@Url.Action("HomeMenu", "Home")',
+            data: {
+                controller: "Home",
+                action: "ServiceDetail"
+            },
+            type: "GET",
+            success: (result) => {
+                $("#home-menu-target").html(result);
+            },
+            error: (jqXHR, textStatus, errorThrown) => {
+                $("#home-menu-target").text(`${textStatus}: ${errorThrown}`);
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("Index", "ServiceDetail")',
+            type: "GET",
+            success: (result) => {
+                $("#service-detail-target").html(result);
+            },
+            error: (jqXHR, textStatus, errorThrown) => {
+                $("#service-detail-target").text(`${textStatus}: ${errorThrown}`);
+            }
+        });
+
+    </script>
+}
