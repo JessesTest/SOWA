@@ -1,0 +1,288 @@
+﻿@model SW.ExternalWeb.Models.HomePageViewModel
+@using System.Configuration
+@{
+    ViewBag.Title = "Account Home";
+}
+
+@if (Model.CustomerId == 0)
+{
+    return;
+}
+
+<div class="row">
+    <div class="col-xs-12" id="home-menu-target">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12" id="home-target">
+    </div>
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        
+        $.ajax({
+            url: '@Url.Action("HomeMenu", "Home")',
+            data: {
+                controller: "Home",
+                action: "BillSummary"
+            },
+            type: "GET",
+            success: (result) => {
+                $("#home-menu-target").html(result);
+
+                if ("@Model.DOIHAVECOUNSELORS" == "True") {
+                    $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                    $('.paymentwidget').remove();
+                    $('#layout-error').append("<div class='row'><div class='col-xs-12'><div class='alert alert-warning'><button type='button' class='close' data-dismiss='alert'>&times;</button><ul><li><i class='fa fa-ban-circle text-warning'></i><strong>Your account has a overdue balance. Contact Solid Waste to make a payment at 785.233.4774 or by email at solidwaste@snco.us</strong></li></ul></div></div></div>");
+                }
+            },
+            error: (jqXHR, textStatus, errorThrown) => {
+                $("#home-menu-target").text(`${textStatus}: ${errorThrown}`);
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("Index", "Home")',
+            type: "GET",
+            success: (result) => {
+                $("#home-target").html(result);
+
+                var table = $('#transactions').DataTable({
+                    "ajax": "@Url.Action("TransactionsJson", "Home", new { customerId = Model.CustomerId})",
+                    "columns": [
+                        {
+                            "class": 'details-control',
+                            "orderable": false,
+                            "data": null,
+                            "defaultContent": ''
+                        },
+                        { "data": "AddDateTime", "sClass": "text-left hidden" },
+                        { "data": "Activity", "sClass": "text-left" },
+                        { "data": "TransactionAmount", "sClass": "text-right" },
+                        { "data": "Balance", "sClass": "text-right" },
+                    ],
+                    "order": [[1, 'desc']],
+                    "scrollX": true,
+                    "lengthMenu": [[-1], ["All"]],
+                    "fnCreatedRow": function (nRow, aData, iDataIndex) {
+                        var remindercheck = 'REMINDER';
+                        if (aData.BillMaster == null || aData.Activity.indexOf(remindercheck) != -1) {
+                            $('td', nRow).eq(0).removeClass('details-control');
+                        }
+                    }
+                });
+
+                // Add event listener for opening and closing details
+                $('#transactions tbody').on('click', 'td.details-control', function () {
+                    var tr = $(this).closest('tr');
+                    var row = table.row(tr);
+
+                    if (row.child.isShown()) {
+                        // This row is already open - close it
+                        $('div.slider', row.child()).slideUp(function () {
+                            row.child.hide();
+                            tr.removeClass('shown');
+                        });
+                    }
+                    else {
+                        // Open this row
+                        row.child(format(row.data()), 'no-padding').show();
+                        tr.addClass('shown');
+
+                        $('div.slider', row.child()).slideDown();
+                    }
+                });
+            },
+            error: (jqXHR, textStatus, errorThrown) => {
+                $("#home-target").text(`${textStatus}: ${errorThrown}`);
+            }
+        });
+
+        function format(d) {
+            if (d.BillMaster == null) {
+                //`d` is the original data object for the row
+                return "";
+            }
+
+            var s =
+                '<div class="slider">'
+                + '<table cellpadding="5" cellspacing="0" border="0" class="address-detail" style="padding-left:50px; width:100%">';
+
+        @*s += '<td><a href="@(envUrl + "CustomerTransactionHistory/DownloadBill?TransactionID=")'+ d.BillMaster.TransactionID + '">View Paper Bill</a></td>'*@
+
+                    if (d.BillMaster.ContractCharge != null) {
+                s +=
+                    '<td class="contract-charge-header-static">'
+                    + '<th class="contract-charge-header-static"> </th>'
+                    + '<th class="contract-charge-header-static"> </th>'
+                    + '<td class="contract-charge-header-color text-right">' + "Contract Charge : " + d.BillMaster.ContractCharge + '</td>'
+            }
+
+            for (i = 0; i < d.BillMaster.BillServiceAddress.length; i++) {
+                if (d.BillMaster.BillServiceAddress[i].BillContainers.length > 0) {
+                    s +=
+                        '<tr class="serviceaddress-detail">'
+                        + '<th class="serviceaddress-detail-cellpadding">' + d.BillMaster.BillServiceAddress[i].ServiceAddressName + '</th>'
+                        + '<th class="serviceaddress-detail-cellpadding">' + d.BillMaster.BillServiceAddress[i].ServiceAddressStreet + '</th>'
+                        + '<td></td><td></td>' +
+                        '</tr>';
+
+                    s += '<tr class="detail-breakdown-header">' +
+                        '<th class="detail-breakdown-header-cellpadding">' + "Container Type" + '</th>' +
+                        '<th class="detail-breakdown-header-cellpadding">' + "" + '</th>' +
+                        '<th class="detail-breakdown-header-cellpadding">' + "Pickup Days" + '</th>' +
+                        '<th class="detail-breakdown-header-cellpadding" style="text-align:right">' + "Charge" + '</th>';
+                }
+                for (j = 0; j < d.BillMaster.BillServiceAddress[i].BillContainers.length; j++) {
+                    s +=
+                        '<tr class="address-detail-cellpadding">';
+                    if (d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerType == 'M') {
+                        s += '<td class="commercialrecycle">'
+                    }
+                    else if (d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerType == 'C') {
+                        s += '<td class="commercialtrash">'
+                    }
+                    else if (d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerType == 'O') {
+                        s += '<td class="rollofftrash">'
+                    }
+                    else if (d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerType == 'R') {
+                        s += '<td class="residentialtrash">'
+                    }
+                    else if (d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerType == 'Z') {
+                        s += '<td class="residentialrecycle">'
+                    }
+                    else if (d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerType == 'S') {
+                        s += '<td class="specialtrash">'
+                    }
+                    s += d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerType
+                        + ' - '
+                        + d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerDescription
+                        + '</td>'
+                        + '<td class="address-detail-cellpadding">' + d.BillMaster.BillServiceAddress[i].BillContainers[j].RateDescription + '</td>'
+                        + '<td class="address-detail-cellpadding">' + d.BillMaster.BillServiceAddress[i].BillContainers[j].DaysService + '</td>'
+                        + '<td class="text-right address-detail-cellpadding">' + d.BillMaster.BillServiceAddress[i].BillContainers[j].ContainerCharge + '</td>'
+                        + '</tr>';
+                }
+            }
+
+            s +=
+                '</table>'
+                + '</div>';
+            return s
+        }
+        $(document).on('input', '#paymentwidgettextbox', () => {
+            var num = this.value;
+            var ifMatch = (num.match(/(?=.)^\$?(([1-9][0-9]{0,2}(,[0-9]{3})*)|0)?(\.[0-9]{2})?$/)) ? true : false;
+            if (this.value.indexOf('-') == 0) {
+                $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                $('#paymentwidgetmakepaymentbutton').attr("value", "Negative Value");
+                $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-danger btn-block");
+            }
+            else if (this.value.indexOf(",") >= 1) {
+                $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                $('#paymentwidgetmakepaymentbutton').attr("value", "Please Remove Commas");
+                $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-danger btn-block");
+            }
+
+            else if (ifMatch == true) {
+                if (this.value == "") {
+                    $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                }
+                else if (this.value <= 1.50) {
+                    $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                    $('#paymentwidgetmakepaymentbutton').attr("value", "Minimum: $1.51");
+                    $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-danger btn-block");
+                }
+                else {
+                    $('#paymentwidgetmakepaymentbutton').removeAttr('disabled');
+                    $('#paymentwidgetmakepaymentbutton').attr("value", "Next");
+                    $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-success btn-block");
+                }
+            }
+            else if (this.value >= 1000) {
+                $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                $('#paymentwidgetmakepaymentbutton').attr("value", "Maximum: $999.99");
+                $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-danger btn-block");
+            }
+            else {
+                $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                $('#paymentwidgetmakepaymentbutton').attr("value", "Invalid Entry");
+                $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-danger btn-block");
+            }
+        });
+        var currentbalance = @Model.CurrentBalance;
+        var pastduebalance = @Model.PastDueBalance;
+        var paymentplanbalance = @(Model.PPBalance ?? 0);
+        $(document).on("click", "#fullpaymentoption", () => {
+            $('#enteredpaymentvalue').empty();
+            $("#paymentwidgettextbox").val(parseFloat(currentbalance).toFixed(2));
+            $("#paymentwidgettextbox").attr("readonly", "readonly");
+            if ("@Model.DOIHAVECOUNSELORS" == "True") {
+                $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+            }
+            else {
+                $('#paymentwidgetmakepaymentbutton').removeAttr('disabled');
+            }
+            $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-success btn-block");
+            $('#paymentwidgetmakepaymentbutton').attr("Value", "Next");
+        });
+        $(document).on("click", "#paymentplanoption", () => {
+            $('#enteredpaymentvalue').empty();
+            $("#paymentwidgettextbox").val(parseFloat(paymentplanbalance).toFixed(2));
+            $("#paymentwidgettextbox").attr("readonly", "readonly");
+            if ("@Model.DOIHAVECOUNSELORS" == "True") {
+                $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+            }
+            else {
+                $('#paymentwidgetmakepaymentbutton').removeAttr('disabled');
+            }
+            $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-success btn-block");
+            $('#paymentwidgetmakepaymentbutton').attr("Value", "Next");
+        });
+        $(document).on("click", "#pastduepaymentoption", () => {
+            if (@Model.PastDueBalance == 0) {
+                $('#enteredpaymentvalue').empty();
+                $("#paymentwidgettextbox").val(parseFloat(pastduebalance).toFixed(2));
+                $("#paymentwidgettextbox").attr("readonly", "readonly");
+
+                $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-success btn-block");
+                $('#paymentwidgetmakepaymentbutton').attr("Value", "Zero Past Due");
+            }
+            else {
+                $('#enteredpaymentvalue').empty();
+                $("#paymentwidgettextbox").val(parseFloat(pastduebalance).toFixed(2));
+                $("#paymentwidgettextbox").attr("readonly");
+                if ("@Model.DOIHAVECOUNSELORS" == "True") {
+                    $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+                }
+                else {
+                    $('#paymentwidgetmakepaymentbutton').removeAttr('disabled');
+                }
+                $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-success btn-block");
+                $('#paymentwidgetmakepaymentbutton').attr("Value", "Next");
+            }
+        });
+        $(document).on("click", "#otherpaymentoption", () => {
+            $('#enteredpaymentvalue').empty();
+            $("#paymentwidgettextbox").val("0");
+            $('#paymentwidgettextbox').removeAttr("readonly");
+            $('#paymentwidgetmakepaymentbutton').attr("disabled", "disabled");
+            $('#paymentwidgetmakepaymentbutton').attr("value", "Enter Amount...");
+            $('#paymentwidgetmakepaymentbutton').attr("class", "btn btn-success btn-block");
+        });
+        $(document).on("click", "#paymentwidgetmakepaymentbutton", () => {
+            $('#enteredpaymentvalue').empty();
+            $('#enteredpaymentvalue').append("Summary: " + "<br />" + "Payment Amount: $" + $("#paymentwidgettextbox").val());
+            $('#paymentwidgettextboxgroup').hide();
+            $('#paymentwidgetradiobuttongroup').hide();
+            $("#paymentwidgetmakepaymentbutton").hide();
+            $("#paymentwidgetmakepaymentbuttonfinalrow").show();
+            $("#paymentwidgetgroup2").show();
+            $("#paymentwidgetbackbutton").show();
+        });
+
+    </script>
+}

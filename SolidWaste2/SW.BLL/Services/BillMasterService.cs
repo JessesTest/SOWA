@@ -13,6 +13,16 @@ public class BillMasterService : IBillMasterService
         this.contextFactory = contextFactory;
     }
 
+    public async Task<BillMaster> GetByTransaction(int transactionId)
+    {
+        using var db = contextFactory.CreateDbContext();
+        return await db.BillMasters
+            .Where(e => e.TransactionId == transactionId)
+            .Include(e => e.BillServiceAddresses)
+            .AsNoTracking()
+            .SingleOrDefaultAsync();
+    }
+
     public async Task<BillMaster> GetMostRecentBillMaster(int customerId)
     {
         using var db = contextFactory.CreateDbContext();
