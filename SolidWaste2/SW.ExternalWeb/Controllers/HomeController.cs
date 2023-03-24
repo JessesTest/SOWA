@@ -46,7 +46,12 @@ namespace SW.ExternalWeb.Controllers
             this.paymentPlanService = paymentPlanService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
+        {
+            return RedirectToAction(nameof(BillSummary));
+        }
+
+        public async Task<IActionResult> Index2()
         {
             var userId = User.GetUserId();
             if (userId == null)
@@ -99,7 +104,7 @@ namespace SW.ExternalWeb.Controllers
                     }
                 }
             }
-            return PartialView(vm);
+            return PartialView("Index", vm);
         }
 
         public IActionResult MakeError()
