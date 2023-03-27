@@ -64,7 +64,7 @@ try
         .AddIdentity<ApplicationUser, IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
-    if (!environment.IsEnvironment("Local"))
+    if (environment.IsEnvironment("Local"))
     {
         builder.Services
             .AddDatabaseDeveloperPageExceptionFilter();
