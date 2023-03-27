@@ -52,14 +52,16 @@ GO
 CREATE INDEX [IX_AspNetRoleClaims_RoleId] ON [AspNetRoleClaims] ([RoleId]);
 GO
 
-CREATE TRIGGER dbo.OldIdentity_2_CoreIdentity ON dbo.AspNetUsers
-AFTER INSERT, UPDATE
-AS
-BEGIN
-UPDATE AspNetUsers SET NormalizedEmail = UPPER(email) WHERE NormalizedEmail IS NULL OR email <> UPPER(email)
-UPDATE AspNetUsers SET NormalizedUserName = UPPER(userName) WHERE NormalizedUserName IS NULL OR userName <> UPPER(userName)
-END
-GO
+-- commented out when the identity database was split between solutions into old Identity and new Identity_SW
+--
+--CREATE TRIGGER dbo.OldIdentity_2_CoreIdentity ON dbo.AspNetUsers
+--AFTER INSERT, UPDATE
+--AS
+--BEGIN
+--UPDATE AspNetUsers SET NormalizedEmail = UPPER(email) WHERE NormalizedEmail IS NULL OR email <> UPPER(email)
+--UPDATE AspNetUsers SET NormalizedUserName = UPPER(userName) WHERE NormalizedUserName IS NULL OR userName <> UPPER(userName)
+--END
+--GO
 
 UPDATE AspNetUsers SET NormalizedEmail = UPPER(email) WHERE NormalizedEmail IS NULL OR email <> UPPER(email)
 UPDATE AspNetUsers SET NormalizedUserName = UPPER(userName) WHERE NormalizedUserName IS NULL OR userName <> UPPER(userName)
