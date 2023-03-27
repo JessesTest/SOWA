@@ -93,6 +93,7 @@ namespace SW.BLL.Extensions
                 .Include(s => s.Containers)
                 .Include(s => s.ServiceAddressNotes)
                 .Include(s => s.BillServiceAddresses)
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -104,6 +105,7 @@ namespace SW.BLL.Extensions
                 .Include(s => s.Containers)
                 .Include(s => s.ServiceAddressNotes)
                 .Include(s => s.BillServiceAddresses)
+                .AsSplitQuery()
                 .SingleOrDefaultAsync();
         }
 

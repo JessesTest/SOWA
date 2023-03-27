@@ -55,6 +55,7 @@ public class PersonEntityService : IPersonEntityService
 
         return await query
             .AsNoTracking()
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -67,6 +68,7 @@ public class PersonEntityService : IPersonEntityService
             .Include(e => e.Addresses)
             .Include(e => e.Emails)
             .Include(e => e.Phones)
+            .AsSplitQuery()
             .AsNoTracking()
             .SingleOrDefaultAsync();
     }
