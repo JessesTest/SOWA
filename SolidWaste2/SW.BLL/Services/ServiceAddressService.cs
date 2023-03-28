@@ -31,6 +31,7 @@ public class ServiceAddressService : IServiceAddressService
             .Include(e => e.Containers)
             .Include(e => e.ServiceAddressNotes)
             .Include(e => e.BillServiceAddresses)
+            .AsSplitQuery()
             .AsNoTracking()
             .FirstOrDefaultAsync();
     }
@@ -148,6 +149,7 @@ public class ServiceAddressService : IServiceAddressService
             .Include(e => e.Containers)
             .Include(e => e.ServiceAddressNotes)
             .Include(e => e.BillServiceAddresses)
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }
