@@ -1,0 +1,27 @@
+﻿@model IEnumerable<SW.InternalWeb.Identity.ApplicationUser>
+@{
+}
+
+<table>
+    <caption>Users</caption>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>UserName</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var m in Model)
+            {
+                <tr>
+                    <td>@m.UserId</td>
+                    <td>@m.UserName</td>
+                    <td>@m.Email</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

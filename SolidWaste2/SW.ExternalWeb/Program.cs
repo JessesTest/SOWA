@@ -44,7 +44,7 @@ try
         .AddSolidWasteDbContext(configuration)
         .AddSolidWasteServices(configuration);
 
-    // Session state
+    // session state
     builder.Services
         .AddDistributedMemoryCache()
         .AddSession(options =>
@@ -64,6 +64,7 @@ try
         .AddIdentity<ApplicationUser, IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
+    // logging
     if (environment.IsEnvironment("Local"))
     {
         builder.Services
@@ -75,6 +76,13 @@ try
         builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
         builder.Host.UseNLog();
     }
+
+    // cookie policy
+    builder.Services.Configure<CookiePolicyOptions>(options =>
+    {
+        options.CheckConsentNeeded = context => false;
+        options.MinimumSameSitePolicy = SameSiteMode.None;
+    });
 
     var app = builder.Build();
 
@@ -96,6 +104,7 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+    app.UseSession();
 
     app.UseSession();   // after UseRouting() and before Map...()
 
@@ -113,6 +122,3 @@ finally
 {
     NLog.LogManager.Shutdown();
 }
-
-
-
