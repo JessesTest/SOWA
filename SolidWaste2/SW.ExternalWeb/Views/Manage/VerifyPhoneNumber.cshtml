@@ -1,0 +1,24 @@
+﻿@model SW.ExternalWeb.Models.Manage.VerifyPhoneViewModel
+@{
+    ViewBag.Title = "Verify Phone Number";
+}
+
+<div class="row">
+    <div class="col-xs-12 col-xs-margin-bottom-10">
+        <a class="text-l" href="@Url.Action("Index", "Manage")"><span class="glyphicon glyphicon-chevron-left"></span>Profile</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        @Html.Partial("_VerifyPhoneNumberPanel")
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('[mask="phone"]').mask("(999) 999-9999");
+        });
+    </script>
+}

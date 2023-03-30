@@ -1,0 +1,100 @@
+﻿@model SW.ExternalWeb.Models.Manage.PersonalProfileViewModel
+@{
+    ViewBag.Title = "Manage Your Profile";
+}
+
+@using (Html.BeginForm("PersonalProfile", "Manage", FormMethod.Post, new { @class = "form-horizontal", @role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-5">
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    <h2>Manage Profile</h2>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    <label class="content-label">Account Information</label>
+                    <div class="inner box-grey">
+                        <strong>Created: </strong>
+                        @Model.WhenCreated.ToShortDateString()
+                    </div>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.FirstName, new { @class = "content-label" })
+                    @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", @placeholder = Html.DisplayNameFor(m => m.FirstName) })
+                    @Html.ValidationMessageFor(m => m.FirstName)
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.MiddleName, new { @class = "content-label" })
+                    @Html.TextBoxFor(m => m.MiddleName, new { @class = "form-control", @placeholder = Html.DisplayNameFor(m => m.MiddleName) })
+                    @Html.ValidationMessageFor(m => m.MiddleName)
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.LastName, new { @class = "content-label" })
+                    @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", @placeholder = Html.DisplayNameFor(m => m.LastName) })
+                    @Html.ValidationMessageFor(m => m.LastName)
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.Sex, new { @class = "content-label" })
+                    <select class="form-control" asp-for="Sex" asp-items="Model.SexSelectList"></select>
+                    @Html.ValidationMessageFor(m => m.LastName)
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.DateOfBirth, new { @class = "content-label" })
+                    <input type="text" class="form-control" asp-for="DateOfBirth" placeholder="MM/DD/YYYY" data-provide="datepicker" value="@Model.DateOfBirth?.ToShortDateString()" />
+                    @Html.ValidationMessageFor(m => m.DateOfBirth)
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.Url, new { @class = "content-label" })
+                    @Html.TextBoxFor(m => m.Url, new { @class = "form-control", @placeholder = "Web URL" })
+                    @Html.ValidationMessageFor(m => m.Url)
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-6">
+                    <input class="btn btn-block btn-default btn-lg" type="button" value="Cancel" redirect="@Url.Action("Index", "Manage")" />
+                </div>
+                <div class="col-xs-6">
+                    <input class="btn btn-block btn-primary btn-lg" type="submit" value="Save" data-form-action="@Url.Action("PersonalProfile", "Manage")" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            // DateRangePicker for DateOfBirth field
+            $('#DateOfBirth').daterangepicker({
+                locale: {
+                    format: 'MM/DD/YYYY'
+                },
+                singleDatePicker: true,
+                showDropdowns: true,
+                autoUpdateInput: false
+            },
+            function (start) {
+                $('#DateOfBirth').val(start.format("MM/DD/YYYY"));
+            });
+
+            // Input mask for DateOfBirth field
+            $('#DateOfBirth').inputmask('mask', { 'mask': '99/99/9999', 'placeholder': 'MM/DD/YYYY' });
+        });
+    </script>
+}

@@ -106,6 +106,9 @@ namespace SW.ExternalWeb.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.GetUserId());
                 var result = await _userManager.ChangePasswordAsync(user, vm.OldPassword, vm.NewPassword);
+                if (result.Errors.Any())
+                    throw new Exception(result.Errors.First().Description.ToString());
+
                 if (result.Succeeded)
                 {
                     if (user != null)
@@ -113,7 +116,7 @@ namespace SW.ExternalWeb.Controllers
 
                     ModelState.Clear();
                     ModelState.AddModelError("success", "Password successfully changed");
-                    return RedirectToAction(nameof(Password));
+                    return RedirectToAction(nameof(Index));
                 }
                 else
                 {
@@ -124,8 +127,6 @@ namespace SW.ExternalWeb.Controllers
                     ModelState.AddModelError("", "Current password is incorrect or new passwords do not match.");
                     return RedirectToAction(nameof(Password));
                 }
-
-                throw new Exception(result.Errors.ToString());
             }
             catch (Exception ex)
             {
@@ -290,7 +291,7 @@ namespace SW.ExternalWeb.Controllers
             }
         }
 
-        // SOWA-37 appears that this is an obsolete action so commented it out on conversion
+        // SOWA-38 pathing to this view is commented out and related actions don't exist so this was commented out on conversion, refactor will be needed if this is re-enabled
         //[HttpPost]
         //[ValidateAntiForgeryToken]
         //public async Task<ActionResult> SetTwoFactorEmail(TwoFactorViewModel vm)
@@ -955,7 +956,7 @@ namespace SW.ExternalWeb.Controllers
                 else
                 {
                     vm.ValidationMode = true;
-                    var validAddressList = await _addressValidationService.GetCandidates(vm.StreetAddress, vm.City, vm.Zip);
+                    var validAddressList = await _addressValidationService.GetCandidates(vm.StreetAddress, vm.City, vm.Zip, 3);
                     var validAddresses = validAddressList?.Select(val => new Address
                     {
                         StreetName = val.Address,
@@ -1081,7 +1082,7 @@ namespace SW.ExternalWeb.Controllers
                 else
                 {
                     vm.ValidationMode = true;
-                    var validAddressList = await _addressValidationService.GetCandidates(vm.StreetAddress, vm.City, vm.Zip);
+                    var validAddressList = await _addressValidationService.GetCandidates(vm.StreetAddress, vm.City, vm.Zip, 3);
                     var validAddresses = validAddressList?.Select(val => new Address
                     {
                         StreetName = val.Address,
@@ -1305,7 +1306,7 @@ namespace SW.ExternalWeb.Controllers
 
                 ModelState.Clear();
                 ModelState.AddModelError("success", "Delivery options successfully changed");
-                return RedirectToAction(nameof(Delivery));
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {

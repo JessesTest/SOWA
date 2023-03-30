@@ -1,0 +1,56 @@
+﻿@model SW.ExternalWeb.Models.Manage.VerifyPhoneViewModel
+
+@using (Html.BeginForm("VerifyPhoneNumber", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.PhoneType)
+    @Html.HiddenFor(m => m.Number)
+    @Html.HiddenFor(m => m.Ext)
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h3 class="marginless">Verify Phone Number</h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h4>Verification Code</h4>
+                            <p>You should receive a text message on your phone containing the verification code. Enter the code here. </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            @Html.LabelFor(m => m.Code)
+                            @Html.TextBoxFor(m => m.Code, new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 col-sm-6 col-xs-offset-0 col-sm-offset-6">
+                    <input type="submit" class="btn btn-block btn-primary" value="Submit" data-form-action="@Url.Action("VerifyPhoneNumber", "Manage")" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
