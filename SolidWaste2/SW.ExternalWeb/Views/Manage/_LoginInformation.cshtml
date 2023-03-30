@@ -1,0 +1,33 @@
+﻿@model SW.ExternalWeb.Models.Manage.IndexViewModel
+
+<div class="row form-group">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
+        <h3 class="marginless border-bottom">Login Information</h3>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col-xs-12 col-sm-4 col-md-12 col-lg-4">
+        <h4>Password</h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-12 col-lg-8">
+        <div class="box-grey">
+            <strong>********</strong>
+            <br />
+            @Html.ActionLink("Manage Password", "Password")
+        </div>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col-xs-12 col-sm-4 col-md-12 col-lg-4">
+        <h4>Two Factor Authentication</h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-12 col-lg-8">
+        <div class="box-grey">
+            <strong>@Model.TwoFactor</strong>
+            <br />
+            @Html.ActionLink("Manage Two Factor", "TwoFactor")
+        </div>
+    </div>
+</div>

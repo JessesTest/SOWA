@@ -1,0 +1,146 @@
+﻿@model SW.ExternalWeb.Models.Manage.AddEmailViewModel
+@{
+    ViewBag.Title = "Add an Email Address";
+}
+
+@using (Html.BeginForm("AddEmailAddress", "Manage", FormMethod.Post, new { @role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="col-xs-12">
+        <div class="row">
+            <h2>Manage Email Address</h2>
+            <div class="col-xs-12 manageaccountcontainer">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 manageaccountbody">
+                        @for (int i = 0; i < Model.Emails.Count; i++)
+                        {
+                            @Html.HiddenFor(m => m.Emails[i].EmailID)
+                            @Html.HiddenFor(m => m.Emails[i].TypeDescription)
+                            @Html.HiddenFor(m => m.Emails[i].EmailAddress)
+                            @Html.HiddenFor(m => m.Emails[i].IsDefault)
+                            if (Model.Emails[i].IsDefault)
+                            {
+                                var hasRun = false;
+                                if (hasRun == false)
+                                {
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <h3>Primary Email</h3>
+                                        </div>
+                                    </div>
+                                    hasRun = true;
+                                }
+                                <div class="col-xs-12">
+                                    <hr class="col-xs-margin-top-0" />
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="row form-group">
+                                        <div class="col-xs-12 address-text">
+                                            <div class="row">
+                                                <div class="col-xs-3">
+                                                    @Model.Emails[i].TypeDescription
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    @Model.Emails[i].EmailAddress
+                                                </div>
+                                                <div class="col-xs-12 col-xs-offset-3">
+                                                    <input class="btn-link" type="button" value="Edit" redirect="@Url.Action("ChangeEmailAddress", new { id = Model.Emails[i].EmailID })" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <hr class="col-xs-margin-top-0" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        @if (Model.Emails.Count > 1)
+                        {
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <h3>Other Emails</h3>
+                                </div>
+                            </div>
+                        }
+                        @for (int j = 0; j < Model.Emails.Count; j++)
+                        {
+                            @Html.HiddenFor(m => m.Emails[j].EmailID)
+                            @Html.HiddenFor(m => m.Emails[j].TypeDescription)
+                            @Html.HiddenFor(m => m.Emails[j].EmailAddress)
+                            @Html.HiddenFor(m => m.Emails[j].IsDefault)
+                            if (Model.Emails[j].IsDefault == false)
+                            {
+                                <div class="col-xs-12">
+                                    <hr class="col-xs-margin-top-0" />
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="row form-group">
+                                        <div class="col-xs-12 address-text">
+                                            <div class="row">
+                                                <div class="col-xs-3">
+                                                    @Model.Emails[j].TypeDescription
+                                                </div>
+                                                <div class="col-xs-6 truncate">
+                                                    @Model.Emails[j].EmailAddress
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    @if (Model.Emails[j].IsDefault != true)
+                                                    {
+                                                        <input class="btn-link" type="button" value="Set to Primary" redirect="@Url.Action("SetDefaultEmail", "Manage", new { id = Model.Emails[j].EmailID })" />
+                                                    }
+                                                </div>
+                                                <div class="col-xs-12 col-xs-offset-3">
+                                                    <input class="btn-link" type="button" value="Edit" redirect="@Url.Action("ChangeEmailAddress", new { id = Model.Emails[j].EmailID })" /> |
+                                                    <input class="btn-link" type="button" value="Remove" data-confirm="Confirm delete?" redirect="@Url.Action("RemoveEmailAddress", new { id = Model.Emails[j].EmailID })" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <hr class="col-xs-margin-top-0" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 manageaccountbody">
+                        <div class="row form-group">
+                            <div class="col-xs-12">
+                                <h2>New Email Address</h2>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-xs-margin-bottom-10">
+                                <select class="form-control" asp-for="EmailType" asp-items="Model.EmailTypesDropDown"></select>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-xs-margin-bottom-10">
+                                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @mask = "email", @placeholder = "Email Address" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                @Html.ValidationMessageFor(m => m.EmailType)
+                                @Html.ValidationMessageFor(m => m.Email)
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-6 halfpad-xs-right">
+                                <input class="btn btn-block btn-default btn-lg" type="button" value="Cancel" redirect="@Url.Action("Emails", "Manage")" />
+                            </div>
+                            <div class="col-xs-6 halfpad-xs-left">
+                                <input class="btn btn-block btn-primary btn-lg" type="submit" value="Save" data-form-action="@Url.Action("AddEmailAddress", "Manage")" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

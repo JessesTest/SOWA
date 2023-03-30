@@ -60,40 +60,33 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div id="registerImage" class="col-md-12 hidden-sm hidden-xs">
-                    <img url="~/images/backgrounds/toppartialCityofTopekaBlankBillExample.png" />
-                </div>
-                <div class="col-md-12 hidden-sm hidden-xs">
-                    <div class="row">
-                        <div class="col-md-12" align="center">
-                            <hr style="margin-bottom: 5px; margin-top: 5px;" />
-                            <text style="font-size: 18px;">Problems Registering?</text>
-                            <hr style="margin-top: 5px;" />
-                            If the top of your bill looks similar to this, click <a href="http://www.topeka.org/PayOnline/">here</a> to be redirected to the City of Topeka's bill payment page.
-                            <hr />
-                        </div>
+        <div class="col-md-6 col-xs-12">
+            <div id="registerImage" class="col-md-12 hidden-sm hidden-xs">
+                <img url="~/images/backgrounds/toppartialCityofTopekaBlankBillExample.png" />
+            </div>
+            <div class="col-md-12 hidden-sm hidden-xs">
+                <div class="row">
+                    <div class="col-md-12" align="center">
+                        <hr style="margin-bottom: 5px; margin-top: 5px;" />
+                        <text style="font-size: 18px;">Problems Registering?</text>
+                        <hr style="margin-top: 5px;" />
+                        If the top of your bill looks similar to this, click <a href="http://www.topeka.org/PayOnline/">here</a> to be redirected to the City of Topeka's bill payment page.
+                        <hr />
                     </div>
                 </div>
-                <div class="col-xs-12" style="margin-bottom: 5px;">
-                    <input type="submit" class="btn btn-primary btn-block btn-lg" value="Register" />
-                </div>
+            </div>
+            <div class="col-xs-12" style="margin-bottom: 5px;">
+                <input type="submit" class="btn btn-primary btn-block btn-lg" value="Register" />
             </div>
         </div>
     </div>
-}
-
-@section head
-{
-    <link rel="stylesheet" href="~/Content/font-awesome.min.css" />
 }
 
 <div id="pinFinderpopup" class="questionbuttonoverlay">
     <div class="popup">
         <a class="close" href="#" style="font-size: 5em">&times;</a>
         <div class="blankbillcontent">
-            <img id="blankbillimage" src="~/Content/images/backgrounds/BlankBillExample.png" />
+            <img id="blankbillimage" src="~/images/backgrounds/BlankBillExample.png" />
             PIN number will be located on your bill.
         </div>
     </div>
@@ -103,12 +96,8 @@
     <div class="popup">
         <a class="close" href="#" style="font-size: 5em">&times;</a>
         <div class="blankbillcontent">
-            <img id="blankbillimage" src="~/Content/images/backgrounds/FullName.png" />
+            <img id="blankbillimage" src="~/images/backgrounds/FullName.png" />
             PIN number will be located on your bill.
         </div>
     </div>
 </div>
-
-
-
-@* jQuery validation *@

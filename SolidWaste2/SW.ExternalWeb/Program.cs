@@ -26,7 +26,8 @@ try
 
     // Add services to the container.
     builder.Services
-        .AddRazorPages();
+        .AddRazorPages()
+        .AddRazorRuntimeCompilation();
 
     builder.Services
         .AddControllersWithViews(mvcOptions => 
