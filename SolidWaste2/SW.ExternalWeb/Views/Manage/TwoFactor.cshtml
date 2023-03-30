@@ -1,0 +1,16 @@
+﻿@model SW.ExternalWeb.Models.Manage.TwoFactorViewModel
+@{
+    ViewBag.Title = "Manage Your Two Factor Authentication Settings";
+}
+
+<div class="row">
+    <div class="col-xs-12 col-xs-margin-bottom-10">
+        <a class="text-l" href="@Url.Action("Index", "Manage")"><span class="glyphicon glyphicon-chevron-left"></span>Profile</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        @Html.Partial("_TwoFactorPanel")
+    </div>
+</div>

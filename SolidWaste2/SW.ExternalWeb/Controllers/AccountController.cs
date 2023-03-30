@@ -248,9 +248,7 @@ namespace SW.ExternalWeb.Controllers
                     var result = await userManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
                     {
-                        var uri = new Uri(Request.Host.Value);
-                        var scheme = uri.Scheme;
-                        var callbackUrl = Url.Action("ConfirmEmail", "Account", null, scheme);
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                         _ = userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
                         ModelState.AddModelError("success", "Thank you for registering. You will need to confirm your email before logging in.");
@@ -299,9 +297,7 @@ namespace SW.ExternalWeb.Controllers
                     ModelState.AddModelError(nameof(model.Email), $"Unconfimed email {model.Email} was not found.");
                     return View(model);
                 }
-                var uri = new Uri(Request.Host.Value);
-                var scheme = uri.Scheme;
-                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, scheme);
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                 _ = userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
                 ModelState.AddModelError("success", "You will need to confirm your email before logging in.");

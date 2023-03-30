@@ -1,0 +1,90 @@
+﻿@model SW.ExternalWeb.Models.Manage.IndexViewModel
+
+<div class="row form-group">
+    <div class="col-xs-12 col-md-12 col-lg-12">
+        <div class="row">
+            <div class="col-xs-6" style="padding-right:0">
+                <h3 class="marginless border-bottom">Contact Information</h3>
+            </div>
+            <div class="col-xs-6" style="padding-left:0; text-align:right;">
+                <h3 class="marginless border-bottom" style="color:black; font-size:14px;">Account Created: @Model.WhenCreated.ToShortDateString()</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div class="row form-group">
+    <div class="col-xs-12 col-sm-4 col-md-12 col-lg-4">
+        <h4>Profile</h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-12 col-lg-8">
+        <div class="box-grey">
+            <strong>@Model.Name</strong>
+            <br />
+            @Html.ActionLink("Manage Profile", "Profile")
+        </div>
+    </div>
+</div>*@
+<div class="row form-group">
+    <div class="col-xs-12 col-sm-4 col-md-12 col-lg-4">
+        <h4>Billing Address</h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-12 col-lg-8">
+        <div class="box-grey">
+            <strong>@Model.Address1</strong>
+            <br />
+            <strong>@Model.Address2</strong>
+            <br />
+            @Html.ActionLink("Manage Addresses", "Addresses")
+        </div>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col-xs-12 col-sm-4 col-md-12 col-lg-4">
+        <h4>Password</h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-12 col-lg-8">
+        <div class="box-grey">
+            <strong>********</strong>
+            <br />
+            @Html.ActionLink("Manage Password", "Password")
+        </div>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col-xs-12 col-sm-4 col-md-12 col-lg-4">
+        <h4>Primary Phone</h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-12 col-lg-8">
+        <div class="box-grey">
+            <strong>@Model.PhoneType:</strong>
+            @Model.PhoneNumber
+            <br />
+            @Html.ActionLink("Manage Phones", "Phones")
+        </div>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col-xs-12 col-sm-4 col-md-12 col-lg-4">
+        <h4>Emails</h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-12 col-lg-8">
+        <div class="box-grey">
+            <strong>@Model.EmailAddress</strong>
+            <br />
+            @Html.ActionLink("Manage Emails", "Emails")
+        </div>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col-xs-12 col-sm-4 col-md-12 col-lg-4">
+        <h4>Bill Delivery</h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-12 col-lg-8">
+        <div class="box-grey">
+            <strong>@Model.Delivery</strong>
+            <br />
+            @Html.ActionLink("Manage Delivery Options", "Delivery")
+        </div>
+    </div>
+</div>
