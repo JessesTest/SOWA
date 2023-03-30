@@ -19,9 +19,16 @@ namespace SW.InternalWeb.Controllers
         public IActionResult Index()
         {
             return View();
-        }
+		}
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+		public IActionResult ResetSessionTimeout()
+		{
+            _ = HttpContext.Session;
+
+			return Json(null);
+		}
+
+		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         [AllowAnonymous]
         public IActionResult Error()
         {
