@@ -11,17 +11,17 @@ public class TestController : Controller
     private readonly SignInManager<ApplicationUser> signInManager;
     private readonly IAddressValidationService addresService;
 
-    public TestController(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        IAddressValidationService addresService)
-    {
-        this.userManager = userManager;
-        this.signInManager = signInManager;
-        this.addresService = addresService;
-    }
+	public TestController(
+		UserManager<ApplicationUser> userManager,
+		SignInManager<ApplicationUser> signInManager,
+		IAddressValidationService addresService)
+	{
+		this.userManager = userManager;
+		this.signInManager = signInManager;
+		this.addresService = addresService;
+	}
 
-    public IActionResult Index()
+	public IActionResult Index()
     {
         return View();
     }
