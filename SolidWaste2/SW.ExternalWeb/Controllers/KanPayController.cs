@@ -1,4 +1,5 @@
 ﻿using Common.Extensions;
+using Common.Web.Extensions.Alerts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -45,7 +46,7 @@ namespace SW.ExternalWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Index(AccountHomeMenuViewModel x)
+        public async Task<IActionResult> Index(AccountHomeMenuViewModel x)
         {
             ApplicationUser user = await userManager.FindByIdAsync(User.GetUserId());
             PersonEntity person = await personEntityService.GetById(user.UserId);
@@ -55,10 +56,7 @@ namespace SW.ExternalWeb.Controllers
 
             bool customerHasKanPay = await kanPayService.AnyByCustomer(currentBillMaster.CustomerId.ToString());
             if (customerHasKanPay)
-            {
-                ModelState.AddModelError("Info", string.Concat("Quick Pay: Payment of $", x.KanPayPayment, " is in process, please inquire in a few minutes."));
-                return RedirectToAction("BillSummary", "Home");
-            }
+                return RedirectToAction("BillSummary", "Home").WithInfo(string.Concat("Quick Pay: Payment of $", x.KanPayPayment, " is in process, please inquire in a few minutes."), "");
 
             string Domain = kanPaySettings.Domain.ToString();
             string KanPayMerchantKey = kanPaySettings.MerchantKey;
@@ -182,42 +180,37 @@ namespace SW.ExternalWeb.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("Danger", string.Concat("Quick Pay: unable to return token ", result.ERRORMESSAGE));
-                    return RedirectToAction("BillSummary", "Home");   //.witherrormessage unable to return token
+                    return RedirectToAction("BillSummary", "Home").WithDanger(string.Concat("Quick Pay: unable to return token ", result.ERRORMESSAGE), "");   //.witherrormessage unable to return token
                 }
             }
             catch (Exception e)
             {
-                ModelState.AddModelError("Danger", string.Concat("Quick Pay: unable to redirect ", e.Message));
-                return RedirectToAction("BillSummary", "Home");   //.witherrormessage unable to redirect to KANPAY
+                return RedirectToAction("BillSummary", "Home").WithDanger(string.Concat("Quick Pay: unable to redirect ", e.Message), "");   //.witherrormessage unable to redirect to KANPAY
             }
         }
 
-        public async Task<ActionResult> CcpReturnCancel(string token)     //CANCEL LandingPage Return from KanPay Common CheckOut Page
+        public async Task<IActionResult> CcpReturnCancel(string token)     //CANCEL LandingPage Return from KanPay Common CheckOut Page
         {
             await kanPayService.DeleteByToken(token);
 
-            ModelState.AddModelError("Info", "Quick Pay: cancelled");
-            return RedirectToAction("BillSummary", "Home");   //.witherrormessage kanpay process was cancelled
+            return RedirectToAction("BillSummary", "Home").WithInfo("Quick Pay: cancelled", "");   //.witherrormessage kanpay process was cancelled
         }
 
-        public async Task<ActionResult> CcpReturnFailure(string token, int? errorcode, string errormessage)     //FAILURE LandingPage Return from KanPay Common CheckOut Page
+        public async Task<IActionResult> CcpReturnFailure(string token, int? errorcode, string errormessage)     //FAILURE LandingPage Return from KanPay Common CheckOut Page
         {
             await kanPayService.DeleteByToken(token);
 
-            ModelState.AddModelError("Danger", string.Concat("Quick Pay: failure ", errormessage));
-            return RedirectToAction("BillSummary", "Home");   //.witherrormessage kanpay process was failure
+            return RedirectToAction("BillSummary", "Home").WithDanger(string.Concat("Quick Pay: failure ", errormessage), "");   //.witherrormessage kanpay process was failure
         }
 
-        public async Task<ActionResult> CcpReturnDuplicate(string token, int? errorcode, string errormessage)     //DUPLICATE LandingPage Return from KanPay Common CheckOut Page
+        public async Task<IActionResult> CcpReturnDuplicate(string token, int? errorcode, string errormessage)     //DUPLICATE LandingPage Return from KanPay Common CheckOut Page
         {
             await kanPayService.DeleteByToken(token);
 
-            ModelState.AddModelError("Info", string.Concat("Quick Pay: duplicate ", errormessage));
-            return RedirectToAction("BillSummary", "Home");   //.witherrormessage kanpay process was duplicate 
+            return RedirectToAction("BillSummary", "Home").WithInfo(string.Concat("Quick Pay: duplicate ", errormessage), "");   //.witherrormessage kanpay process was duplicate 
         }
 
-        public async Task<ActionResult> CcpReturnSuccess(string token)     //SUCCESS LandingPage Return from KanPay Common CheckOut Page
+        public async Task<IActionResult> CcpReturnSuccess(string token)     //SUCCESS LandingPage Return from KanPay Common CheckOut Page
         {
             //START: the following proxy logic is also expressed in the SW_KanPay_ConsoleApplication(Program.cs)  please keep insync...
             using ServiceWebClient proxy = new();
@@ -295,21 +288,19 @@ namespace SW.ExternalWeb.Controllers
                         f.SncoFeeAmount;
 
                     await transactionService.AddKanpayTransaction(tra, f, tok.First().KanPayId, User.Identity.Name);     //tra=transaction, f=fee, tok=token
-                    ModelState.AddModelError("Success", "Quick Pay Successful! A confirmation invoice has been sent to " + response.EMAIL + ".");
-                    return RedirectToAction("BillSummary", "Home");   //.witherrormessage kanpay process was successfull
+
+                    return RedirectToAction("BillSummary", "Home").WithSuccess("Quick Pay Successful! A confirmation invoice has been sent to " + response.EMAIL + ".", "");   //.witherrormessage kanpay process was successfull
                 }
                 else
                 {
                     await kanPayService.DeleteByToken(token);
 
-                    ModelState.AddModelError("Danger", string.Concat("Quick Pay: SUCCESS LandingPage failure ", response.FAILMESSAGE));
-                    return RedirectToAction("BillSummary", "Home");   //.witherrormessage unable to return token
+                    return RedirectToAction("BillSummary", "Home").WithDanger(string.Concat("Quick Pay: SUCCESS LandingPage failure ", response.FAILMESSAGE), "");   //.witherrormessage unable to return token
                 }
             }
             catch (Exception e)
             {
-                ModelState.AddModelError("Danger", string.Concat("Quick Pay: SUCCESS LandingPage exception ", e.Message));
-                return RedirectToAction("BillSummary", "Home");   //.witherrormessage unable to return token
+                return RedirectToAction("BillSummary", "Home").WithDanger(string.Concat("Quick Pay: SUCCESS LandingPage exception ", e.Message), "");   //.witherrormessage unable to return token
             }
 
             //END: proxy logic is also expressed in the SW_KanPay_ConsoleApplication(Program.cs)  please keep insync...                

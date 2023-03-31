@@ -43,7 +43,9 @@
         <div id="site-content" class="row">
             <div id="shadow-top" class="col-xs-12"></div>
             <div id="layout-error" class="col-xs-12">
-                @Html.Partial("_LayoutError")
+                <div id="alertContainer">
+                    <partial name="_StatusMessages" />
+                </div>
             </div>
             <div class="col-xs-12">
                 @RenderBody()

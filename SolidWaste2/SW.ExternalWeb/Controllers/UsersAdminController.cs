@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Common.Web.Extensions.Alerts;
+using Common.Web.Services.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -63,6 +65,11 @@ public class UsersAdminController : Controller
 
         var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
         var adminresult = await userManager.CreateAsync(user, model.Password);
+        if (adminresult.Errors.Any())
+        {
+            ViewBag.RoleId = new SelectList(roleManager.Roles, "Name", "Name");
+            return View(model).WithDanger(adminresult.Errors.First().Description, "");
+        }
 
         //Add User to the selected Roles 
         if (adminresult.Succeeded)
@@ -70,21 +77,14 @@ public class UsersAdminController : Controller
             if (selectedRoles != null)
             {
                 var result = await userManager.AddToRolesAsync(user, selectedRoles);
-                if (!result.Succeeded)
+                if (result.Errors.Any())
                 {
-                    ModelState.AddModelError("", result.Errors.First().Description);
                     ViewBag.RoleId = new SelectList(await roleManager.Roles.ToListAsync(), "Name", "Name");
-                    return View(model);
+                    return View(model).WithDanger(result.Errors.First().Description, "");
                 }
             }
         }
-        else
-        {
-            ModelState.AddModelError("", adminresult.Errors.First().Description);
-            ViewBag.RoleId = new SelectList(roleManager.Roles, "Name", "Name");
-            return View(model);
 
-        }
         return RedirectToAction("Index");
     }
 
@@ -129,10 +129,7 @@ public class UsersAdminController : Controller
                 .Select(r => new SelectListItem(r.Name, r.Name, selectedRole.Contains(r.Name)));
 
         if (!ModelState.IsValid)
-        {
-            ModelState.AddModelError("", "Something failed.");
-            return View(editUser);
-        }
+            return View(editUser).WithDanger("Something failed.", "");
 
         var userRoles = await userManager.GetRolesAsync(user);
 
@@ -140,18 +137,12 @@ public class UsersAdminController : Controller
         user.Email = editUser.Email;
 
         var addResult = await userManager.AddToRolesAsync(user, selectedRole.Except(userRoles).ToArray());
-        if (!addResult.Succeeded)
-        {
-            ModelState.AddModelError("", addResult.Errors.First().Description);
-            return View(editUser);
-        }
+        if (addResult.Errors.Any())
+            return View(editUser).WithDanger(addResult.Errors.First().Description, "");
 
         var removeResult = await userManager.RemoveFromRolesAsync(user, userRoles.Except(selectedRole).ToArray());
-        if (!removeResult.Succeeded)
-        {
-            ModelState.AddModelError("", removeResult.Errors.First().Description);
-            return View(editUser);
-        }
+        if (removeResult.Errors.Any())
+            return View(editUser).WithDanger(removeResult.Errors.First().Description, "");
 
         return RedirectToAction("Index");
     }
@@ -189,11 +180,9 @@ public class UsersAdminController : Controller
         }
 
         var result = await userManager.DeleteAsync(user);
-        if (!result.Succeeded)
-        {
-            ModelState.AddModelError("", result.Errors.First().Description);
-            return View(user);
-        }
+        if (result.Errors.Any())
+            return View().WithDanger(result.Errors.First().Description, "");
+        
         return RedirectToAction("Index");
     }
 
