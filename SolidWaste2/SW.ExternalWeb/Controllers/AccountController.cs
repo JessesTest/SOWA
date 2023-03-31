@@ -1,4 +1,4 @@
-﻿using Common.Services.Email;
+using Common.Services.Email;
 using Common.Web.Extensions.Alerts;
 using Identity.BL.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -71,14 +71,13 @@ namespace SW.ExternalWeb.Controllers
                 if (!await userManager.IsEmailConfirmedAsync(user))
                 {
                     model.EmailIsUnconfirmed = true;
-                    ModelState.AddModelError("", "You must have a confirmed email to log on.");
-                    return View(model);
+
+                    return View(model).WithDanger("You must have a confirmed email to log on.", "");
                 }
             }
             else
             {
-                ModelState.AddModelError("", "Incorrect username and/or password combination");
-                return View(model);
+                return View(model).WithDanger("Incorrect username and/or password combination", "");
             }
 
             // This doesn't count login failures towards lockout only two factor authentication
@@ -99,8 +98,7 @@ namespace SW.ExternalWeb.Controllers
             }
             else
             {
-                ModelState.AddModelError("", "Incorrect username and/or password combination");
-                return View(model);
+                return View(model).WithDanger("Incorrect username and/or password combination", "");
             }
         }
 
@@ -144,8 +142,7 @@ namespace SW.ExternalWeb.Controllers
                 return RedirectToAction("VerifyCode", model);
             }
 
-            ModelState.AddModelError(nameof(model.SelectedProvider), $"Invalid provider {model.SelectedProvider}");
-            return View(model);
+            return View(model).WithDanger($"Invalid provider {model.SelectedProvider}", "");
         }
 
         [HttpGet]
@@ -181,8 +178,7 @@ namespace SW.ExternalWeb.Controllers
             }
             else
             {
-                ModelState.AddModelError("", "Invalid code.");
-                return View(model);
+                return View(model).WithDanger("Invalid code.", "");
             }
         }
 
@@ -204,30 +200,15 @@ namespace SW.ExternalWeb.Controllers
         {
             string systemCode = model.Code.Substring(0, 2).ToUpper();
             if (!int.TryParse(model.Code.Substring(2), out int account))
-            {
-                ModelState.AddModelError("Code", "PIN is not in the correct format.");
-                return View(model);
-            }
-            bool process = false;
+                return View(model).WithDanger("PIN is not in the correct format.", "");
 
             var pe = await personEntityService.GetBySystemAndCode(systemCode, account);
-            if (pe != null)
-            {
-                if (pe.FullName.ToUpper().Trim() == model.FullName.ToUpper().Trim())
-                {
-                    process = true;
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Name on Bill field is CASE SENSITIVE and must match both the case and spelling on the bill.");
-                }
-            }
-            else
-            {
-                ModelState.AddModelError("", "PIN does not exist or name does not match");
-            }
+            if (pe == null)
+                return View(model).WithDanger("PIN does not exist or name does not match", "");
+            if (pe.FullName.ToUpper().Trim() != model.FullName.ToUpper().Trim())
+                return View(model).WithDanger("Name on Bill field is CASE SENSITIVE and must match both the case and spelling on the bill.", "");
 
-            if (process && ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var user = new ApplicationUser
                 {
@@ -241,21 +222,20 @@ namespace SW.ExternalWeb.Controllers
 
                 if (userList.Any())
                 {
-                    ModelState.AddModelError("", "There is already a user registered for this account");
+                    return View(model).WithDanger("There is already a user registered for this account", "");
                 }
                 else
                 {
                     var result = await userManager.CreateAsync(user, model.Password);
+                    if (result.Errors.Any())
+                        return View().WithDanger(result.Errors.First().Description, "");
                     if (result.Succeeded)
                     {
                         var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                         _ = userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
-                        ModelState.AddModelError("success", "Thank you for registering. You will need to confirm your email before logging in.");
-                        return RedirectToAction("Login", "Account");
+                        return RedirectToAction("Login", "Account").WithSuccess("Thank you for registering. You will need to confirm your email before logging in.", "");
                     }
-
-                    AddErrors(result);
                 }
             }
 
@@ -274,7 +254,7 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult ResendEmailConfirmation()
+        public IActionResult ResendEmailConfirmation()
         {
             var model = new EmailConfirmationViewModel();
             return View(model);
@@ -283,30 +263,25 @@ namespace SW.ExternalWeb.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ResendEmailConfirmation(EmailConfirmationViewModel model)
+        public async Task<IActionResult> ResendEmailConfirmation(EmailConfirmationViewModel model)
         {
             try
             {
                 if (!ModelState.IsValid)
-                {
                     return View(nameof(ResendEmailConfirmation), model);
-                }
+
                 var user = await userManager.FindByEmailAsync(model.Email);
                 if (user == null || user.EmailConfirmed)
-                {
-                    ModelState.AddModelError(nameof(model.Email), $"Unconfimed email {model.Email} was not found.");
-                    return View(model);
-                }
+                    return View(model).WithDanger($"Unconfimed email {model.Email} was not found.", "");
+
                 var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                 _ = userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
-                ModelState.AddModelError("success", "You will need to confirm your email before logging in.");
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("Login", "Account").WithSuccess("You will need to confirm your email before logging in.", "");
             }
             catch (Exception e)
             {
-                ModelState.AddModelError("", e.Message);
-                return View(nameof(ResendEmailConfirmation), model);
+                return View(nameof(ResendEmailConfirmation), model).WithDanger(e.Message, "");
             }
         }
 
@@ -316,7 +291,7 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult ForgotPassword()
+        public IActionResult ForgotPassword()
         {
             return View();
         }
@@ -324,7 +299,7 @@ namespace SW.ExternalWeb.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if(!ModelState.IsValid)
                 return View("ForgotPasswordConfirmation");
@@ -436,14 +411,14 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult ForgotPasswordConfirmation()
+        public IActionResult ForgotPasswordConfirmation()
         {
             return View();
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult> ResetPassword(string userId, string code)
+        public async Task<IActionResult> ResetPassword(string userId, string code)
         {
             if (code == null || userId == null)
                 return View("Error");
@@ -465,30 +440,29 @@ namespace SW.ExternalWeb.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ResetPassword(ResetPasswordViewModel model)
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
+
             var user = await userManager.FindByIdAsync(model.UserId);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
                 return RedirectToAction("ResetPasswordConfirmation", "Account");
             }
-            var result = await userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            var result = await userManager.ResetPasswordAsync(user, model.Code, model.Password); 
+            if (result.Errors.Any())
+                return View().WithDanger(result.Errors.First().Description, "");
             if (result.Succeeded)
-            {
                 return RedirectToAction("ResetPasswordConfirmation", "Account");
-            }
-            AddErrors(result);
+
             return View();
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult ResetPasswordConfirmation()
+        public IActionResult ResetPasswordConfirmation()
         {
             return View();
         }
@@ -506,18 +480,6 @@ namespace SW.ExternalWeb.Controllers
             }
 
             return RedirectToAction("Index", "Home");
-        }
-
-        #endregion
-
-        #region Util
-
-        private void AddErrors(IdentityResult result)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
         }
 
         #endregion

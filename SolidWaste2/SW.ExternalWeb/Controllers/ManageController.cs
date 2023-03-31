@@ -2,6 +2,7 @@
 using Common.Services.AddressValidation;
 using Common.Services.Email;
 using Common.Services.Sms;
+using Common.Web.Extensions.Alerts;
 using Identity.BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -62,7 +63,7 @@ namespace SW.ExternalWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var vm = new IndexViewModel();
@@ -88,7 +89,7 @@ namespace SW.ExternalWeb.Controllers
         #region Password
 
         [HttpGet]
-        public async Task<ActionResult> Password()
+        public async Task<IActionResult> Password()
         {
             var vm = new PasswordViewModel();
 
@@ -97,7 +98,7 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Password(PasswordViewModel vm)
+        public async Task<IActionResult> Password(PasswordViewModel vm)
         {
             if (!ModelState.IsValid)
                 return View(vm);
@@ -107,31 +108,26 @@ namespace SW.ExternalWeb.Controllers
                 var user = await _userManager.FindByIdAsync(User.GetUserId());
                 var result = await _userManager.ChangePasswordAsync(user, vm.OldPassword, vm.NewPassword);
                 if (result.Errors.Any())
-                    throw new Exception(result.Errors.First().Description.ToString());
+                    throw new Exception(result.Errors.First().Description);
 
                 if (result.Succeeded)
                 {
                     if (user != null)
                         await SignInAsync(user, false);
 
-                    ModelState.Clear();
-                    ModelState.AddModelError("success", "Password successfully changed");
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index)).WithSuccess("Password successfully changed", "");
                 }
                 else
                 {
                     if (user != null)
                         await SignInAsync(user, false);
 
-                    ModelState.Clear();
-                    ModelState.AddModelError("", "Current password is incorrect or new passwords do not match.");
-                    return RedirectToAction(nameof(Password));
+                    return RedirectToAction(nameof(Password)).WithDanger("Current password is incorrect or new passwords do not match.", "");
                 }
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
@@ -140,7 +136,7 @@ namespace SW.ExternalWeb.Controllers
         #region Two Factor
 
         [HttpGet]
-        public async Task<ActionResult> TwoFactor()
+        public async Task<IActionResult> TwoFactor()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var vm = new TwoFactorViewModel();
@@ -160,102 +156,86 @@ namespace SW.ExternalWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> EnableTFA()
+        public async Task<IActionResult> EnableTFA()
         {
             try
             {
                 var user = await _userManager.FindByIdAsync(User.GetUserId());
                 await _userManager.SetTwoFactorEnabledAsync(user, true);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Two factor authentication enabled");
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithSuccess("Two factor authentication enabled", "");
             }
             catch(Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> DisableTFA()
+        public async Task<IActionResult> DisableTFA()
         {
             try
             {
                 var user = await _userManager.FindByIdAsync(User.GetUserId());
                 await _userManager.SetTwoFactorEnabledAsync(user, false);
-
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Two factor authentication disabled");
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithSuccess("Two factor authentication disabled", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> RememberBrowser()
+        public async Task<IActionResult> RememberBrowser()
         {
             try
             {
                 var user = await _userManager.FindByIdAsync(User.GetUserId());
                 await _signInManager.RememberTwoFactorClientAsync(user);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Two factor authentication set to remember browser");
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithSuccess("Two factor authentication set to remember browser", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> ForgetBrowser()
+        public async Task<IActionResult> ForgetBrowser()
         {
             try
             {
                 await _signInManager.ForgetTwoFactorClientAsync();
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Two factor authentication set to not remember browser");
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithSuccess("Two factor authentication set to not remember browser", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> ClearTwoFactorPhone()
+        public async Task<IActionResult> ClearTwoFactorPhone()
         {
             try
             {
                 var user = await _userManager.FindByIdAsync(User.GetUserId());
                 await _userManager.SetPhoneNumberAsync(user, null);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Two factor phone settings cleared");
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithSuccess("Two factor phone settings cleared", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> SetTwoFactorPhone(TwoFactorViewModel vm)
+        public async Task<IActionResult> SetTwoFactorPhone(TwoFactorViewModel vm)
         {
             try
             {
@@ -286,15 +266,14 @@ namespace SW.ExternalWeb.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(TwoFactor));
+                return RedirectToAction(nameof(TwoFactor)).WithDanger(ex.Message, "");
             }
         }
 
         // SOWA-38 pathing to this view is commented out and related actions don't exist so this was commented out on conversion, refactor will be needed if this is re-enabled
         //[HttpPost]
         //[ValidateAntiForgeryToken]
-        //public async Task<ActionResult> SetTwoFactorEmail(TwoFactorViewModel vm)
+        //public async Task<IActionResult> SetTwoFactorEmail(TwoFactorViewModel vm)
         //{
         //    try
         //    {
@@ -332,13 +311,12 @@ namespace SW.ExternalWeb.Controllers
         //    }
         //    catch (Exception ex)
         //    {
-        //        ModelState.AddModelError("", ex.Message);
-        //        return RedirectToAction(nameof(TwoFactor));
+        //        return RedirectToAction(nameof(TwoFactor)).WithDanger(ex.Message, "");
         //    }
         //}
 
         [HttpGet]
-        public async Task<ActionResult> VerifyPhoneNumber()
+        public async Task<IActionResult> VerifyPhoneNumber()
         {
             var vm = TempData["VerifyPhone"] as VerifyPhoneViewModel;
             return (vm == null || vm.Number == null) ? View("Error") : View(vm);
@@ -346,7 +324,7 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> VerifyPhoneNumber(VerifyPhoneViewModel vm)
+        public async Task<IActionResult> VerifyPhoneNumber(VerifyPhoneViewModel vm)
         {
             if (!ModelState.IsValid)
                 return View(vm);
@@ -368,16 +346,13 @@ namespace SW.ExternalWeb.Controllers
                     if (user != null)
                         await SignInAsync(user, false);
 
-                    ModelState.Clear();
-                    ModelState.AddModelError("success", "Phone number successfully added");
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index)).WithSuccess("Phone number successfully added", "");
                 }
                 throw new Exception(result.Errors.ToString());
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
@@ -386,7 +361,7 @@ namespace SW.ExternalWeb.Controllers
         #region Phone
 
         [HttpGet]
-        public async Task<ActionResult> Phones()
+        public async Task<IActionResult> Phones()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var phonesDM = await _phoneService.GetByPerson(user.UserId, false);
@@ -404,7 +379,7 @@ namespace SW.ExternalWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> AddPhoneNumber()
+        public async Task<IActionResult> AddPhoneNumber()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var phonesDM = await _phoneService.GetByPerson(user.UserId, false);
@@ -424,7 +399,7 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> AddPhoneNumber(AddPhoneViewModel vm)
+        public async Task<IActionResult> AddPhoneNumber(AddPhoneViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -460,20 +435,17 @@ namespace SW.ExternalWeb.Controllers
 
                 await _phoneService.Add(phone);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Phone number successfully added");
-                return RedirectToAction(nameof(Phones));
+                return RedirectToAction(nameof(Phones)).WithSuccess("Phone number successfully added", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
                 vm.PhoneTypesDropDown = await GeneratePhoneTypesSelectList();
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> ChangePhoneNumber(int? id)
+        public async Task<IActionResult> ChangePhoneNumber(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Phones));
@@ -508,14 +480,13 @@ namespace SW.ExternalWeb.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Phones));
+                return RedirectToAction(nameof(Phones)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangePhoneNumber(ChangePhoneViewModel vm)
+        public async Task<IActionResult> ChangePhoneNumber(ChangePhoneViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -548,20 +519,17 @@ namespace SW.ExternalWeb.Controllers
                 phone.Code = null;
                 await _phoneService.Update(phone);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Phone number successfully changed");
-                return RedirectToAction(nameof(Phones));
+                return RedirectToAction(nameof(Phones)).WithSuccess("Phone number successfully changed", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
                 vm.PhoneTypesDropDown = await GeneratePhoneTypesSelectList();
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> SetDefaultPhone(int? id)
+        public async Task<IActionResult> SetDefaultPhone(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Phones));
@@ -577,19 +545,16 @@ namespace SW.ExternalWeb.Controllers
 
                 await _phoneService.SetDefault(user.UserId, id.Value);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Primary contact phone number changed");
-                return RedirectToAction(nameof(Phones));
+                return RedirectToAction(nameof(Phones)).WithSuccess("Primary contact phone number changed", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Phones));
+                return RedirectToAction(nameof(Phones)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> RemovePhoneNumber(int? id)
+        public async Task<IActionResult> RemovePhoneNumber(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Phones));
@@ -614,14 +579,11 @@ namespace SW.ExternalWeb.Controllers
 
                 await _phoneService.Remove(phone);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Successfully removed phone number");
-                return RedirectToAction(nameof(Phones));
+                return RedirectToAction(nameof(Phones)).WithSuccess("Successfully removed phone number", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Phones));
+                return RedirectToAction(nameof(Phones)).WithDanger(ex.Message, "");
             }
         }
 
@@ -630,7 +592,7 @@ namespace SW.ExternalWeb.Controllers
         #region Emails
 
         [HttpGet]
-        public async Task<ActionResult> Emails()
+        public async Task<IActionResult> Emails()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var emailsDM = await _emailService.GetByPerson(user.UserId, false);
@@ -650,7 +612,7 @@ namespace SW.ExternalWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> AddEmailAddress()
+        public async Task<IActionResult> AddEmailAddress()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var emailsDM = await _emailService.GetByPerson(user.UserId, false);
@@ -672,7 +634,7 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> AddEmailAddress(AddEmailViewModel vm)
+        public async Task<IActionResult> AddEmailAddress(AddEmailViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -707,20 +669,17 @@ namespace SW.ExternalWeb.Controllers
 
                 await _emailService.Add(email);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Email address successfully added");
-                return RedirectToAction(nameof(Emails));
+                return RedirectToAction(nameof(Emails)).WithSuccess("Email address successfully added", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
                 vm.EmailTypesDropDown = await GenerateEmailTypesSelectList();
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> ChangeEmailAddress(int? id)
+        public async Task<IActionResult> ChangeEmailAddress(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Emails));
@@ -754,14 +713,13 @@ namespace SW.ExternalWeb.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Emails));
+                return RedirectToAction(nameof(Emails)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangeEmailAddress(ChangeEmailViewModel vm)
+        public async Task<IActionResult> ChangeEmailAddress(ChangeEmailViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -796,20 +754,17 @@ namespace SW.ExternalWeb.Controllers
                 var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                 _ = _userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Email address successfully changed");
-                return RedirectToAction(nameof(Emails));
+                return RedirectToAction(nameof(Emails)).WithSuccess("Email address successfully changed", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
                 vm.EmailTypesDropDown = await GenerateEmailTypesSelectList();
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> SetDefaultEmail(int? id)
+        public async Task<IActionResult> SetDefaultEmail(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Emails));
@@ -829,19 +784,16 @@ namespace SW.ExternalWeb.Controllers
                 var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                 _ = _userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Primary contact email address changed");
-                return RedirectToAction(nameof(Emails));
+                return RedirectToAction(nameof(Emails)).WithSuccess("Primary contact email address changed", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Emails));
+                return RedirectToAction(nameof(Emails)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> RemoveEmailAddress(int? id)
+        public async Task<IActionResult> RemoveEmailAddress(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Emails));
@@ -866,14 +818,11 @@ namespace SW.ExternalWeb.Controllers
 
                 await _emailService.Remove(email);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Successfully removed email address");
-                return RedirectToAction(nameof(Emails));
+                return RedirectToAction(nameof(Emails)).WithSuccess("Successfully removed email address", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Emails));
+                return RedirectToAction(nameof(Emails)).WithDanger(ex.Message, "");
             }
         }
 
@@ -882,7 +831,7 @@ namespace SW.ExternalWeb.Controllers
         #region Addresses
 
         [HttpGet]
-        public async Task<ActionResult> Addresses()
+        public async Task<IActionResult> Addresses()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var addressesDM = (await _addressService.GetByPerson(user.UserId, false)).Where(a => a.Code.Description == "Billing");
@@ -902,7 +851,7 @@ namespace SW.ExternalWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> AddAddress()
+        public async Task<IActionResult> AddAddress()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var addressesDM = (await _addressService.GetByPerson(user.UserId, false)).Where(a => a.Code.Description == "Billing");
@@ -923,7 +872,7 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> AddAddress(AddAddressViewModel vm)
+        public async Task<IActionResult> AddAddress(AddAddressViewModel vm)
         {
             if (!vm.ValidationMode && !ModelState.IsValid)
                 return View(vm);
@@ -945,9 +894,7 @@ namespace SW.ExternalWeb.Controllers
                     address.PersonEntityID = user.UserId;
                     await _addressService.Add(address);
 
-                    ModelState.Clear();
-                    ModelState.AddModelError("success", "Address successfully added");
-                    return RedirectToAction(nameof(Addresses));
+                    return RedirectToAction(nameof(Addresses)).WithSuccess("Address successfully added", "");
                 }
                 else
                 {
@@ -965,17 +912,13 @@ namespace SW.ExternalWeb.Controllers
                     {
                         vm.ValidationMode = false;
 
-                        ModelState.Clear();
-                        ModelState.AddModelError("", "No matching addresses could be found. Please correct the address or contact Solid Waste at 785-233-4774 if you are sure this is correct.");
-                        return View(vm);
+                        return View(vm).WithDanger("No matching addresses could be found. Please correct the address or contact Solid Waste at 785-233-4774 if you are sure this is correct.", "");
                     }
                     else if (validAddresses.Count > 1)
                     {
                         vm.ValidAddresses = validAddresses;
 
-                        ModelState.Clear();
-                        ModelState.AddModelError("", "Please select the correct address from the list.");
-                        return View(vm);
+                        return View(vm).WithDanger("Please select the correct address from the list.", "");
                     }
                     else
                     {
@@ -989,21 +932,18 @@ namespace SW.ExternalWeb.Controllers
                         address.PersonEntityID = user.UserId;
                         await _addressService.Add(address);
 
-                        ModelState.Clear();
-                        ModelState.AddModelError("success", "Address successfully added");
-                        return RedirectToAction(nameof(Addresses));
+                        return RedirectToAction(nameof(Addresses)).WithSuccess("Address successfully added", "");
                     }
                 }
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> ChangeAddress(int? id)
+        public async Task<IActionResult> ChangeAddress(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Addresses));
@@ -1038,14 +978,13 @@ namespace SW.ExternalWeb.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Addresses));
+                return RedirectToAction(nameof(Addresses)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangeAddress(ChangeAddressViewModel vm)
+        public async Task<IActionResult> ChangeAddress(ChangeAddressViewModel vm)
         {
             if (!vm.ValidationMode && !ModelState.IsValid)
                 return View(vm);
@@ -1071,9 +1010,7 @@ namespace SW.ExternalWeb.Controllers
                     address.Id = userAddress.Id;
                     await _addressService.Update(address);
 
-                    ModelState.Clear();
-                    ModelState.AddModelError("success", "Address successfully changed");
-                    return RedirectToAction(nameof(Addresses));
+                    return RedirectToAction(nameof(Addresses)).WithSuccess("Address successfully changed", "");
                 }
                 else
                 {
@@ -1091,17 +1028,13 @@ namespace SW.ExternalWeb.Controllers
                     {
                         vm.ValidationMode = false;
 
-                        ModelState.Clear();
-                        ModelState.AddModelError("", "No matching addresses could be found. Please correct the address or contact Solid Waste at 785-233-4774 if you are sure this is correct.");
-                        return View(vm);
+                        return View(vm).WithDanger("No matching addresses could be found. Please correct the address or contact Solid Waste at 785-233-4774 if you are sure this is correct.", "");
                     }
                     else if (validAddresses.Count > 1)
                     {
                         vm.ValidAddresses = validAddresses;
 
-                        ModelState.Clear();
-                        ModelState.AddModelError("", "Please select the correct address from the list.");
-                        return View(vm);
+                        return View(vm).WithDanger("Please select the correct address from the list.", "");
                     }
                     else
                     {
@@ -1144,19 +1077,16 @@ namespace SW.ExternalWeb.Controllers
                     }
                 }
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Address successfully changed");
-                return RedirectToAction(nameof(Addresses));
+                return RedirectToAction(nameof(Addresses)).WithSuccess("Address successfully changed", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> SetDefaultAddress(int? id)
+        public async Task<IActionResult> SetDefaultAddress(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Addresses));
@@ -1198,19 +1128,16 @@ namespace SW.ExternalWeb.Controllers
                     _ = _sendGridService.SendSingleEmail(email);
                 }
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Primary mailing address changed");
-                return RedirectToAction(nameof(Addresses));
+                return RedirectToAction(nameof(Addresses)).WithSuccess("Primary mailing address changed", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Addresses));
+                return RedirectToAction(nameof(Addresses)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult> RemoveAddress(int? id)
+        public async Task<IActionResult> RemoveAddress(int? id)
         {
             if (id == null)
                 return RedirectToAction(nameof(Addresses));
@@ -1231,14 +1158,11 @@ namespace SW.ExternalWeb.Controllers
 
                 await _addressService.Remove(address);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Successfully removed address");
-                return RedirectToAction(nameof(Addresses));
+                return RedirectToAction(nameof(Addresses)).WithSuccess("Successfully removed address", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Addresses));
+                return RedirectToAction(nameof(Addresses)).WithDanger(ex.Message, "");
             }
         }
 
@@ -1247,7 +1171,7 @@ namespace SW.ExternalWeb.Controllers
         #region Delivery
 
         [HttpGet]
-        public async Task<ActionResult> Delivery()
+        public async Task<IActionResult> Delivery()
         {
             try
             {
@@ -1263,14 +1187,13 @@ namespace SW.ExternalWeb.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return RedirectToAction(nameof(Delivery));
+                return RedirectToAction(nameof(Delivery)).WithDanger(ex.Message, "");
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Delivery(DeliveryViewModel vm)
+        public async Task<IActionResult> Delivery(DeliveryViewModel vm)
         {
             if (!ModelState.IsValid)
                 return View(vm);
@@ -1300,14 +1223,11 @@ namespace SW.ExternalWeb.Controllers
 
                 _ = _sendGridService.SendSingleEmail(email);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Delivery options successfully changed");
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)).WithSuccess("Delivery options successfully changed", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("danger", ex.Message);
-                return View(vm);
+                return View(vm).WithDanger(ex.Message, "");
             }
         }
 
@@ -1316,7 +1236,7 @@ namespace SW.ExternalWeb.Controllers
         #region Profile
 
         [HttpGet]
-        public async Task<ActionResult> Profile()
+        public async Task<IActionResult> Profile()
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             var person = await _personEntityService.GetById(user.UserId);
@@ -1349,7 +1269,7 @@ namespace SW.ExternalWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> BusinessProfile(BusinessProfileViewModel vm)
+        public async Task<IActionResult> BusinessProfile(BusinessProfileViewModel vm)
         {
             if (!ModelState.IsValid)
                 return View("BusinessProfile", vm);
@@ -1364,20 +1284,17 @@ namespace SW.ExternalWeb.Controllers
 
                 await _personEntityService.Update(person);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Profile successfully updated");
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)).WithSuccess("Profile successfully updated", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View("BusinessProfile", vm);
+                return View("BusinessProfile", vm).WithDanger(ex.Message, "");
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> PersonalProfile(PersonalProfileViewModel vm)
+        public async Task<IActionResult> PersonalProfile(PersonalProfileViewModel vm)
         {
             if (!ModelState.IsValid)
                 return View("PersonalProfile", vm);
@@ -1396,14 +1313,11 @@ namespace SW.ExternalWeb.Controllers
 
                 await _personEntityService.Update(person);
 
-                ModelState.Clear();
-                ModelState.AddModelError("success", "Profile successfully updated");
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)).WithSuccess("Profile successfully updated", "");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View("PersonalProfile", vm);
+                return View("PersonalProfile", vm).WithDanger(ex.Message, "");
             }
         }
 

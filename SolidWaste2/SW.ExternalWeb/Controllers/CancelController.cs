@@ -1,6 +1,7 @@
 ﻿using Common.Extensions;
 using Common.Services.Email;
 using Common.Web.Extensions;
+using Common.Web.Extensions.Alerts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -80,14 +81,11 @@ public class CancelController : Controller
     public async Task<IActionResult> Index(CancelViewModel model)
     {
         if(!ModelState.IsValid)
-        {
             return View(model);
-        }
+
         if (model.CancelDate.Value.DayOfWeek == System.DayOfWeek.Sunday)
-        {
-            ModelState.AddModelError("CancelDate", "Cancel date may not be a Sunday");
-            return View(model);
-        }
+            return View(model).WithDanger("Cancel date may not be a Sunday", "");
+
         var user = await userManager.FindByIdAsync(User.GetUserId());
         var person = await personEntityService.GetById(user.UserId);
         var customer = await customerService.GetByPE(person.Id);
@@ -148,7 +146,6 @@ public class CancelController : Controller
             .ToList();
         return PartialView(containers);
     }
-
 
     [NonAction]
     private async Task CancelContainerEmail(int containerId, PersonEntity person, Customer customer)
