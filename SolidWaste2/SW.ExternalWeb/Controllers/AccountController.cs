@@ -1,4 +1,4 @@
-﻿using Common.Services.Email;
+using Common.Services.Email;
 using Common.Web.Extensions.Alerts;
 using Identity.BL.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -231,9 +231,7 @@ namespace SW.ExternalWeb.Controllers
                         return View().WithDanger(result.Errors.First().Description, "");
                     if (result.Succeeded)
                     {
-                        var uri = new Uri(Request.Host.Value);
-                        var scheme = uri.Scheme;
-                        var callbackUrl = Url.Action("ConfirmEmail", "Account", null, scheme);
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                         _ = userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
                         return RedirectToAction("Login", "Account").WithSuccess("Thank you for registering. You will need to confirm your email before logging in.", "");
@@ -276,9 +274,7 @@ namespace SW.ExternalWeb.Controllers
                 if (user == null || user.EmailConfirmed)
                     return View(model).WithDanger($"Unconfimed email {model.Email} was not found.", "");
 
-                var uri = new Uri(Request.Host.Value);
-                var scheme = uri.Scheme;
-                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, scheme);
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                 _ = userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
                 return RedirectToAction("Login", "Account").WithSuccess("You will need to confirm your email before logging in.", "");

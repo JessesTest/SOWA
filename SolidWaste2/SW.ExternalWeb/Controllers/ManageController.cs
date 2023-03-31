@@ -751,9 +751,7 @@ namespace SW.ExternalWeb.Controllers
                 email.Code = null;
                 await _emailService.Update(email);
 
-                var uri = new Uri(Request.Host.Value);
-                var scheme = uri.Scheme;
-                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, scheme);
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                 _ = _userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
                 return RedirectToAction(nameof(Emails)).WithSuccess("Email address successfully changed", "");
@@ -783,9 +781,7 @@ namespace SW.ExternalWeb.Controllers
                 await _emailService.SetDefault(user.UserId, id.Value);
                 await _userManager.SetEmailAsync(user, email.Email1);
 
-                var uri = new Uri(Request.Host.Value);
-                var scheme = uri.Scheme;
-                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, scheme);
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", null, "https");
                 _ = _userNotificationService.SendConfirmationEmailByUserId(user.UserId, callbackUrl);
 
                 return RedirectToAction(nameof(Emails)).WithSuccess("Primary contact email address changed", "");
