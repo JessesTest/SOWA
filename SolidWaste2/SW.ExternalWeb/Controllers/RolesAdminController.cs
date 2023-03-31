@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Common.Web.Extensions.Alerts;
+using Common.Web.Services.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -51,24 +53,22 @@ public class RolesAdminController : Controller
     #region Create
 
     [HttpGet]
-    public ActionResult Create()
+    public IActionResult Create()
     {
         return View(new RoleViewModel());
     }
 
     [HttpPost]
-    public async Task<ActionResult> Create(RoleViewModel roleViewModel)
+    public async Task<IActionResult> Create(RoleViewModel roleViewModel)
     {
         if (ModelState.IsValid)
         {
             var role = new IdentityRole(roleViewModel.Name);
             var roleresult = await roleManager.CreateAsync(role);
-            if (!roleresult.Succeeded)
-            {
-                ModelState.AddModelError("", roleresult.Errors.First().Description);
-                return View();
-            }
-            return RedirectToAction("Index");
+            if (roleresult.Errors.Any())
+                return View().WithDanger(roleresult.Errors.First().Description, "");
+            if (roleresult.Succeeded)
+                return RedirectToAction("Index");
         }
         return View();
     }
@@ -78,7 +78,7 @@ public class RolesAdminController : Controller
     #region Edit
 
     [HttpGet]
-    public async Task<ActionResult> Edit(string id)
+    public async Task<IActionResult> Edit(string id)
     {
         if (id == null)
         {
@@ -95,7 +95,7 @@ public class RolesAdminController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> Edit(RoleViewModel roleModel)
+    public async Task<IActionResult> Edit(RoleViewModel roleModel)
     {
         if (ModelState.IsValid)
         {
@@ -112,7 +112,7 @@ public class RolesAdminController : Controller
     #region Delete
 
     [HttpGet]
-    public async Task<ActionResult> Delete(string id)
+    public async Task<IActionResult> Delete(string id)
     {
         if (id == null)
         {
@@ -128,7 +128,7 @@ public class RolesAdminController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> DeleteConfirmed(string id, string deleteUser)
+    public async Task<IActionResult> DeleteConfirmed(string id, string deleteUser)
     {
         if (ModelState.IsValid)
         {
@@ -150,12 +150,10 @@ public class RolesAdminController : Controller
             {
                 result = await roleManager.DeleteAsync(role);
             }
-            if (!result.Succeeded)
-            {
-                ModelState.AddModelError("", result.Errors.First().Description);
-                return View();
-            }
-            return RedirectToAction("Index");
+            if (result.Errors.Any())
+                return View().WithDanger(result.Errors.First().Description, "");
+            if (result.Succeeded)
+                return RedirectToAction("Index");
         }
         return View();
     }
