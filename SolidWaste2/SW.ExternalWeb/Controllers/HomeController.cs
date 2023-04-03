@@ -267,7 +267,11 @@ namespace SW.ExternalWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> TransactionsJson()
         {
-            var user = await userManager.FindByIdAsync(User.GetUserId());
+            var userId = User.GetUserId();
+            if (userId == null)
+                return Challenge(); // not authenticated
+
+            var user = await userManager.FindByIdAsync(userId);
             var person = await personEntityService.GetById(user.UserId);
             var customer = await customerService.GetByPE(person.Id);
             var customerId = customer.CustomerId;
