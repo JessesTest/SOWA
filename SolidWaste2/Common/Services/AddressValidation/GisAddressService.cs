@@ -36,14 +36,14 @@ public class GisAddressService : IAddressValidationService
         if (!string.IsNullOrWhiteSpace(zip5))
             parameters.Add("postal", zip5);
 
-        var candidatesResult = await DoRequest<GisResult>(parameters, cancellationToken);
+        var candidatesResult = await GetRequest<GisResult>(parameters, cancellationToken);
 
         return candidatesResult.Candidates
              .Select(c => new ValidAddress(c.Address, c.Score))
              .ToList();
     }
 
-    internal async Task<T> DoRequest<T>(IDictionary<string, object> data, CancellationToken cancellationToken)
+    internal async Task<T> GetRequest<T>(IDictionary<string, object> data, CancellationToken cancellationToken)
         where T : new()
     {
         using var client = httpClientFactory.CreateClient("GisAddress");
