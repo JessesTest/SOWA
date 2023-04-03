@@ -214,7 +214,7 @@ namespace SW.ExternalWeb.Controllers
             return View(customerId);
         }
 
-        public async Task<IActionResult> HomeMenu(string controller, string action)
+        public async Task<IActionResult> HomeMenu(string sourceController, string sourceAction)
         {
             var userId = User.GetUserId();
             if (userId == null)
@@ -257,8 +257,8 @@ namespace SW.ExternalWeb.Controllers
             vm.AccountNumber = customerId.ToString();
             vm.CurrentBalance = await transactionService.GetCurrentBalance(customerId);
             vm.PastDueBalance = await transactionService.GetPastDueAmount(customerId);
-            vm.CurrentController = controller;
-            vm.CurrentAction = action;
+            vm.CurrentController = sourceController;
+            vm.CurrentAction = sourceAction;
             vm.CustomerType = customer.CustomerType;
 
             return PartialView("_Menu", vm);
