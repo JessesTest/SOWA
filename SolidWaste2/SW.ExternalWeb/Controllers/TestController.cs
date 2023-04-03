@@ -5,6 +5,7 @@ using SW.ExternalWeb.Identity;
 
 namespace SW.ExternalWeb.Controllers;
 
+[NonController]
 public class TestController : Controller
 {
     private readonly UserManager<ApplicationUser> userManager;
