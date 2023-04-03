@@ -379,7 +379,7 @@ table.visible-xs         { display: table; }
     .halfpad-print-left         { padding-left: 10px; }
 }
 
-/*@media (max-width : 479px) {
+@media (max-width : 479px) {
     .hidden-xs { display: none !important; }
 }
 
@@ -389,8 +389,10 @@ table.visible-xs         { display: table; }
 
 @media (min-width : 768px) and (max-width : 999px) {    
     .hidden-md { display: none !important; }
-}*/
+}
 
-@media (min-width : 0px) /*default value was 1000px*/{    
-    .hidden-lg { display: none !important; }
+@media (min-width : 1000px) {
+    .hidden-lg {
+        display: none !important;
+    }
 }
