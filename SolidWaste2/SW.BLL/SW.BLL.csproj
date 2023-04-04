@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\PE.BL\PE.BL.csproj" />
     <ProjectReference Include="..\PE.DAL\PE.DAL.csproj" />
     <ProjectReference Include="..\SW.BLL.KanPay\SW.BLL.KanPay.csproj" />

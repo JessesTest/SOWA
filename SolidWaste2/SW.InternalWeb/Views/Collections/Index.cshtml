@@ -1,0 +1,45 @@
+﻿@model List<SW.DM.Transaction>
+@{
+    ViewBag.Title = "Collections";
+    ViewBag.ATitle = "Collections";
+}
+
+<table id="results">
+    <thead>
+        <tr>
+            <th>Customer ID</th>
+            <th>Name</th>
+            <th>Collections</th>
+            <th>Counselors</th>
+            <th>Uncollectable</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="inquiryresultsrecord">
+                <td>@Html.ActionLink(item.CustomerId.ToString(), "Payment", new { customerId = item.CustomerId }, new { @class = "btn btn-sm btn-primary" })</td>
+                <td>@item.Customer.PersonEntity.FullName</td>
+                <td>@string.Format("{0:c}", item.CollectionsBalance)</td>
+                <td>@string.Format("{0:c}", item.CounselorsBalance)</td>
+                <td>@string.Format("{0:c}", item.UncollectableBalance)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@*
+@section head
+{
+    @Styles.Render("~/Content/DataTables/css/datatables")
+}*@
+@section scripts
+{
+    @* @Scripts.Render("~/bundles/datatables") *@
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(document).ready(function () {
+                $("#results").DataTable({ "order": [[0, "asc"]] });
+            })
+        });
+    </script>
+}
