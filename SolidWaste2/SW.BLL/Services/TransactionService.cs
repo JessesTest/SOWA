@@ -1,16 +1,11 @@
+using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using PE.BL.Services;
 using PE.DM;
 using SW.BLL.DTOs;
 using SW.BLL.Extensions;
 using SW.DAL.Contexts;
 using SW.DM;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SW.BLL.Services;
 
@@ -100,6 +95,12 @@ public class TransactionService : ITransactionService
             .Where(e => e.Id == transactionId)
             .AsNoTracking()
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<Transaction> GetLatesetTransaction(int customerId)
+    {
+        using var db = dbFactory.CreateDbContext();
+        return await db.GetLatesetTransaction(customerId);
     }
 
     #endregion
@@ -257,6 +258,129 @@ public class TransactionService : ITransactionService
                 && ((t.AddDateTime > bill.AddDateTime) || (t.AddDateTime == bill.AddDateTime && t.Sequence > bill.Sequence)))
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<ICollection<Transaction>> GetLatestTransactionsWithDelinquency()
+    {
+        using var db = dbFactory.CreateDbContext();
+
+        var groupTran = await db.Transactions
+            .Where(t => !t.DeleteFlag)
+            .GroupBy(t => t.CustomerId)
+            .Select(t => t.Max(gt => gt.Id))
+            .ToListAsync();
+
+        var temp = await (
+            from t in db.Transactions
+            where groupTran.Contains(t.Id) &&
+            (t.CollectionsBalance > 0 || t.CounselorsBalance > 0 || t.UncollectableBalance > 0)
+            select t)
+            .ToListAsync();
+
+        var bob = new List<Transaction>();
+        var customerIds = temp.Select(t => t.CustomerId).Distinct().ToList();
+        foreach (var customerId in customerIds)
+        {
+            bob.Add(temp.Where(t => t.CustomerId == customerId).OrderBy(t => t.Id).Last());
+        }
+
+        foreach (var tom in bob)
+        {
+            tom.Customer = await db.Customers.Where(c => c.CustomerId == tom.CustomerId).SingleOrDefaultAsync();
+            tom.Customer.PersonEntity = await _personEntityService.GetById(tom.Customer.Pe);
+            if (tom.Customer.PersonEntity == null)
+                tom.Customer.PersonEntity = new PersonEntity();
+        }
+
+        return bob;
+    }
+
+    public async Task MakeDelinquencyPayment(int customerId, string transactionTypeCode, decimal amount, string comment, DateTime? dateTime = null)
+    {
+        var userName = System.Security.Claims.ClaimsPrincipal.Current.GetNameOrEmail();
+
+        using var db = dbFactory.CreateDbContext();
+
+        var customer = await db.GetCustomerById(customerId);
+        if (customer == null || customer.DelDateTime != null)
+            throw new ArgumentException("Customer not found", nameof(customerId));
+
+        var code = await db.GetTransactionCodeByCode(transactionTypeCode);
+        if (code == null || code.DeleteFlag)
+            throw new ArgumentException("Transaction code not found", nameof(transactionTypeCode));
+
+        Func<Transaction, decimal> GetTranAmt;
+        if (code.IsCollections)
+            GetTranAmt = t => t.CollectionsAmount;
+        else if (code.IsCounselors)
+            GetTranAmt = t => t.CounselorsAmount;
+        else if (code.IsUncollectable)
+            GetTranAmt = t => t.UncollectableAmount.GetValueOrDefault();
+        else
+            throw new InvalidOperationException("invalid transaction type");
+
+        var feesToPay = await db.GetDelinquencyFeesToPay(customerId, code);
+        var lastTransaction = await db.GetLatesetTransaction(customerId);
+        var sequence = 0;
+        var remainingPayment = amount;
+
+        foreach (var fee in feesToPay)
+        {
+            var remainingFee = GetTranAmt(fee);
+
+            var t = new Transaction
+            {
+                AddDateTime = dateTime ?? DateTime.Now,
+                AddToi = userName,
+                Comment = comment,
+                ContainerId = fee.ContainerId,
+                CustomerId = fee.CustomerId,
+                CustomerType = fee.CustomerType,
+                ObjectCode = fee.ObjectCode,
+                Sequence = sequence++,
+                ServiceAddressId = fee.ServiceAddressId
+            };
+
+            var transactionAmount = remainingFee < remainingPayment ? remainingFee : remainingPayment;
+            if (transactionAmount > 0)
+            {
+                code.Process(transactionAmount, lastTransaction, t);
+                await db.AddTransaction(t);
+                lastTransaction = t;
+
+                fee.ChgDateTime = dateTime ?? DateTime.Now;
+                fee.ChgToi = userName;
+                fee.Partial = fee.Partial.GetValueOrDefault() + transactionAmount;
+                if (code.IsCollections)
+                    fee.PaidFull = fee.CollectionsAmount - fee.Partial.Value <= 0;
+                else if (code.IsCounselors)
+                    fee.PaidFull = fee.CounselorsAmount - fee.Partial.Value <= 0;
+                else if (code.IsUncollectable)
+                    fee.PaidFull = fee.UncollectableAmount - fee.Partial.Value <= 0;
+                db.UpdateTransaction(fee);
+
+                remainingPayment -= transactionAmount;
+            }
+
+            if (remainingPayment <= 0)
+                break;
+        }
+        if (remainingPayment > 0)
+        {
+            var t = new Transaction
+            {
+                AddDateTime = dateTime.HasValue ? dateTime.Value : DateTime.Now,
+                AddToi = userName,
+                Comment = "overpay",
+                CustomerId = lastTransaction.CustomerId,
+                CustomerType = lastTransaction.CustomerType,
+                Sequence = sequence++
+            };
+            code.Process(remainingPayment, lastTransaction, t);
+            await db.AddTransaction(t);
+        }
+
+        await db.SaveChangesAsync();
     }
 
     #endregion

@@ -11,4 +11,5 @@ public interface IAddressService
     Task Update(Address address);
     Task Remove(Address address);
     Task SetDefault(int personId, int addressId);
+    Task<ICollection<Address>> GetByIds(IEnumerable<int> ids);
 }

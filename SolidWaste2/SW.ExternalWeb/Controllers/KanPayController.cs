@@ -48,7 +48,11 @@ namespace SW.ExternalWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(AccountHomeMenuViewModel x)
         {
-            ApplicationUser user = await userManager.FindByIdAsync(User.GetUserId());
+            var userId = User.GetUserId();
+            if (userId == null)
+                return Challenge(); // not authorized
+
+            ApplicationUser user = await userManager.FindByIdAsync(userId);
             PersonEntity person = await personEntityService.GetById(user.UserId);
             Customer customer = await customerService.GetByPE(person.Id);
             BillMaster currentBillMaster = await billMasterService.GetMostRecentBillMaster(customer.CustomerId);

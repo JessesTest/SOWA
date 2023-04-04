@@ -25,8 +25,8 @@
         $.ajax({
             url: '@Url.Action("HomeMenu", "Home")',
             data: {
-                controller: "Home",
-                action: "ServiceDetail"
+                sourceController: "Home",
+                sourceAction: "ServiceDetail"
             },
             type: "GET",
             success: (result) => {

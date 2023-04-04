@@ -1,26 +1,28 @@
 ﻿@model SW.ExternalWeb.Models.AccountHomeMenuViewModel
-<div id="largescreens" class="hidden-xs hidden-sm">
+
+<div id="largescreens" class="">
+    @*<div id="largescreens" class="hidden-xs hidden-sm visible-md visible-lg">*@
     <div class="row">
-        <div class="col-lg-9 col-xs-8">
+        <div class="col-xs-12 col-md-8 col-lg-9" style="padding-bottom:10px;">
             <div class="row">
-                <div class="col-xs-6">
+                <div class="col-xs-12">
                     <h2>Billing and Payments</h2>
                 </div>
             </div>
             <div class="row" style="padding-right:12px">
-                <div class="col-xs-9">
+                <div class="col-xs-12">
                     <h3 style="font-weight:bold; text-align:left; vertical-align:bottom; padding-bottom:0px;">Account Number: @Model.AccountNumber</h3>
                 </div>
             </div>
 
             <div class="col-xs-12" style="border-top:3px solid black; background-color: gainsboro; background-clip:padding-box;  padding-bottom: 10px; padding-top: 10px; padding-right:20px">
                 <div class="row">
-                    <div class="col-xs-5">
+                    <div class="col-xs-12">
                         Most Recent Monthly Bill: @Model.MostRecentBillAmt.ToString("c")
                     </div>
                 </div>
                 <div class="row" style="padding-bottom: 10px">
-                    <div class="col-xs-5">
+                    <div class="col-xs-12">
                         Payments Since Last Bill: @Model.ActivitySinceLastBill.ToString("c")
                     </div>
                 </div>
@@ -37,7 +39,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-3 paymentwidget">
+        <div class="col-xs-12 col-md-4 col-lg-3 paymentwidget" style="margin-bottom:10px;">
             @using (Html.BeginForm("Index", "KanPay", FormMethod.Post))
             {
                 <div class="row paymentwidgetheaderbg">
@@ -143,11 +145,8 @@
                                     </label>
                                 </div>
                             }
-
-
                         </div>
                     </div>
-
                     <div class="col-xs-12">
                         <div class="row">
                             @if (@Model.CurrentBalance > 0)
@@ -168,13 +167,12 @@
                                 <input type="button" value="Zero Balance" class="btn btn-success btn-block disabled" />
                             }
                         </div>
-
                     </div>
                 </div>
             }
         </div>
     </div>
-    <div class="row" style="padding-top:20px">
+    <div class="row" style="padding-top:10px; padding-bottom: 15px;">
         <div class="col-xs-12">
             @if (Model.CurrentController == "Home" && Model.CurrentAction == "BillSummary")
             {
@@ -201,43 +199,41 @@
                 </a>
             }
             @*@if (Model.CurrentController == "Home" && Model.CurrentAction == "ServiceDetail")
-            {
+        {
             <a href="@Url.Action("ServiceDetail", "Home")" class="activefeaturesbuttonhome">
-            Service Details
+                Service Details
             </a>
-            }
-            else
-            {
+        }
+        else
+        {
             <a href="@Url.Action("ServiceDetail", "Home")" class="featuresbuttonhome">
-            Service Details
+                Service Details
             </a>
-            }*@
+        }*@
             <div style="border-bottom: 2px solid #344479; display:block"></div>
         </div>
-    </div>
-    <div class="row" style="padding-bottom:15px">
     </div>
 </div>
 
 @*<div id="pinFinderpopup" class="questionbuttonoverlay">
-        <div class="popup">
-            <a class="close" href="#" style="font-size: 5em">&times;</a>
-            <div class="blankbillcontent">
-                <img id="blankbillimage" src="~/Content/images/backgrounds/TOS_overlay.png" />
-            </div>
+    <div class="popup">
+        <a class="close" href="#" style="font-size: 5em">&times;</a>
+        <div class="blankbillcontent">
+            <img id="blankbillimage" src="~/Content/images/backgrounds/TOS_overlay.png" />
         </div>
-    </div>*@
+    </div>
+</div>*@
 
-<div id="smallscreens" class="hidden-lg hidden-md hidden-xs">
+@*<div id="smallscreens" class="hidden-xs visible-sm hidden-md hidden-lg">
     <div class="row">
         <div class="col-xs-8">
             <h2>Billing and Payments</h2>
         </div>
-        @*<div class="col-xs-4">
-        <a href="@Url.Action("Index", "KanPay")" class="btn btn-success" style="float:right; font-size:13px">
-        Make Payment
-        </a>
-        </div>*@
+        <div class="col-xs-4">
+            <a href="@Url.Action("Index", "KanPay")" class="btn btn-success" style="float:right; font-size:13px">
+                Make Payment
+            </a>
+        </div>
     </div>
     <div class="row">
         <div class="col-xs-12">
@@ -317,10 +313,9 @@
             <hr style="border-bottom:1px solid #344479; margin-left:20px; margin-right:20px;" />
         </div>
     </div>
-</div>
+</div>*@
 
-
-<div id="xsscreens" class="hidden-lg hidden-md hidden-sm">
+@*<div id="xsscreens" class="visible-xs hidden-sm hidden-md hidden-lg">
     <div class="row">
         <div class="col-xs-12">
             <h2>Billing and Payments</h2>
@@ -390,14 +385,14 @@
             @Html.ActionLink("Service Detail", "Index", "Cancel")
         </div>
     </div>
-    @*<div class="col-xs-12">
-    <a href="@Url.Action("Index", "KanPay")" class="btn btn-success" style="font-size:13px; display:block; margin: 0 auto">
-    Make Payment
-    </a>
-    </div>*@
+    <div class="col-xs-12">
+        <a href="@Url.Action("Index", "KanPay")" class="btn btn-success" style="font-size:13px; display:block; margin: 0 auto">
+            Make Payment
+        </a>
+    </div>
     <div class="row">
         <div class="col-xs-12">
             <hr style="border-bottom:1px solid #344479; margin-left:20px; margin-right:20px;" />
         </div>
     </div>
-</div>
+</div>*@

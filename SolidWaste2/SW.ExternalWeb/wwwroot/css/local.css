@@ -1255,10 +1255,11 @@ div#site-content {
     div#loginImage {
         background-image: url('../images/backgrounds/we_take_time_graphic.jpg');
         background-size: cover;
-        width: 350px;
-        height: 250px;
+        width: 340px;
+        height: 238px;
         margin-top: -10px;
-        margin-left: 0px;
+        margin-left: auto;
+        margin-right: auto;
         padding-top: 0px;
     }
     div#registerImage {
@@ -1268,45 +1269,50 @@ div#site-content {
         height: 100px;
         margin-top: 10px;
         margin-bottom: 50px;
-        margin-left: 0px;
+        margin-left: auto;
+        margin-right: auto;
         padding-top: 0px;
     }
     div#forgotpasswordImage {
         background-image: url('../images/backgrounds/we_take_time_graphic.jpg');
         background-size: cover;
-        width: 350px;
-        height: 250px;
+        width: 340px;
+        height: 238px;
         margin-top: -10px;
-        margin-left: 0px;
+        margin-left: auto;
+        margin-right: auto;
         padding-top: 0px;
     }
 }
 
 @media (min-width: 1000px) {
     div#loginImage {
-        margin-left: 0px;
         background-image: url('../images/backgrounds/we_take_time_graphic.jpg');
         background-size: cover;
         margin-top: 15px;
+        margin-left: auto;
+        margin-right: auto;
         padding-top: 0px;
         height: 350px;
         width: 500px;
     }
     div#registerImage {
-        margin-left: 0px;
         background-image: url('../images/backgrounds/toppartialCityofTopekaBlankBillExample.png');
         background-size: contain;
         margin-top: 15px;
         padding-top: 0px;
         margin-bottom: 25px;
+        margin-left: auto;
+        margin-right: auto;
         height: 120px;
         width: 425px;
     }
     div#forgotpasswordImage {
-        margin-left: 0px;
         background-image: url('../images/backgrounds/we_take_time_graphic.jpg');
         background-size: cover;
         margin-top: 15px;
+        margin-left: auto;
+        margin-right: auto;
         padding-top: 0px;
         height: 350px;
         width: 500px;
