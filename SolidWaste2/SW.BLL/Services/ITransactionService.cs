@@ -24,6 +24,8 @@ namespace SW.BLL.Services
         Task<decimal> GetCounselorsBalance(int customerId);
         Task<ICollection<CustomerDelinquency>> GetAllDelinquencies();
         Task<ICollection<Transaction>> GetPayments(DateTime thruDate, Transaction bill);
+        Task<ICollection<Transaction>> GetLatestTransactionsWithDelinquency();
+        Task MakeDelinquencyPayment(int customerId, string transactionTypeCode, decimal amount, string comment, DateTime? dateTime = null);
 
         // KanPay
         Task AddKanpayTransaction(Transaction transaction, TransactionKanPayFee fee, int kanpayid, string user);
