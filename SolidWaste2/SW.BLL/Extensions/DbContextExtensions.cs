@@ -111,11 +111,94 @@ namespace SW.BLL.Extensions
 
         #endregion
 
+        #region Transaction
+
+        public static async Task<ICollection<Transaction>> GetDelinquencyFeesToPay(this SwDbContext db, int customerId, TransactionCode code)
+        {
+            ICollection<Transaction> feesToPay;
+
+            if (code.IsCollections)
+            {
+                // collections
+                feesToPay = await db.Transactions
+                    .Where(t => !t.DeleteFlag && t.CustomerId == customerId && t.CollectionsAmount > 0 && (!t.PaidFull.HasValue || !t.PaidFull.Value))
+                    .ToListAsync();
+            }
+            else if (code.IsCounselors)
+            {
+                // counselors
+                feesToPay = await db.Transactions
+                    .Where(t => !t.DeleteFlag && t.CustomerId == customerId && t.CounselorsAmount > 0 && (!t.PaidFull.HasValue || !t.PaidFull.Value))
+                    .ToListAsync();
+            }
+            else if (code.IsUncollectable)
+            {
+                // uncollectable
+                feesToPay = await db.Transactions
+                    .Where(t => !t.DeleteFlag && t.CustomerId == customerId && t.UncollectableAmount > 0 && (!t.PaidFull.HasValue || !t.PaidFull.Value))
+                    .ToListAsync();
+            }
+            else
+            {
+                return new List<Transaction>();
+            }
+            return feesToPay.OrderBy(t => t.AddDateTime).ThenBy(t => t.Sequence).ThenBy(t => t.Id).ToList();
+        }
+
+        public static async Task<Transaction> GetLatesetTransaction(this SwDbContext db, int customerId)
+        {
+            var customer = await db.GetCustomerById(customerId);
+
+            return await db.Transactions
+                .Where(t => t.CustomerId == customer.CustomerId)
+                .Where(t => !t.DeleteFlag)
+                .OrderByDescending(t => t.AddDateTime)
+                .ThenByDescending(t => t.Sequence)
+                .ThenByDescending(t => t.Id)
+                .FirstOrDefaultAsync();
+        }
+
+        public static async Task AddTransaction(this SwDbContext db, Transaction transaction)
+        {
+            var customerId = transaction.CustomerId;
+            var customer = await db.Customers
+                .Where(e => e.CustomerId == customerId || e.LegacyCustomerId == customerId)
+                .Where(e => e.DelDateTime == null)
+                .SingleAsync();
+
+            var lastTransaction = await db.Transactions
+                .Where(t => t.CustomerId == customer.CustomerId)
+                .Where(t => !t.DeleteFlag)
+                .OrderByDescending(t => t.Sequence)
+                .OrderByDescending(t => t.AddDateTime)
+                .FirstOrDefaultAsync();
+
+            if (lastTransaction != null && transaction.AddDateTime.ToString("G") == lastTransaction.AddDateTime.ToString("G"))
+            {
+                transaction.Sequence = lastTransaction.Sequence + 1;
+            }
+
+            db.Transactions.Add(transaction);
+        }
+
+        public static void UpdateTransaction(this SwDbContext db, Transaction transaction)
+        {
+            transaction.ChgDateTime = DateTime.Now;
+            db.Transactions.Update(transaction);
+        }
+
+        #endregion
+
         #region Transaction Code
 
         public static ValueTask<TransactionCode> GetTransactionCode(this SwDbContext db, int transactionCodeId)
         {
             return db.TransactionCodes.FindAsync(transactionCodeId);
+        }
+
+        public static Task<TransactionCode> GetTransactionCodeByCode(this SwDbContext db, string code)
+        {
+            return db.TransactionCodes.Where(c => c.Code == code && !c.DeleteFlag).SingleOrDefaultAsync();
         }
 
         #endregion
