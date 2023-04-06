@@ -13,6 +13,22 @@ namespace SW.BLL.Services
             this.dbFactory = dbFactory;
         }
 
+        public async Task<ICollection<ContainerSubtype>> GetAll()
+        {
+            using var db = dbFactory.CreateDbContext();
+            return await db.ContainerSubtypes
+                .Where(e => !e.DeleteFlag)
+                .ToListAsync();
+        }
+
+        public async Task<ICollection<ContainerSubtype>> GetByContainerType(int containerCodeId)
+        {
+            using var db = dbFactory.CreateDbContext();
+            return await db.ContainerSubtypes
+                .Where(e => e.ContainerCodeId == containerCodeId && !e.DeleteFlag)
+                .ToListAsync();
+        }
+
         public async Task<ContainerSubtype> GetById(int containerSubtypeId)
         {
             using var db = dbFactory.CreateDbContext();
