@@ -1,4 +1,4 @@
-html {
+/*html {
   font-size: 14px;
 }
 
@@ -15,4 +15,10 @@ html {
 
 body {
   margin-bottom: 60px;
+}*/
+
+/* changes to the base bootstrap.css file */
+.alert-warning {
+    background-color: rgba(255, 213, 97, .8);
+    border-color: #f7c8a9;
 }
