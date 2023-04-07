@@ -10,4 +10,5 @@ public interface ICodeService
     Task Add(Code code);
     Task Update(Code code);
     Task Remove(Code code);
+    Task<Code> Get(string type, string code);
 }
