@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PE.BL.Services;
+using SW.BLL.Extensions;
 using SW.DAL.Contexts;
 
 namespace SW.BLL.Services;
@@ -20,8 +21,11 @@ public class BillingSummaryService : IBillingSummaryService
         string[] paymentCodes = { "CC", "KP", "P", "BW", "PP", "IP", "JE", "ACH" };
 
         using var db = dbFactory.CreateDbContext();
+
+        var customer = await db.GetCustomerById(customerId);
+
         return await db.Transactions
-            .Where(t => t.CustomerId == customerId)
+            .Where(t => t.CustomerId == customer.CustomerId)
             .Where(t => !t.DeleteFlag)
             .Where(t => t.AddDateTime >= startDate)
             .Where(t => t.AddDateTime <= endDate)
@@ -34,8 +38,11 @@ public class BillingSummaryService : IBillingSummaryService
         string[] paymentCodes = { "BD", "R", "C", "DER", "DEM", "RC", "DEP", "DEC", "DEK", "B" };
 
         using var db = dbFactory.CreateDbContext();
+
+        var customer = await db.GetCustomerById(customerId);
+
         return await db.Transactions
-            .Where(t => t.CustomerId == customerId)
+            .Where(t => t.CustomerId == customer.CustomerId)
             .Where(t => !t.DeleteFlag)
             .Where(t => t.AddDateTime >= startDate)
             .Where(t => t.AddDateTime <= endDate)
@@ -48,8 +55,11 @@ public class BillingSummaryService : IBillingSummaryService
         string[] paymentCodes = { "BK", "EP", "MB", "RD", "RR", "MBR", "FB", "LF", "CF", "WC", "WRC", "WRO", "WRR", "CR" };
 
         using var db = dbFactory.CreateDbContext();
+
+        var customer = await db.GetCustomerById(customerId);
+
         return await db.Transactions
-            .Where(t => t.CustomerId == customerId)
+            .Where(t => t.CustomerId == customer.CustomerId)
             .Where(t => !t.DeleteFlag)
             .Where(t => t.AddDateTime >= startDate)
             .Where(t => t.AddDateTime <= endDate)
@@ -67,14 +77,16 @@ public class BillingSummaryService : IBillingSummaryService
         onDate = onDate.Date;
 
         using var db = dbFactory.CreateDbContext();
-        var customer = (await db.Customers.FindAsync(customerId)) ??
+
+        var customer = await db.GetCustomerById(customerId);
+        if (customer == null)
             throw new ArgumentException("Customer not found", nameof(customerId));
 
         BillingSummary bs = new();
         bs.SetContractCharge(customer.ContractCharge);
 
         var serviceAddresses = await db.ServiceAddresses
-            .Where(sa => sa.CustomerId == customerId && sa.CustomerType == customer.CustomerType && !sa.DeleteFlag && (!sa.CancelDate.HasValue || sa.CancelDate.Value >= onDate))
+            .Where(sa => sa.CustomerId == customer.CustomerId && sa.CustomerType == customer.CustomerType && !sa.DeleteFlag && (!sa.CancelDate.HasValue || sa.CancelDate.Value >= onDate))
             .Include(sa => sa.Containers.Where(c => !c.DeleteFlag && (!c.CancelDate.HasValue || c.CancelDate.Value >= onDate)))
             .ThenInclude(c => c.ContainerCode)
             .ToListAsync();

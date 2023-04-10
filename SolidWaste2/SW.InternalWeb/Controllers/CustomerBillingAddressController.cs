@@ -6,8 +6,6 @@ using SW.BLL.Services;
 using SW.DM;
 using SW.InternalWeb.Extensions;
 using SW.InternalWeb.Models.CustomerBillingAddress;
-using Twilio.Rest.Autopilot.V1.Assistant;
-using static Microsoft.Graph.CoreConstants;
 
 namespace SW.InternalWeb.Controllers;
 
@@ -89,8 +87,6 @@ public class CustomerBillingAddressController : Controller
 
         if (customer.PaymentPlan)
             ModelState.AddModelError("info", "Customer has a payment plan.");
-
-        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(model));
 
         return View(model);
     }
