@@ -119,4 +119,56 @@ public class CustomerService : ICustomerService
 
         return maxCustomerId.Value + 1;
     }
+
+    public async Task CancelRelatedEntities(Customer c, string chgToi)
+    {
+        using var db = dbFactory.CreateDbContext();
+
+        var serviceAddresses = await db.ServiceAddresses
+            .Where(s => s.CustomerId == c.CustomerId)
+            .Include(s => s.Containers)
+            .ToListAsync();
+
+        foreach (ServiceAddress sa in serviceAddresses)
+        {
+            foreach (Container co in sa.Containers)
+            {
+                var coUpdate = false;
+                if (co.CancelDate == null || co.CancelDate > c.CancelDate)
+                {
+                    co.CancelDate = c.CancelDate;
+                    coUpdate = true;
+                }
+                if (co.EffectiveDate > c.CancelDate)
+                {
+                    co.EffectiveDate = c.CancelDate.Value;
+                    coUpdate = true;
+                }
+                if (coUpdate)
+                {
+                    co.ChgToi = chgToi;
+                    co.ChgDateTime = DateTime.Now;
+                }
+            }
+
+            var saUpdate = false;
+            if (sa.CancelDate == null || sa.CancelDate > c.CancelDate)
+            {
+                sa.CancelDate = c.CancelDate;
+                saUpdate = true;
+            }
+            if (sa.EffectiveDate > c.CancelDate)
+            {
+                sa.EffectiveDate = c.CancelDate.Value;
+                saUpdate = true;
+            }
+            if (saUpdate)
+            {
+                sa.ChgToi = chgToi;
+                sa.ChgDateTime = DateTime.Now;
+            }
+        }
+
+        await db.SaveChangesAsync();
+    }
 }

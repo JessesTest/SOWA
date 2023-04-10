@@ -10,7 +10,7 @@ namespace SW.BLL.Extensions
 
         #region Container
 
-        public static Task GetContainersByServiceAddress(this SwDbContext db, int serviceAddressId)
+        internal static Task GetContainersByServiceAddress(this SwDbContext db, int serviceAddressId)
         {
             return db.Containers
                 .Where(e => e.ServiceAddressId == serviceAddressId)
@@ -22,7 +22,7 @@ namespace SW.BLL.Extensions
                 .ToListAsync();
         }
 
-        public static Task<Container> GetContainerById(this SwDbContext db, int containerId)
+        internal static Task<Container> GetContainerById(this SwDbContext db, int containerId)
         {
             return db.Containers
                 .Where(e => e.Id == containerId)
@@ -38,7 +38,7 @@ namespace SW.BLL.Extensions
 
         #region Container Code
 
-        public static ValueTask<ContainerCode> GetContainerCodeById(this SwDbContext db, int containerCodeId)
+        internal static ValueTask<ContainerCode> GetContainerCodeById(this SwDbContext db, int containerCodeId)
         {
             return db.ContainerCodes.FindAsync(containerCodeId);
         }
@@ -47,14 +47,14 @@ namespace SW.BLL.Extensions
 
         #region Customer
 
-        public static Task<Customer> GetCustomerById(this SwDbContext db,  int customerId)
+        internal static Task<Customer> GetCustomerById(this SwDbContext db,  int customerId)
         {
             return db.Customers
                 .Where(e => e.CustomerId == customerId || e.LegacyCustomerId == customerId)
                 .SingleOrDefaultAsync();
         }
 
-        public static Task<Customer> GetCustomerByPe(this SwDbContext db, int pe)
+        internal static Task<Customer> GetCustomerByPe(this SwDbContext db, int pe)
         {
             return db.Customers
                 .Where(e => e.Pe == pe)
@@ -65,7 +65,7 @@ namespace SW.BLL.Extensions
 
         #region Payment Plan
 
-        public static Task<PaymentPlan> GetActivePaymentPlanByCustomer(this SwDbContext db, int customerId, bool includeDetails = true)
+        internal static Task<PaymentPlan> GetActivePaymentPlanByCustomer(this SwDbContext db, int customerId, bool includeDetails = true)
         {
             var query = db.PaymentPlans
                 .Where(pp => pp.CustomerId == customerId)
@@ -85,7 +85,7 @@ namespace SW.BLL.Extensions
 
         #region Service Address
 
-        public static Task<List<ServiceAddress>> GetServiceAddressByCustomer(this SwDbContext db, int customerId)
+        internal static Task<List<ServiceAddress>> GetServiceAddressByCustomer(this SwDbContext db, int customerId)
         {
             return db.ServiceAddresses
                 .Where(s => s.CustomerId == customerId && !s.DeleteFlag)
@@ -97,7 +97,7 @@ namespace SW.BLL.Extensions
                 .ToListAsync();
         }
 
-        public static Task<ServiceAddress> GetServiceAddressById(this SwDbContext db, int serviceAddressId)
+        internal static Task<ServiceAddress> GetServiceAddressById(this SwDbContext db, int serviceAddressId)
         {
             return db.ServiceAddresses
                 .Where(s => s.Id == serviceAddressId)
@@ -113,7 +113,7 @@ namespace SW.BLL.Extensions
 
         #region Transaction
 
-        public static async Task<ICollection<Transaction>> GetDelinquencyFeesToPay(this SwDbContext db, int customerId, TransactionCode code)
+        internal static async Task<ICollection<Transaction>> GetDelinquencyFeesToPay(this SwDbContext db, int customerId, TransactionCode code)
         {
             ICollection<Transaction> feesToPay;
 
@@ -145,7 +145,7 @@ namespace SW.BLL.Extensions
             return feesToPay.OrderBy(t => t.AddDateTime).ThenBy(t => t.Sequence).ThenBy(t => t.Id).ToList();
         }
 
-        public static async Task<Transaction> GetLatesetTransaction(this SwDbContext db, int customerId)
+        internal static async Task<Transaction> GetLatesetTransaction(this SwDbContext db, int customerId)
         {
             var customer = await db.GetCustomerById(customerId);
 
@@ -158,7 +158,7 @@ namespace SW.BLL.Extensions
                 .FirstOrDefaultAsync();
         }
 
-        public static async Task AddTransaction(this SwDbContext db, Transaction transaction)
+        internal static async Task AddTransaction(this SwDbContext db, Transaction transaction)
         {
             var customerId = transaction.CustomerId;
             var customer = await db.Customers
@@ -181,7 +181,7 @@ namespace SW.BLL.Extensions
             db.Transactions.Add(transaction);
         }
 
-        public static void UpdateTransaction(this SwDbContext db, Transaction transaction)
+        internal static void UpdateTransaction(this SwDbContext db, Transaction transaction)
         {
             transaction.ChgDateTime = DateTime.Now;
             db.Transactions.Update(transaction);
@@ -191,12 +191,12 @@ namespace SW.BLL.Extensions
 
         #region Transaction Code
 
-        public static ValueTask<TransactionCode> GetTransactionCode(this SwDbContext db, int transactionCodeId)
+        internal static ValueTask<TransactionCode> GetTransactionCode(this SwDbContext db, int transactionCodeId)
         {
             return db.TransactionCodes.FindAsync(transactionCodeId);
         }
 
-        public static Task<TransactionCode> GetTransactionCodeByCode(this SwDbContext db, string code)
+        internal static Task<TransactionCode> GetTransactionCodeByCode(this SwDbContext db, string code)
         {
             return db.TransactionCodes.Where(c => c.Code == code && !c.DeleteFlag).SingleOrDefaultAsync();
         }
