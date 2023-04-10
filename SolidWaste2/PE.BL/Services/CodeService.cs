@@ -73,4 +73,14 @@ public class CodeService : ICodeService
         db.Codes.Update(code);
         await db.SaveChangesAsync();
     }
+
+    public async Task<Code> Get(string type, string code)
+    {
+        using var db = contextFactory.CreateDbContext();
+        return await db.Codes
+            .Where(c => c.Type == type)
+            .Where(c => c.Code1 == code)
+            .Where(c => !c.Delete)
+            .SingleOrDefaultAsync();
+    }
 }
