@@ -19,7 +19,7 @@ public class WorkOrderLegacyService : IWorkOrderLegacyService
         return await db.WorkOrderLegacies
             .Where(e => e.WorkOrderLegacyId == workOrderLegacyId)
             .AsNoTracking()
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task Update(WorkOrderLegacy workOrderLegacy)
