@@ -97,12 +97,6 @@ public class TransactionService : ITransactionService
             .FirstOrDefaultAsync();
     }
 
-    public async Task<Transaction> GetLatesetTransaction(int customerId)
-    {
-        using var db = dbFactory.CreateDbContext();
-        return await db.GetLatesetTransaction(customerId);
-    }
-
     #endregion
 
     #region Delinquency
