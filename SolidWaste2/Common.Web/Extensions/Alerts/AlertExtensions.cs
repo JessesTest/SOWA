@@ -28,4 +28,25 @@ public static class AlertExtensions
     {
         return Alert(result, "danger", title, body);
     }
+
+
+    public static IActionResult WithSuccessWhen(this IActionResult result, bool when, string title, string body)
+    {
+        return when ? result.WithSuccess(title, body) : result;
+    }
+
+    public static IActionResult WithInfoWhen(this IActionResult result, bool when, string title, string body)
+    {
+        return when ? result.WithInfo(title, body) : result;
+    }
+
+    public static IActionResult WithWarningWhen(this IActionResult result, bool when, string title, string body)
+    {
+        return when ? result.WithWarning(title, body) : result;
+    }
+
+    public static IActionResult WithDangerWhen(this IActionResult result, bool when, string title, string body)
+    {
+        return when ? result.WithDanger(title, body) : result;
+    }
 }

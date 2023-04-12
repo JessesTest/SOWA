@@ -11,4 +11,5 @@ public interface ICustomerService
     Task<Customer> GetByPE(int peId);
     Task<int> GetNextCustomerNumber(string customerType);
     Task Update(Customer customer);
+    Task CancelRelatedEntities(Customer c, string chgToi);
 }
