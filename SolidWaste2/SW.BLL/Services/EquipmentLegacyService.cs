@@ -29,7 +29,7 @@ public class EquipmentLegacyService : IEquipmentLegacyService
         return await db.EquipmentLegacies
             .Where(e => e.EquipmentLegacyId == id)
             .AsNoTracking()
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task<EquipmentLegacy> GetByEquipmentNumber(int equipmentNumber)
@@ -38,6 +38,6 @@ public class EquipmentLegacyService : IEquipmentLegacyService
         return await db.EquipmentLegacies
             .Where(e => e.EquipmentNumber == equipmentNumber && !e.DelFlag)
             .AsNoTracking()
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 }
