@@ -6,5 +6,8 @@ namespace SW.BLL.Services
     {
         Task<PaymentPlan> GetActiveByCustomer(int customerId, bool includeDetails = true);
         Task<ICollection<PaymentPlan>> GetByCustomer(int customerId, bool includeDetails = true);
+        Task<PaymentPlan> GetById(int paymentPlanId);
+        Task Add(PaymentPlan pp);
+        Task Update(PaymentPlan pp);
     }
 }

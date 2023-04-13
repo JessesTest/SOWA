@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SW.DM;
 
@@ -17,10 +16,10 @@ public class PaymentPlan
     public bool Canceled { get; set; }
     public string AddToi { get; set; }
     public DateTime AddDateTime { get; set; }
-    public string? ChgToi { get; set; }
+    public string ChgToi { get; set; }
     public DateTime? ChgDateTime { get; set; }
     public bool DelFlag { get; set; }
-    public string? DelToi { get; set; }
+    public string DelToi { get; set; }
     public DateTime? DelDateTime { get; set; }
 
     public virtual Customer Customer { get; set; }
