@@ -1,0 +1,107 @@
+﻿@model SW.InternalWeb.Models.WorkOrderInquiry.WorkOrderInquiryViewModel
+@{
+    ViewBag.Title = "Search Results";
+    ViewBag.ATitle = "Search Results Work Orders";
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="Results" class="table table-condensed table-bordered">
+                    <thead>
+                        <tr class="bg-dark">
+                            <th class="col-xs-1">
+                                Action
+                            </th>
+                            @*<th class="col-xs-1">
+                                Origin
+                            </th>*@
+                            <th class="col-xs-4">
+                                @Html.DisplayNameFor(m => m.CustomerName) / @Html.DisplayNameFor(m => m.CustomerAddress)
+                            </th>
+                            <th class="col-xs-1">
+                                @Html.DisplayNameFor(m => m.ContainerRoute)
+                            </th>
+                            <th class="col-xs-2">
+                                @Html.DisplayNameFor(m => m.TransDate)
+                            </th>
+                            <th class="col-xs-2">
+                                @Html.DisplayNameFor(m => m.DriverInitials)
+                            </th>
+                            <th class="col-xs-1">
+                                @Html.DisplayNameFor(m => m.WorkOrderId)
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Results.Count(); i++)
+                        {
+                            var item = Model.Results.ElementAt(i);
+                            @*string rowBG;
+                            if (item.ResolveDate != null)
+                            {
+                                rowBG = "alert-info";
+                            }
+                            else
+                            {
+                                rowBG = "alert-success";
+                            }
+                            <tr class="@rowBG">*@
+                            <tr>
+                                <td class="v-middle text-center">
+                                    <button type="button" class="btn btn-block btn-sm btn-primary" onclick="location.href='@Url.Action("Index", "WorkOrder", new { workOrderId = item.WorkOrderId })'">View</button>
+                                </td>
+                                @*<td class="v-middle text-center">
+                                    @if (item.ResolveDate != null)
+                                    {
+                                        <p class="margin-bottom-5">WorkOrder Closed</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="margin-bottom-5">WorkOrder</p>
+                                    }
+                                </td>*@
+                                <td>
+                                    <p class="margin-bottom-5"><strong>@Html.DisplayFor(m => item.CustomerName)</strong></p>
+                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.CustomerAddress)</p>
+                                </td>
+                                <td>
+                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.ContainerRoute)</p>
+                                </td>
+                                <td>
+                                    @if (item.TransDate != null)
+                                    {
+                                        <p class="margin-bottom-5">@item.TransDate.Value.ToShortDateString()</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="margin-bottom-5">@Html.DisplayFor(m => item.TransDate)</p>
+                                    }
+                                </td>
+                                <td>
+                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.DriverInitials)</p>
+                                </td>
+                                <td>
+                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.WorkOrderId)</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            $('#Results').dataTable({
+                'order' : [[1, 'asc']]
+            });
+        });
+    </script>
+}

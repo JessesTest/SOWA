@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IServiceAddressService, ServiceAddressService>()
             .AddTransient<ITransactionCodeService, TransactionCodeService>()
             .AddTransient<ITransactionService, TransactionService>()
+            .AddTransient<IWorkOrderService, WorkOrderService>()
             .AddTransient<IWorkOrderLegacyService, WorkOrderLegacyService>();
 
         services
