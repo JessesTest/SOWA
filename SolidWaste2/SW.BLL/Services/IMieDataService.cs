@@ -6,6 +6,7 @@ namespace SW.BLL.Services
     {
         Task<ICollection<MieDataInfo>> Get(string miedataImageID, bool miedataActive);
         Task<MieData> GetById(int mieDataId);
+        Task Deactivate(int customerId, string username);
         Task Add(MieData mieData);
         Task Update(MieData mieData);
         Task Delete(int id);

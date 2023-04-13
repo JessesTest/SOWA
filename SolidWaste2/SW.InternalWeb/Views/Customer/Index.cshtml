@@ -328,6 +328,7 @@
                                     <p>Select a file to upload.</p>
                                     @using (Html.BeginForm("Edit", "MieData", FormMethod.Post, new { enctype = "multipart/form-data" }))
                                     {
+                                        <input asp-for="CustomerID" type="hidden" />
                                         <span class="btn btn-default btn-lg btn-block">
                                             <i class="fa fa-bars pull-right"></i>
                                             @*<input type="file" name="Image" />*@
@@ -340,7 +341,7 @@
                                             <i class="fa fa-cloud-upload text"></i>
                                             <span class="text">Save Upload</span>
                                         </button>
-                                        <button type="submit" class="btn btn-danger delete" value="Return" data-form-action="@Url.Action("Return", "MieData")">
+                                        <button type="submit" class="btn btn-danger delete" value="Return" data-form-action="@Url.Action("Return", "MieData", new{ customerId = Model.CustomerID })">
                                             <i class="icon-trash icon-white"></i>
                                             <span>Cancel</span>
                                         </button>
@@ -351,7 +352,7 @@
                                             @foreach(var image in Model.InactiveImages)
                                             {
                                                 <p class="text-right">
-                                                    @Html.ActionLink(image.MieDataImageFileName, "ImageDownload", "MieData", new { id = image.MieDataId, mieDataActive = false }, new { @class = "text-ul", @style = "line-height:15px;" })
+                                                    @Html.ActionLink(image.MieDataImageFileName, "ImageDownload", "MieData", new { id = image.MieDataId, mieDataActive = false, customerId = Model.CustomerID }, new { @class = "text-ul", @style = "line-height:15px;" })
                                                 </p>
                                             }
                                         }
