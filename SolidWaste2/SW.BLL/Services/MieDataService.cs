@@ -80,4 +80,23 @@ public class MieDataService : IMieDataService
         db.MieDatas.Update(mieData);
         await db.SaveChangesAsync();
     }
+
+    public async Task Deactivate(int customerId, string username)
+    {
+        var miedataActive = true;
+        var miedataImageID = customerId.ToString();
+
+        using var db = dbFactory.CreateDbContext();
+        var images = await db.MieDatas
+            .Where(i => i.MieDataImageId == miedataImageID && i.MieDataActive == miedataActive && !i.MieDataDelete)
+            .ToListAsync();
+
+        foreach(var image in images)
+        {
+            image.MieDataActive = false;
+            image.ChgDateTime = DateTime.Now;
+            image.ChgToi = username;
+        }
+        await db.SaveChangesAsync();
+    }
 }
