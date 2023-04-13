@@ -1,0 +1,105 @@
+﻿@model SW.InternalWeb.Models.WorkOrderLegacyInquiry.WorkOrderLegacyInquiryViewModel
+
+@{
+    ViewBag.Title = "Search Results";
+    ViewBag.ATitle = "Search Results Legacy Work Orders";
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="Results" class="table table-condensed table-bordered">
+                    <thead>
+                        <tr class="bg-dark">
+                            <th class="col-xs-1">
+                                Action
+                            </th>
+                            <th class="col-xs-1">
+                                Origin
+                            </th>
+                            <th class="col-xs-4">
+                                @Html.DisplayNameFor(m => m.BreakdownLocation)
+                            </th>
+                            <th class="col-xs-1">
+                                @Html.DisplayNameFor(m => m.Route)
+                            </th>
+                            <th class="col-xs-2">
+                                @Html.DisplayNameFor(m => m.TransDate)
+                            </th>
+                            <th class="col-xs-2">
+                                @Html.DisplayNameFor(m => m.Driver)
+                            </th>
+                            <th class="col-xs-1">
+                                @Html.DisplayNameFor(m => m.EquipmentNumber)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Results.Count(); i++)
+                        {
+                            var item = Model.Results.ElementAt(i);
+                            string rowBG;
+                            if (item.RecType == "B")
+                            {
+                                rowBG = "alert-success";
+                            }
+                            else
+                            {
+                                rowBG = "alert-info";
+                            }
+                            <tr class="@rowBG">
+                                <td class="v-middle text-center">
+                                    @if (item.RecType == "B")
+                                    {
+                                        <button type="button" class="btn btn-block btn-sm btn-primary" onclick="location.href='@Url.Action("Breakdown", "Legacy", new { id = item.WorkOrderLegacyId })'">View</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-block btn-sm btn-primary" onclick="location.href='@Url.Action("WorkOrder", "Legacy", new { id = item.WorkOrderLegacyId })'">View</button>
+                                    }
+                                </td>
+                                <td class="v-middle text-center">
+                                    @if (item.RecType == "B")
+                                    {
+                                        <p class="margin-bottom-5">BreakDown</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="margin-bottom-5">WorkOrder</p>
+                                    }
+                                </td>
+                                <td>
+                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.BreakdownLocation)</p>
+                                </td>
+                                <td>
+                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.Route)</p>
+                                </td>
+                                <td>
+                                    <p class="margin-bottom-5">@item.TransDate.ToShortDateString()</p>
+                                </td>
+                                <td>
+                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.Driver)</p>
+                                </td>
+                                <td>
+                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.EquipmentNumber)</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            $('#Results').dataTable({
+                'order' : [[2, 'asc']]
+            });
+        });
+    </script>
+}
