@@ -4,7 +4,7 @@ public class ServiceAddressNote
 {
     public int Id { get; set; }
     public int ServiceAddressId { get; set; }
-    public string? Note { get; set; }
+    public string Note { get; set; }
     public bool DeleteFlag { get; set; }
     public DateTime AddDateTime { get; set; }
     public string AddToi { get; set; }

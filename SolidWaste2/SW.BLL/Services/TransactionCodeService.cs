@@ -22,4 +22,12 @@ public class TransactionCodeService : ITransactionCodeService
             .OrderBy(c => c.Description)
             .ToListAsync();
     }
+
+    public async Task<TransactionCode> GetByCode(string code)
+    {
+        using var db = dbFactory.CreateDbContext();
+        return await db.TransactionCodes
+            .Where(c => c.Code == code && !c.DeleteFlag)
+            .SingleOrDefaultAsync();
+    }
 }
