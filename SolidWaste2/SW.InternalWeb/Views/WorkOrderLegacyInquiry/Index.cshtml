@@ -1,0 +1,98 @@
+﻿@model SW.InternalWeb.Models.WorkOrderLegacyInquiry.WorkOrderLegacyInquiryViewModel
+
+@{
+    ViewBag.Title = "Legacy Work Order Inquiry";
+    ViewBag.ATitle = "Legacy Work Order Inquiry";
+}
+
+@using (Html.BeginForm("Results", "WorkOrderLegacyInquiry", FormMethod.Get, new { role = "form" }))
+{
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row form-group">
+                <div class="col-xs-3">
+                    @Html.LabelFor(m => m.EquipmentNumber)
+                    @Html.TextBoxFor(m => m.EquipmentNumber, new { @class = "form-control" })
+                </div>
+                <div class="col-xs-3">
+                    @Html.LabelFor(m => m.Route)
+                    @Html.TextBoxFor(m => m.Route, new { @class = "form-control" })
+                </div>
+                <div class="col-xs-3">
+                    @Html.LabelFor(m => m.TransDate)
+                    @Html.TextBoxFor(m => m.TransDate, new { @class = "form-control" })
+                </div>
+                <div class="col-xs-3">
+                    @Html.LabelFor(m => m.Driver)
+                    @Html.TextBoxFor(m => m.Driver, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-6">
+                    @Html.LabelFor(m => m.BreakdownLocation)
+                    @Html.TextBoxFor(m => m.BreakdownLocation, new { @class = "form-control" })
+                </div>
+                <div class="col-xs-6">
+                    @Html.LabelFor(m => m.ProblemNumber)
+                    @Html.TextBoxFor(m => m.ProblemNumber, new { @class = "form-control" })
+                </div>
+            </div>
+            @*<div class="row form-group">
+                    <div class="col-xs-12">
+                        <div class="checkbox">
+                            <label>
+                                @Html.CheckBoxFor(m => m.Include)
+                                (Include closed Work Orders)
+                            </label>
+                        </div>
+                    </div>
+                </div>*@
+            <div class="row">
+                <div class="col-xs-12">
+                    (At least one field is required to search)
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2">
+                    <input type="submit" class="btn btn-primary btn-block" value="Search" />
+                </div>
+                <div class="col-xs-2">
+                    <input type="button" class="btn btn-info btn-block" id="Clear" value="Clear" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            // Single DateRangePicker for transdate field
+            $('#@Html.IdFor(m => m.TransDate)').daterangepicker({
+                locale: {
+                    format: 'MM/DD/YYYY'
+                },
+                singleDatePicker: true,
+                showDropdowns: true,
+                autoUpdateInput: false
+            },
+            function (start) {
+                $('#@Html.IdFor(m => m.TransDate)').val(start.format("MM/DD/YYYY"));
+            });
+
+            // InputMask for transdate field
+            $('#@Html.IdFor(m => m.TransDate)').inputmask('mask', { 'mask': '99/99/9999' });
+
+            // Clear button functionality
+            $('#Clear').on('click', function () {
+                $('[type="text"]').val('');
+            });
+        });
+    </script>
+}
