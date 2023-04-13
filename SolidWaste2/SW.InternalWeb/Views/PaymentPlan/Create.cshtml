@@ -1,0 +1,72 @@
+﻿@model SW.InternalWeb.Models.PaymentPlans.PaymentPlanViewModel
+@{
+    ViewBag.Title = "Create Payment Plan";
+    ViewBag.ATitle = "Create Payment Plan";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(m => m.FirstPaymentDate)
+    @Html.HiddenFor(m => m.MonthlyTotal)
+    @Html.HiddenFor(m => m.TotalDue)
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="row form-group">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.CustomerType)
+                    @Html.TextBoxFor(m => m.CustomerType, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.CustomerId)
+                    @Html.TextBoxFor(m => m.CustomerId, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-6">
+                    @Html.LabelFor(m => m.FullName)
+                    @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row form-group">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.TotalDue)
+                    @Html.TextBoxFor(m => m.TotalDue, "{0:c}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.MonthlyTotal)
+                    @Html.TextBoxFor(m => m.MonthlyTotal, "{0:c}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.FirstPaymentDate)
+                    @Html.TextBoxFor(m => m.FirstPaymentDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row form-group">
+                @for (int i = 2; i <= 6; i++)
+                {
+                    <div class="col-xs-2">
+                        <label>@i Months</label>
+                        <div style="text-align:right">
+                            <label>
+                                @string.Format("{0:c}", Model.MonthlyTotal)<br />
+                                @string.Format("+ {0:#,##0.00}", Model.TotalDue / i)
+                            </label>
+                        </div>
+
+                        <button type="submit" name="Months" value="@i" class="btn btn-block btn-primary">@string.Format("{0:c}", Model.TotalDue / i + Model.MonthlyTotal)</button>
+                    </div>
+                }
+                <div class="col-xs-2">
+                    <label>&nbsp;</label>
+                    <div>
+                        <label>&nbsp;<br />&nbsp; </label>
+                    </div>
+                    @Html.ActionLink("Cancel", "Index", "PaymentPlan", new { customerId = Model.CustomerId }, new { @class = "btn btn-block btn-info" })
+                </div>
+            </div>
+
+        </div>
+    </div>
+}

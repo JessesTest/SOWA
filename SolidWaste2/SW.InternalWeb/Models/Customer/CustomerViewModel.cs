@@ -72,6 +72,6 @@ public class CustomerViewModel
     public int? LegacyCustomerID { get; set; }
 
 
-    public ICollection<MieDataInfo> ActiveImages { get; set; }
-    public ICollection<MieDataInfo> InactiveImages { get; set; }
+    public ICollection<MieDataInfo> ActiveImages { get; set; } = new List<MieDataInfo>();
+    public ICollection<MieDataInfo> InactiveImages { get; set; } = new List<MieDataInfo>();
 }
