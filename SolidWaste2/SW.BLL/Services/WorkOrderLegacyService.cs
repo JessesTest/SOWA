@@ -45,7 +45,7 @@ public class WorkOrderLegacyService : IWorkOrderLegacyService
             query = query.Where(e => e.EquipmentNumber == equipmentNumber);
 
         if (!string.IsNullOrWhiteSpace(route))
-            query = query.Where(e => e.EquipmentNumber == equipmentNumber);
+            query = query.Where(e => e.Route == route);
 
         if (transDate.HasValue)
             query = query.Where(e => e.TransDate == transDate);
