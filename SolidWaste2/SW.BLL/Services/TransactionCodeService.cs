@@ -23,6 +23,16 @@ public class TransactionCodeService : ITransactionCodeService
             .ToListAsync();
     }
 
+    //SOWA-56
+    public async Task<List<TransactionCode>> GetTransactionCodes()
+    {
+        using var db = dbFactory.CreateDbContext();
+        return await db.TransactionCodes
+            .Where(c => !c.DeleteFlag)
+            .OrderBy(c => c.Code)
+            .ToListAsync(); 
+    }
+
     public async Task<TransactionCode> GetByCode(string code)
     {
         using var db = dbFactory.CreateDbContext();
