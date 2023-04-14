@@ -30,6 +30,14 @@ public class TransactionCodeService : ITransactionCodeService
         return await db.TransactionCodes
             .Where(c => !c.DeleteFlag)
             .OrderBy(c => c.Code)
-            .ToListAsync();
+            .ToListAsync(); 
+    }
+
+    public async Task<TransactionCode> GetByCode(string code)
+    {
+        using var db = dbFactory.CreateDbContext();
+        return await db.TransactionCodes
+            .Where(c => c.Code == code && !c.DeleteFlag)
+            .SingleOrDefaultAsync();
     }
 }

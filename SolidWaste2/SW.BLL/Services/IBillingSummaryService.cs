@@ -10,6 +10,8 @@ public interface IBillingSummaryService
     Task<decimal> GetTotalPaymentsForCustomerInDateRange(int customerId, DateTime startDate, DateTime endDate);
 
     Task<BillingSummary> GetBillingSummary(int customerId);
+
+    Task<BillingSummary> GetBillingSummaryForPaymentPlan(int customerId);
 }
 
 public class BillingSummary : List<BillingSummaryServiceAddress>

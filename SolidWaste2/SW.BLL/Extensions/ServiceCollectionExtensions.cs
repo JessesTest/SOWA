@@ -18,13 +18,16 @@ public static class ServiceCollectionExtensions
             .AddTransient<IContainerService, ContainerService>()
             .AddTransient<IContainerSubtypeService, ContainerSubtypeService>()
             .AddTransient<ICustomerService, CustomerService>()
+            .AddTransient<IEquipmentLegacyService, EquipmentLegacyService>()
             .AddTransient<IKanPayService, KanPayService>()
             .AddTransient<IMieDataService, MieDataService>()
             .AddTransient<IPaymentPlanService, PaymentPlanService>()
             .AddTransient<IRefuseRouteService, RefuseRouteService>()
             .AddTransient<IServiceAddressService, ServiceAddressService>()
             .AddTransient<ITransactionCodeService, TransactionCodeService>()
-            .AddTransient<ITransactionService, TransactionService>();
+            .AddTransient<ITransactionService, TransactionService>()
+            .AddTransient<IWorkOrderService, WorkOrderService>()
+            .AddTransient<IWorkOrderLegacyService, WorkOrderLegacyService>();
 
         services
             .Configure<KanPaySettings>(configuration.GetSection("KanPay"));

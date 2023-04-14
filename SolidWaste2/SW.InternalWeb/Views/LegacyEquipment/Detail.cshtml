@@ -1,0 +1,108 @@
+﻿@model SW.InternalWeb.Models.LegacyEquipment.LegacyEquipmentDetailViewModel
+@{
+    ViewBag.Title = "Legacy Equipment Detail";
+    ViewBag.ATitle = "Legacy Equipment Detail";
+}
+
+@using (Html.BeginForm("Search", "LegacyEquipment", FormMethod.Post, new { @role = "form" }))
+{
+    @Html.HiddenFor(model => model.EquipmentLegacyID)
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <fieldset class="form-group">
+                <legend>Equipment Details</legend>
+                <div class="row form-group">
+                    <div class="col-xs-2">
+                        @Html.LabelFor(m => m.EquipmentNumber)
+                        @Html.TextBoxFor(m => m.EquipmentNumber, new { @class = "form-control", @maxlength = "10" })
+                        @Html.ValidationMessageFor(m => m.EquipmentNumber, null, new { @class = "text-danger" })
+                    </div>
+                    <div class="col-xs-1">
+                        @Html.LabelFor(m => m.EquipmentYear)
+                        @Html.TextBoxFor(m => m.EquipmentYear, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.EquipmentMake)
+                        @Html.TextBoxFor(m => m.EquipmentMake, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.EquipmentModel)
+                        @Html.TextBoxFor(m => m.EquipmentModel, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.EquipmentVIN)
+                        @Html.TextBoxFor(m => m.EquipmentVIN, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-xs-2">
+                        @Html.LabelFor(m => m.PurchaseDate)
+                        @Html.TextBoxFor(m => m.PurchaseDate, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-2">
+                        @Html.LabelFor(m => m.Mileage)
+                        @Html.TextBoxFor(m => m.Mileage, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-2">
+                        @Html.LabelFor(m => m.PurchaseAmt)
+                        @Html.TextBoxFor(m => m.PurchaseAmt, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.MonthlyDepreciationAmt)
+                        @Html.TextBoxFor(m => m.MonthlyDepreciationAmt, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-xs-12">
+                        @Html.LabelFor(m => m.EquipmentDescription)
+                        @Html.TextBoxFor(m => m.EquipmentDescription, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="form-group">
+                <legend>Preventative Maintenance Information</legend>
+                <div class="row form-group">
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.DateOfLastPM)
+                        @Html.TextBoxFor(m => m.DateOfLastPM, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.MilesAtLastPM)
+                        @Html.TextBoxFor(m => m.MilesAtLastPM, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.StandbyEquipmentFlag)
+                        @Html.TextBoxFor(m => m.StandbyEquipmentFlag, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="form-group">
+                <legend>Record Details</legend>
+                <div class="row form-group">
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.AddDateTime)
+                        @Html.TextBoxFor(m => m.AddDateTime, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-2">
+                        @Html.LabelFor(m => m.AddToi)
+                        @Html.TextBoxFor(m => m.AddToi, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-3">
+                        @Html.LabelFor(m => m.ChgDateTime)
+                        @Html.TextBoxFor(m => m.ChgDateTime, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-xs-2">
+                        @Html.LabelFor(m => m.ChgToi)
+                        @Html.TextBoxFor(m => m.ChgToi, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+            </fieldset>
+            <div class="row">
+                <div class="col-xs-2">
+                    <button type="submit" value="Search" class="btn btn-primary btn-block" data-form-action="@Url.Action("Search", "LegacyEquipment")">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

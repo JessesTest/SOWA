@@ -2,6 +2,7 @@
 using PE.BL.Services;
 using SW.BLL.Extensions;
 using SW.DAL.Contexts;
+using System.Linq;
 
 namespace SW.BLL.Services;
 
@@ -10,7 +11,9 @@ public class BillingSummaryService : IBillingSummaryService
     private readonly IDbContextFactory<SwDbContext> dbFactory;
     private readonly IAddressService addressService;
 
-    public BillingSummaryService(IDbContextFactory<SwDbContext> dbFactory, IAddressService addressService)
+    public BillingSummaryService(
+        IDbContextFactory<SwDbContext> dbFactory,
+        IAddressService addressService)
     {
         this.dbFactory = dbFactory;
         this.addressService = addressService;
@@ -130,5 +133,73 @@ public class BillingSummaryService : IBillingSummaryService
             }
         }
         return bs;
+    }
+
+    public Task<BillingSummary> GetBillingSummaryForPaymentPlan(int customerId)
+    {
+        return GetBillingSummaryForPaymentPlan(customerId, DateTime.Now);
+    }
+    internal async Task<BillingSummary> GetBillingSummaryForPaymentPlan(int customerId, DateTime onDate)
+    {
+        using var db = dbFactory.CreateDbContext();
+
+        onDate = onDate.Date;
+        var customer = await db.GetCustomerById(customerId);
+        if (customer == null)
+        {
+            throw new ArgumentException("Customer not found", nameof(customerId));
+        }
+
+        //var pe = await personEntityService.GetById(customer.Pe)
+
+        var bs = new BillingSummary();
+        bs.SetContractCharge(customer.ContractCharge);
+
+        var addresses = await db.ServiceAddresses.Where(a =>
+            a.CustomerId == customer.CustomerId &&
+            a.CustomerType == customer.CustomerType &&
+            !a.DeleteFlag &&
+            a.EffectiveDate <= onDate &&
+            (!a.CancelDate.HasValue || a.CancelDate.Value >= onDate))
+            .ToListAsync();
+        foreach (var a in addresses)
+        {
+            var bsa = new BillingSummaryServiceAddress
+            {
+                ServiceAddress = a,
+                Address = await addressService.GetById(a.PeaddressId)
+            };
+            bs.Add(bsa);
+
+            //SCMB-243-New-Container-Rates-For-2022
+            var containers = await db.Containers
+                .Where(c => c.ServiceAddressId == a.Id && !c.DeleteFlag && c.EffectiveDate <= onDate && (!c.CancelDate.HasValue || c.CancelDate.Value >= onDate))
+                .Include(c => c.ContainerCode)
+                .ToListAsync();
+
+            foreach (var c in containers)
+            {
+                int? daysOfService = c.NumDaysService;
+                BillingSummaryContainer bsc = new()
+                {
+                    Container = c
+                };
+
+                bsc.Rate = await db.ContainerRates.Where(r =>
+                    r.BillingSize == c.BillingSize &&
+                    r.ContainerType == c.ContainerCodeId &&
+                    //r.EffectiveDate <= effective_date &&
+                    r.EffectiveDate <= DateTime.Now &&
+                    r.NumDaysService == daysOfService &&
+                    !r.DeleteFlag &&
+                    r.ContainerSubtypeId == c.ContainerSubtypeId)
+                    .OrderByDescending(r => r.EffectiveDate)
+                    .FirstOrDefaultAsync();
+                bsa.Add(bsc);
+            }
+        }
+
+        return bs;
+
     }
 }
