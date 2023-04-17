@@ -50,10 +50,23 @@ public static class Extensions
                 if (first)
                     first = false;
                 else
-                    sb.Append("<br/>");
+                    sb.Append("<br />");
                 sb.Append(System.Net.WebUtility.HtmlEncode(temp));
             }
         }
         return new HtmlString(sb.ToString());
+    }
+
+    public static string Ellipsis(this string self, int length)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < length && i < self.Length; i++)
+            sb.Append(self[i]);
+
+        if (sb.Length >= length)
+            sb.Append("...");
+
+        return sb.ToString();
     }
 }

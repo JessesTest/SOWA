@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IContainerRateService, ContainerRateService>()
             .AddTransient<IContainerService, ContainerService>()
             .AddTransient<IContainerSubtypeService, ContainerSubtypeService>()
+            .AddTransient<ICustomerInquiryService, CustomerInquiryService>()
             .AddTransient<ICustomerService, CustomerService>()
             .AddTransient<IEquipmentLegacyService, EquipmentLegacyService>()
             .AddTransient<IKanPayService, KanPayService>()

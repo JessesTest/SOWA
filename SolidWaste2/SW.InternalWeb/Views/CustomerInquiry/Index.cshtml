@@ -1,0 +1,21 @@
+﻿@model SW.InternalWeb.Models.CustomerInquiry.CustomerInquiryParametersViewModel
+@{
+    ViewBag.Title = "Index";
+    ViewBag.ATitle = "Customer Inquiry";
+}
+
+@if (Model.Results != null)
+{
+    @Html.Partial("Results", Model.Results)
+}
+@Html.Partial("Params")
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#results").DataTable({ "order": [[6, "desc"]] });
+        })
+    </script>
+}
