@@ -37,7 +37,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solid Waste", "Solid Waste"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW.BLL.KanPay", "SW.BLL.KanPay\SW.BLL.KanPay.csproj", "{1B0FA2A9-E3A8-4CC4-B977-2B6A96066ABA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SW.InternalWeb", "SW.InternalWeb\SW.InternalWeb.csproj", "{4A180CF6-FB33-43CC-B276-5BA6E8EF3BBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW.InternalWeb", "SW.InternalWeb\SW.InternalWeb.csproj", "{4A180CF6-FB33-43CC-B276-5BA6E8EF3BBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SW.Reporting", "SW.Reporting\SW.Reporting.csproj", "{B21643DC-3AC2-4C90-A575-C64FED430F4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,6 +103,10 @@ Global
 		{4A180CF6-FB33-43CC-B276-5BA6E8EF3BBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A180CF6-FB33-43CC-B276-5BA6E8EF3BBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A180CF6-FB33-43CC-B276-5BA6E8EF3BBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B21643DC-3AC2-4C90-A575-C64FED430F4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B21643DC-3AC2-4C90-A575-C64FED430F4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B21643DC-3AC2-4C90-A575-C64FED430F4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B21643DC-3AC2-4C90-A575-C64FED430F4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
