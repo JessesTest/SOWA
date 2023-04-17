@@ -1,0 +1,59 @@
+﻿@model IEnumerable<SW.BLL.Services.CustomerInquiryResult>
+@using SW.InternalWeb.Extensions
+<table id="results">
+    <thead>
+        <tr>
+            <th>Cust. <br /> ID</th>
+            <th></th>
+            <th>PIN</th>
+            <th style="width:20%">Customer Name</th>
+            <th>Billing Address</th>
+            <th>Service Addresses</th>
+            @*<th>Location Number</th>*@
+            <th>Effective Date</th>
+            <th>Cancel Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="inquiryresultsrecord">
+                <td>@Html.ActionLink(@item.Customer.CustomerId.ToString(), "Index", "Customer", new { CustomerID = item.Customer.CustomerId }, new { @class = "selectablecolumndata" })</td>
+                <td>@item.Customer.CustomerType</td>
+                <td>@item.PersonEntity.Code.Code1@item.PersonEntity.Account</td>
+                <td class="text-uppercase" style="white-space:nowrap">@Extensions.Ellipsis(item.PersonEntity.FullName.ToString(), 20)</td>
+                <td style="white-space:nowrap">
+                    @if (item.BillingAddress != null)
+                    {
+                        @Html.ActionLink(Extensions.Ellipsis(item.BillingAddress.FormatAddress(), 20), "Index", "CustomerBillingAddress", new { customerID = item.Customer.CustomerId }, new { @class = "selectablecolumndata" })
+                    }
+                </td>
+                <td style="white-space:nowrap">
+                    @if (item.ServiceAddresses.Count == 1)
+                    {
+                        foreach (var a in item.ServiceAddresses)
+                        {
+                            @Html.ActionLink(Extensions.Ellipsis(a.PEAddress.FormatAddress(), 20), "Index", "CustomerServiceAddress", new { customerID = item.Customer.CustomerId }, new { @class = "selectablecolumndata" })
+                        }
+                    }
+                    else if (item.ServiceAddresses.Count == 0)
+                    {
+                        <div>
+                            No Service Address
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <b>
+                                @string.Format(item.ServiceAddresses.Count + " Service addresses")
+                            </b>
+                        </div>
+                    }
+                </td>
+                <td>@string.Format("{0:d}", item.Customer.EffectiveDate)</td>
+                <td>@(item.Customer.CancelDate.HasValue ? string.Format("{0:d}", item.Customer.CancelDate.Value) : "n/a")</td>
+            </tr>
+        }
+    </tbody>
+</table>

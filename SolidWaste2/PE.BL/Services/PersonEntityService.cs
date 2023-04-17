@@ -134,12 +134,11 @@ public class PersonEntityService : IPersonEntityService
         if (address.PersonEntityID != personEntityId)
             throw new ArgumentException("Address PersonEntityID mismatch", nameof(addressId));
 
-        var person = await db.People
-            .Where(e => e.Id == personEntityId && !e.Delete)
-            .SingleOrDefaultAsync();
 
-        if (person == null)
-            throw new ArgumentException("Invalid person", nameof(personEntityId));
+        _ = await db.People
+            .Where(e => e.Id == personEntityId && !e.Delete)
+            .SingleOrDefaultAsync()
+            ?? throw new ArgumentException("Invalid person", nameof(personEntityId));
 
         var oldDefaults = await db.Addresses
             .Where(e => e.PersonEntityID == personEntityId && e.IsDefault)
@@ -166,12 +165,10 @@ public class PersonEntityService : IPersonEntityService
         if(email.PersonEntityID != personEntityId)
             throw new ArgumentException("Email PersonEntityID mismatch", nameof(emailId));
 
-        var person = await db.People
+        _ = await db.People
             .Where(e => e.Id == personEntityId && !e.Delete)
-            .SingleOrDefaultAsync();
-
-        if (person == null)
-            throw new ArgumentException("Invalid person", nameof(personEntityId));
+            .SingleOrDefaultAsync()
+            ?? throw new ArgumentException("Invalid person", nameof(personEntityId));
 
         var oldDefaults = await db.Emails
             .Where(e => e.PersonEntityID == personEntityId && e.IsDefault)
@@ -198,12 +195,10 @@ public class PersonEntityService : IPersonEntityService
         if (phone.PersonEntityID != personEntityId)
             throw new ArgumentException("Phone PersonEntityID mismatch", nameof(phoneId));
 
-        var person = await db.People
+        _ = await db.People
             .Where(e => e.Id == personEntityId && !e.Delete)
-            .SingleOrDefaultAsync();
-
-        if (person == null)
-            throw new ArgumentException("Invalid person", nameof(personEntityId));
+            .SingleOrDefaultAsync()
+            ?? throw new ArgumentException("Invalid person", nameof(personEntityId));
 
         var oldDefaults = await db.Phones
             .Where(e => e.PersonEntityID == personEntityId && e.IsDefault)
@@ -329,4 +324,136 @@ public class PersonEntityService : IPersonEntityService
     }
 
     #endregion
+
+    #region Search
+
+    public async Task<ICollection<PersonEntity>> Search(
+        string fullName,
+        string firstName,
+        string middleName,
+        string lastName,
+        string billingAddress,
+        string serviceAddress,
+        string departmentCodeCode,
+        string pin = null,
+        IEnumerable<int> personEntityIds = null)
+    {
+        using var db = contextFactory.CreateDbContext();
+        IQueryable<PersonEntity> query = db.People
+            .Where(p => !p.Delete);
+
+        if (!string.IsNullOrWhiteSpace(fullName))
+            query = query.Where(p => p.FullName.Contains(fullName));
+
+        if (!string.IsNullOrWhiteSpace(firstName))
+            query = query.Where(p => p.FirstName.Contains(firstName));
+
+        if (!string.IsNullOrWhiteSpace(middleName))
+            query = query.Where(p => p.MiddleName.Contains(middleName));
+
+        if (!string.IsNullOrWhiteSpace(lastName))
+            query = query.Where(p => p.LastName.Contains(lastName));
+
+        if (!string.IsNullOrWhiteSpace(departmentCodeCode))
+            query = query.Where(p => p.Code.Code1 == departmentCodeCode && p.Code.Type == "Department" && !p.Code.Delete);
+
+        if (!string.IsNullOrWhiteSpace(pin))
+            query = query.Where(p => p.Account.Contains(pin));
+
+        if (personEntityIds != null)
+            query = query.Where(p => personEntityIds.Contains(p.Id));
+
+        var temp = await query
+            .Include(p => p.Addresses.Where(a => new[] { "B", "S" }.Contains(a.Code.Code1) && !a.Delete))   // Billing, Service
+            .ThenInclude(a => a.Code)
+            .Include(p => p.Code)
+            .Include(p => p.Emails)
+            .Include(p => p.Phones)
+            .AsSplitQuery()
+            .ToListAsync();
+
+        // addresses
+        List<PersonEntity> value = new();
+        var bypassBilling = string.IsNullOrWhiteSpace(billingAddress);
+        var bypassService = string.IsNullOrWhiteSpace(serviceAddress);
+        foreach (var pe in temp)
+        {
+            if (
+                (bypassBilling || FilterAddress(billingAddress, GetAddressesByCode("B", pe.Addresses))) &&
+                (bypassService || FilterAddress(serviceAddress, GetAddressesByCode("S", pe.Addresses)))
+            )
+            {
+                value.Add(pe);
+            }
+        }
+        return value;
+    }
+
+    private static Address[] GetAddressesByCode(string code, IEnumerable<Address> addresses)
+    {
+        return addresses == null
+            ? Array.Empty<Address>()
+            : addresses.Where(a => a.Code.Code1 == code).ToArray();
+    }
+
+    private static bool FilterAddress(string search, IEnumerable<Address> addresses)
+    {
+        if (string.IsNullOrWhiteSpace(search) || !addresses.Any())
+            return false;
+
+        var parts = SplitAddress(search);
+        foreach(var a in addresses)
+        {
+            var allPartsMatch = true;
+
+            foreach(var part in parts)
+            {
+                if (!(
+                    MatchesPart(a.StreetName, part) ||
+                    MatchesPart(a.Direction, part) ||
+                    MatchesPart(a.Suffix, part) ||
+                    MatchesPart(a.Apt, part) ||
+                    MatchesPart(a.Number?.ToString(), part)
+                    ))
+                {
+                    allPartsMatch = false;
+                    break;
+                }
+            }
+
+            if (allPartsMatch)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool MatchesPart(string addressComponent, string searchPart)
+    {
+        return !string.IsNullOrWhiteSpace(addressComponent)
+            && addressComponent.Contains(searchPart);
+    }
+
+    private static string[] SplitAddress(string address)
+    {
+        if (string.IsNullOrWhiteSpace(address))
+            return Array.Empty<string>();
+
+        var chars = address.ToCharArray();
+        for(int i = 0; i < chars.Length; i++)
+        {
+            if (char.IsLetterOrDigit(chars[i]))
+                continue;
+
+            chars[i] = ' ';
+        }
+        var str = new string(chars);
+        return str
+            .Split()
+            .Where(s => s.Length > 0)
+            .ToArray();
+    }
+
+    #endregion
+
 }
