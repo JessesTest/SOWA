@@ -60,7 +60,7 @@ public class CustomerController : Controller
         var activeImages = await activeImagesTask;
         var inactiveImages = (await inactiveImagesTask).OrderByDescending(MieData => MieData.ChgDateTime).ToList();
 
-        var customerType = Helpers.GenerateCustomerCodeSelectList().First(t => t.Value == customer.CustomerType).Text;
+        var customerType = Helpers.CustomerCodes.First(t => t.Value == customer.CustomerType).Text;
 
         CustomerViewModel vm = new()
         {
