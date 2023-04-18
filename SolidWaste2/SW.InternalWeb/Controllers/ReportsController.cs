@@ -10,6 +10,7 @@ using PE.DM;
 using System.Collections.Generic;
 using System.Linq;
 using Telerik.Reporting.OpenXmlRendering;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace SW.InternalWeb.Controllers
 {
@@ -99,16 +100,128 @@ namespace SW.InternalWeb.Controllers
 
                 if (!vm.TransActionCode.SpreadSheet) 
                 { 
-                    var receipt = await _reportingService.GenerateReportPDF("Transactions", parameters);
+                    var report = await _reportingService.GenerateReportPDF("Transactions", parameters);
 
-                    return File(receipt, "application/pdf", "transactions_" + DateTime.Now + ".pdf");
+                    return File(report, "application/pdf", "transactions_" + DateTime.Now + ".pdf");
                 }
                 else 
                 {
-                    var receipt = await _reportingService.GenerateReportXLS("Transactions", parameters);
+                    var report = await _reportingService.GenerateReportXLS("Transactions", parameters);
 
-                    return File(receipt, "application/xlsx", "transactions_" + DateTime.Now + ".xlsx");
+                    return File(report, "application/xlsx", "transactions_" + DateTime.Now + ".xlsx");
                 }
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delinquency(bool exportToXls)
+        {
+            //The Telerik Report Delinquency uses a stored procedure sp_DelinquencyPlus that needs to be created within the SolidWaste db for all
+            //environments
+
+            try 
+            {
+                if (exportToXls)
+                {
+                    var report = await _reportingService.GenerateReportXLS("Delinquency");
+
+                    return File(report, "application/xlsx", "delinquency_" + DateTime.Now + ".xlsx");
+                }
+                else
+                {
+                    var report = await _reportingService.GenerateReportPDF("Delinquency");
+
+                    return File(report, "application/pdf", "delinquency_" + DateTime.Now + ".pdf");
+                }
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }            
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Balances(bool exportToXls)
+        {
+            //The Telerik Report DelinquencyPlus uses a stored procedure sp_DelinquencyPlus that needs to be created within the SolidWaste db for all
+            //environments
+
+            try
+            {
+                if (exportToXls)
+                {
+                    var report = await _reportingService.GenerateReportXLS("DelinquencyPlus");
+
+                    return File(report, "application/xlsx", "balances_" + DateTime.Now + ".xlsx");
+                }
+                else
+                {
+                    var report = await _reportingService.GenerateReportPDF("DelinquencyPlus");
+
+                    return File(report, "application/pdf", "aging_" + DateTime.Now + ".pdf");
+                }
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        public async Task<IActionResult> WriteOffRecommendation()
+        {
+            //The Telerik Report WriteOffRecommendations uses a stored procedure sp_WriteOffRecommendations that needs to be created within the SolidWaste db for all
+            //environments
+
+            try
+            {
+                var report = await _reportingService.GenerateReportPDF("WriteOffRecommendations");
+
+                return File(report, "application/pdf", "write_off_recommendations_" + DateTime.Now + ".pdf");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        public async Task<IActionResult> RecyclingOnlyDelinquency()
+        {
+            //The Telerik Report RecyclingOnlyDelinquency uses a stored procedure sp_RecyclingOnlyDelinquency that needs to be created within the SolidWaste db for all
+            //environments
+
+            try
+            {
+                var report = await _reportingService.GenerateReportPDF("RecyclingOnlyDelinquency");
+
+                return File(report, "application/pdf", "recycling_only_delinquency_" + DateTime.Now + ".pdf");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        public async Task<IActionResult> Revenue(string revenueYear)
+        {
+            try
+            {
+                if (revenueYear == null)
+                {
+                    revenueYear = DateTime.Now.Year.ToString();
+                }
+
+                var parameters = new Dictionary<string, object>
+                {
+                    {"SelectedYear", revenueYear}
+                };
+
+                var report = await _reportingService.GenerateReportPDF("Revenue", parameters);
+
+                return File(report, "application/pdf", "revenue_" + revenueYear + "_" + DateTime.Now + ".pdf");
             }
             catch (Exception ex)
             {
@@ -128,9 +241,9 @@ namespace SW.InternalWeb.Controllers
                     {"customer_id", vm.BatchBilling.CustomerId}
                     //{"customer_id", null}
                 };
-                var receipt = await _reportingService.GenerateReportPDF("SW_Bill", parameters);
+                var report = await _reportingService.GenerateReportPDF("SW_Bill", parameters);
 
-                return File(receipt, "application/pdf", "sw_bills_" + DateTime.Now + ".pdf");
+                return File(report, "application/pdf", "sw_bills_" + DateTime.Now + ".pdf");
             }
             catch (Exception ex)
             {

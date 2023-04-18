@@ -244,20 +244,23 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xs-12">
-                            <div class="row form-group">
-                                <div class="col-xs-4">
-                                    Revenue Report
-                                </div>
-                                <div class="col-xs-6">
-                                    <label for="revenueYear">Year (yyyy): </label>
-                                    <input type="text" name="revenueYear" />
-                                </div>
-                                <div class="col-xs-2" style="padding-top: 7px;">
-                                    @Html.ActionLink("Submit", "Revenue", "Reports", null, new { @class = "btn btn-sm btn-default" })
+                        @using (Html.BeginForm("Revenue", "Reports", FormMethod.Post))
+                        {
+                            <div class="col-xs-12">
+                                <div class="row form-group">
+                                    <div class="col-xs-4">
+                                        Revenue Report
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <label for="revenueYear">Year (yyyy): </label>
+                                        <input type="text" name="revenueYear" />
+                                    </div>
+                                    <div class="col-xs-2" style="padding-top: 7px;">
+                                        <button type="submit" class="btn btn-sm btn-default">Submit</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </section>
             </div>
