@@ -61,6 +61,9 @@ public class PersonEntityService : IPersonEntityService
 
     public async Task<PersonEntity> GetById(int id)
     {
+        if (id <= 0)
+            return null;
+
         using var db = contextFactory.CreateDbContext();
         return await db.People
             .Where(e => e.Id == id)
