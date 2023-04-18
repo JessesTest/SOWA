@@ -21,9 +21,9 @@
                             </div>
                             <div class="col-xs-3">
                                 @Html.LabelFor(m => m.CustomerType, new { @class = "font-bold" })
-                                <select class="form-control" asp-for="CustomerType" asp-items="Helpers.GenerateCustomerCodeSelectList()"></select>
+                                <select class="form-control" asp-for="CustomerType" asp-items="Helpers.CustomerCodes"></select>
                                 @*@Html.SncoDropDownListFor(m => m.CustomerType, Helpers.GenerateCustomerCodeSelectList(), new { @class = "form-control" })*@
-                                @{ string customerTypeValue = string.IsNullOrWhiteSpace(Model.CustomerType) ? Helpers.GenerateCustomerCodeSelectList().FirstOrDefault().Value : Model.CustomerType; }
+                                @{ string customerTypeValue = string.IsNullOrWhiteSpace(Model.CustomerType) ? Helpers.CustomerCodes.FirstOrDefault().Value : Model.CustomerType; }
                                 <input type="hidden" name="@Html.NameFor(m => m.CustomerType)" id="@Html.IdFor(m => m.CustomerType)" value="@customerTypeValue" />
                             </div>
                             <div class="col-xs-6">
