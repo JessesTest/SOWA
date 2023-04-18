@@ -1,0 +1,752 @@
+﻿@model SW.InternalWeb.Models.WorkOrder.WorkOrderViewModel
+@*@using System.Configuration;*@
+@using SW.InternalWeb.Extensions;
+@{
+    ViewBag.Title = "Work Order";
+    ViewBag.ATitle = "Solid Waste Work Order";
+}
+
+@using (Html.BeginForm("Update", "WorkOrder", FormMethod.Post, new { role = "form" }))
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <fieldset class="form-group">
+                        <legend>Customer Information</legend>
+                        <div class="row form-group">
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.CustomerId, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.CustomerId, new { @class = "form-control" })
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.CustomerType, new { @class = "font-bold" })
+                                <select class="form-control" asp-for="CustomerType" asp-items="Helpers.GenerateCustomerCodeSelectList()"></select>
+                                @*@Html.SncoDropDownListFor(m => m.CustomerType, Helpers.GenerateCustomerCodeSelectList(), new { @class = "form-control" })*@
+                                @{ string customerTypeValue = string.IsNullOrWhiteSpace(Model.CustomerType) ? Helpers.GenerateCustomerCodeSelectList().FirstOrDefault().Value : Model.CustomerType; }
+                                <input type="hidden" name="@Html.NameFor(m => m.CustomerType)" id="@Html.IdFor(m => m.CustomerType)" value="@customerTypeValue" />
+                            </div>
+                            <div class="col-xs-6">
+                                @Html.LabelFor(m => m.CustomerName, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.CustomerName, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-6">
+                                @Html.LabelFor(m => m.ServiceAddressId, new { @class = "font-bold" })
+                                @if (Model.ServiceAddressId.HasValue)
+                                {
+                                    @Html.TextBoxFor(m => m.CustomerAddress, new { @class = "form-control hidden" })
+                                    <select class="form-control" asp-for="ServiceAddressId" disabled></select>
+                                    @*@Html.SncoDropDownListFor(m => m.ServiceAddressId, new List<SelectListItem>(), new { @class = "form-control", @disabled = "disabled" })*@
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(m => m.CustomerAddress, new { @class = "form-control" })
+                                    <select class="form-control hidden" asp-for="ServiceAddressId" disabled></select>
+                                    @*@Html.SncoDropDownListFor(m => m.ServiceAddressId, new List<SelectListItem>(), new { @class = "form-control hidden", @disabled = "disabled" })*@
+                                }
+                                @Html.HiddenFor(m => m.ServiceAddressId)
+                            </div>
+                            <div class="col-xs-6">
+                                @Html.LabelFor(m => m.ContainerId, new { @class = "font-bold" })
+                                <select class="form-control" asp-for="ContainerId" disabled></select>
+                                @*@Html.SncoDropDownListFor(m => m.ContainerId, new List<SelectListItem>(), new { @class = "form-control", @disabled = "disabled" })*@
+                                @Html.HiddenFor(m => m.ContainerId)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 text-danger">
+                                @Html.ValidationMessageFor(m => m.CustomerType)
+                                @Html.ValidationMessageFor(m => m.CustomerId)
+                                @Html.ValidationMessageFor(m => m.ServiceAddressId)
+                                @Html.ValidationMessageFor(m => m.CustomerName)
+                                @Html.ValidationMessageFor(m => m.CustomerAddress)
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <legend>Work Order Details</legend>
+                        <div class="row form-group">
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.WorkOrderId, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.WorkOrderId, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.DriverInitials, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.DriverInitials, new { @class = "form-control" })
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.ResolveDate, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.ResolveDate, new { @class = "form-control" })
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.TransDate, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.TransDate, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.ContainerRoute, new { @class = "font-bold float-left" })
+                                <div class="float-right">
+                                    <label class="font-bold float-right text-success " for="@Html.NameFor(m => m.RecyclingFlag)">
+                                        Recycling? &nbsp;
+                                        @Html.CheckBoxFor(m => m.RecyclingFlag, new { @class = "float-right" })
+                                    </label>
+                                </div>
+                                <select class="form-control" asp-for="ContainerRoute"></select>
+                                @*@Html.SncoDropDownListFor(m => m.ContainerRoute, new List<SelectListItem>(), new { @class = "form-control" })*@
+                                @Html.HiddenFor(m => m.ContainerRoute)
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.ContainerCode, new { @class = "font-bold" })
+                                <select class="form-control" asp-for="ContainerCode"></select>
+                                @*@Html.SncoDropDownListFor(m => m.ContainerCode, new List<SelectListItem>(), new { @class = "form-control" })*@
+                                @Html.HiddenFor(m => m.ContainerCode)
+                            </div>
+                            <div class="col-xs-3">
+                                <div class="row-13">
+                                    <div class="col-xs-12 gutter-5 text-center font-bold">
+                                        Pickup Days *
+                                    </div>
+                                    <div class="col-xs-2 gutter-5 text-center">
+                                        @Html.LabelFor(m => m.ContainerPickupMon, new { @class = "font-bold margin-bottom-0 block" })
+                                        @Html.CheckBoxFor(m => m.ContainerPickupMon, new { @class = "" })
+                                    </div>
+                                    <div class="col-xs-2 gutter-5 text-center">
+                                        @Html.LabelFor(m => m.ContainerPickupTue, new { @class = "font-bold margin-bottom-0 block" })
+                                        @Html.CheckBoxFor(m => m.ContainerPickupTue, new { @class = "" })
+                                    </div>
+                                    <div class="col-xs-2 gutter-5 text-center">
+                                        @Html.LabelFor(m => m.ContainerPickupWed, new { @class = "font-bold margin-bottom-0 block" })
+                                        @Html.CheckBoxFor(m => m.ContainerPickupWed, new { @class = "" })
+                                    </div>
+                                    <div class="col-xs-2 gutter-5 text-center">
+                                        @Html.LabelFor(m => m.ContainerPickupThu, new { @class = "font-bold margin-bottom-0 block" })
+                                        @Html.CheckBoxFor(m => m.ContainerPickupThu, new { @class = "" })
+                                    </div>
+                                    <div class="col-xs-2 gutter-5 text-center">
+                                        @Html.LabelFor(m => m.ContainerPickupFri, new { @class = "font-bold margin-bottom-0 block" })
+                                        @Html.CheckBoxFor(m => m.ContainerPickupFri, new { @class = "" })
+                                    </div>
+                                    <div class="col-xs-2 gutter-5 text-center">
+                                        @Html.LabelFor(m => m.ContainerPickupSat, new { @class = "font-bold margin-bottom-0 block" })
+                                        @Html.CheckBoxFor(m => m.ContainerPickupSat, new { @class = "" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.ContainerSize, new { @class = "font-bold" })
+                                <select class="form-control" asp-for="ContainerSize"></select>
+                                @*@Html.SncoDropDownListFor(m => m.ContainerSize, new List<SelectListItem>(), new { @class = "form-control" })*@
+                                @Html.HiddenFor(m => m.ContainerSize)
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12">
+                                @Html.LabelFor(m => m.RepairsNeeded, new { @class = "font-bold" })
+                                @Html.TextAreaFor(m => m.RepairsNeeded, new { @class = "form-control", rows = 4 })
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12">
+                                @Html.LabelFor(m => m.ResolutionNotes, new { @class = "font-bold" })
+                                @Html.TextAreaFor(m => m.ResolutionNotes, new { @class = "form-control", rows = 4 })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 text-danger">
+                                @Html.ValidationMessageFor(m => m.WorkOrderId)
+                                @Html.ValidationMessageFor(m => m.ResolveDate)
+                                @Html.ValidationMessageFor(m => m.DriverInitials)
+                                @Html.ValidationMessageFor(m => m.TransDate)
+                                @Html.ValidationMessageFor(m => m.ContainerRoute)
+                                @Html.ValidationMessageFor(m => m.ContainerPickupMon)
+                                @Html.ValidationMessageFor(m => m.ContainerPickupTue)
+                                @Html.ValidationMessageFor(m => m.ContainerPickupWed)
+                                @Html.ValidationMessageFor(m => m.ContainerPickupThu)
+                                @Html.ValidationMessageFor(m => m.ContainerPickupFri)
+                                @Html.ValidationMessageFor(m => m.ContainerPickupSat)
+                                @Html.ValidationMessageFor(m => m.ContainerCode)
+                                @Html.ValidationMessageFor(m => m.ContainerSize)
+                                @Html.ValidationMessageFor(m => m.RepairsNeeded)
+                                @Html.ValidationMessageFor(m => m.ResolutionNotes)
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <legend>Record Details</legend>
+                        <div class="row">
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.AddDateTime, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.AddDateTime, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.AddToi, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.AddToi, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.ChgDateTime, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.ChgDateTime, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-xs-3">
+                                @Html.LabelFor(m => m.ChgToi, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.ChgToi, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br />
+    <br />
+    <br />
+    <br />
+
+    <div class="container container-left footer2">
+        <div class="col-xs-3 font-bold">
+            <div style="margin-top: 7px;"> * Denotes required field</div>
+        </div>
+        <div class="col-xs-2">
+            @if (Model.WorkOrderId.HasValue)
+            {
+                <button type="submit" class="btn btn-block btn-primary" id="UpdateButton" data-form-action="@Url.Action("Update", "WorkOrder")">Update</button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-block btn-primary" id="AddButton" data-form-action="@Url.Action("Add", "WorkOrder")">Add New</button>
+            }
+        </div>
+        <div class="col-xs-2">
+            @if (Model.WorkOrderId.HasValue)
+            {
+                <button type="button" class="btn btn-block btn-success" id="PrintButton" onclick="location.href='@Url.Action("Workorderbyworkorderid", "Reports" , new { workorderid = Model.WorkOrderId })'">Print</button>
+            }
+        </div>
+        <div class="col-xs-2">
+            @if (Model.WorkOrderId.HasValue)
+            {
+                <button type="button" class="btn btn-block btn-danger" id="DeleteButton" onclick="location.href='@Url.Action("Delete", "WorkOrder" , new { workorderid = Model.WorkOrderId })'">Delete</button>
+            }
+        </div>
+    </div>
+
+}
+
+@section scripts
+{
+    @*@{ string envUrl = ConfigurationManager.AppSettings["EnvironmentHttps"].ToString(); }
+    @Scripts.Render("~/bundles/jqueryval")*@
+    <script type="text/javascript">
+        function clearAfterCustomerId() {
+            $('input#@Html.IdFor(m => m.CustomerType)').val('C');
+            $('select#@Html.IdFor(m => m.CustomerType)').val('C');
+            $('select#@Html.IdFor(m => m.CustomerType)').prop('disabled', false);
+
+            $('input#@Html.IdFor(m => m.CustomerName)').val('');
+            $('input#@Html.IdFor(m => m.CustomerName)').prop('readonly', false);
+
+            $('input#@Html.IdFor(m => m.CustomerAddress)').val('');
+            $('input#@Html.IdFor(m => m.CustomerAddress)').prop('readonly', false);
+
+            $('input#@Html.IdFor(m => m.ServiceAddressId)').val('');
+            $('select#@Html.IdFor(m => m.ServiceAddressId)').empty();
+            $('select#@Html.IdFor(m => m.ServiceAddressId)').prop('disabled', true);
+            $('select#@Html.IdFor(m => m.ContainerId)').prop('disabled', true);
+
+            clearAfterServiceAddressId();
+        }
+        function clearAfterServiceAddressId() {
+            $('input#@Html.IdFor(m => m.ContainerId)').val('');
+            $('select#@Html.IdFor(m => m.ContainerId)').empty();
+
+            clearAfterContainerId();
+        }
+        function clearAfterContainerId() {
+            $('input#@Html.IdFor(m => m.ContainerRoute)').val('');
+            $('select#@Html.IdFor(m => m.ContainerRoute)').val('');
+
+            $('input#@Html.IdFor(m => m.ContainerCode)').val('');
+            $('select#@Html.IdFor(m => m.ContainerCode)').val('');
+            $('select#@Html.IdFor(m => m.ContainerCode)').prop('disabled', false);
+
+            $('input#@Html.IdFor(m => m.ContainerPickupMon)').prop('checked', false).prop('disabled', false).next().val(false);
+            $('input#@Html.IdFor(m => m.ContainerPickupTue)').prop('checked', false).prop('disabled', false).next().val(false);
+            $('input#@Html.IdFor(m => m.ContainerPickupWed)').prop('checked', false).prop('disabled', false).next().val(false);
+            $('input#@Html.IdFor(m => m.ContainerPickupThu)').prop('checked', false).prop('disabled', false).next().val(false);
+            $('input#@Html.IdFor(m => m.ContainerPickupFri)').prop('checked', false).prop('disabled', false).next().val(false);
+            $('input#@Html.IdFor(m => m.ContainerPickupSat)').prop('checked', false).prop('disabled', false).next().val(false);
+
+            clearAfterContainerCode();
+        }
+        function clearAfterContainerCode() {
+            $('input#@Html.IdFor(m => m.ContainerSize)').val('');
+            $('select#@Html.IdFor(m => m.ContainerSize)').empty();
+            $('select#@Html.IdFor(m => m.ContainerSize)').prop('disabled', false);
+        }
+        function customerIdLoad() {
+            $('select#@Html.IdFor(m => m.CustomerType)').val($('input#@Html.IdFor(m => m.CustomerType)').val());
+            $('select#@Html.IdFor(m => m.CustomerType)').prop('disabled', true);
+            $('input#@Html.IdFor(m => m.CustomerName)').prop('readonly', true);
+            $('input#@Html.IdFor(m => m.CustomerAddress)').prop('readonly', true);
+        }
+        function customerTypeLoad() {
+
+        }
+        function serviceAddressIdLoadSuccess(data) {
+            if (data.message != null) {
+                //alert(data.message);
+                return;
+            }
+
+            // Populate ServiceAddressId dropdown
+            var list = $('select#@Html.IdFor(m => m.ServiceAddressId)');
+            list.empty();
+            list.append('<option value="">SELECT A SERVICE ADDRESS</option>');
+            $(data.serviceAddressSelectList).each(function (index, item) {
+                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+            });
+
+            $('select#@Html.IdFor(m => m.ServiceAddressId)').val($('input#@Html.IdFor(m => m.ServiceAddressId)').val());
+        }
+        function serviceAddressIdLoad() {
+            $('select#@Html.IdFor(m => m.ServiceAddressId)').prop('disabled', false);
+            $('select#@Html.IdFor(m => m.ContainerId)').prop('disabled', false);
+
+            var data = {
+                CustomerId: $('input#@Html.IdFor(m => m.CustomerId)').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                @*url: '@(envUrl + "api/WorkOrderAPI/ServiceAddressIdLoad")',*@
+                url: getPath('~/api/WorkOrderAPI/ServiceAddressIdLoad'),
+                data: JSON.stringify(data),
+                cache: false,
+                success: serviceAddressIdLoadSuccess,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function containerIdLoadSuccess(data) {
+            if (data.message != null) {
+                //alert(data.message);
+                return;
+            }
+
+            // Populate Container dropdown
+            var list = $('select#@Html.IdFor(m => m.ContainerId)');
+            list.empty();
+            list.append('<option value="">SELECT A CONTAINER</option>');
+            $(data.containerSelectList).each(function (index, item) {
+                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+            });
+
+            $('select#@Html.IdFor(m => m.ContainerId)').val($('input#@Html.IdFor(m => m.ContainerId)').val());
+            $('select#@Html.IdFor(m => m.ContainerCode)').prop('disabled', true);
+            $('input#@Html.IdFor(m => m.ContainerPickupMon)').prop('disabled', true);
+            $('input#@Html.IdFor(m => m.ContainerPickupTue)').prop('disabled', true);
+            $('input#@Html.IdFor(m => m.ContainerPickupWed)').prop('disabled', true);
+            $('input#@Html.IdFor(m => m.ContainerPickupThu)').prop('disabled', true);
+            $('input#@Html.IdFor(m => m.ContainerPickupFri)').prop('disabled', true);
+            $('input#@Html.IdFor(m => m.ContainerPickupSat)').prop('disabled', true);
+            $('select#@Html.IdFor(m => m.ContainerSize)').prop('disabled', true);
+        }
+        function containerIdLoad() {
+            $('select#@Html.IdFor(m => m.ContainerId)').prop('disabled', false);
+
+            var data = {
+                ServiceAddressId: $('input#@Html.IdFor(m => m.ServiceAddressId)').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerIdLoad")',*@
+                url: getPath('~/api/WorkOrderAPI/ContainerIdLoad'),
+                data: JSON.stringify(data),
+                cache: false,
+                success: containerIdLoadSuccess,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function containerSizeLoadSuccess(data) {
+            if (data.message != null) {
+                //alert(data.message);
+                clearAfterContainerCode();
+                return;
+            }
+
+            // Populate ContainerSize dropdown
+            var list = $('select#@Html.IdFor(m => m.ContainerSize)');
+            list.empty();
+            list.append('<option value=""></option>');
+            $(data.containerSizeSelectList).each(function (index, item) {
+                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+            });
+
+            // Set ContainerSize dropdown option from hidden ContainerSize value
+            $('select#@Html.IdFor(m => m.ContainerSize)').val($('input#@Html.IdFor(m => m.ContainerSize)').val());
+        }
+        function containerSizeLoad() {
+            var dayCount = 0;
+
+            if ($('input#@Html.IdFor(m => m.ContainerPickupMon)').prop('checked')) {
+                dayCount++;
+            }
+
+            if ($('input#@Html.IdFor(m => m.ContainerPickupTue)').prop('checked')) {
+                dayCount++;
+            }
+
+            if ($('input#@Html.IdFor(m => m.ContainerPickupWed)').prop('checked')) {
+                dayCount++;
+            }
+
+            if ($('input#@Html.IdFor(m => m.ContainerPickupThu)').prop('checked')) {
+                dayCount++;
+            }
+
+            if ($('input#@Html.IdFor(m => m.ContainerPickupFri)').prop('checked')) {
+                dayCount++;
+            }
+
+            if ($('input#@Html.IdFor(m => m.ContainerPickupSat)').prop('checked')) {
+                dayCount++;
+            }
+
+            var data = {
+                ContainerCode: $('input#@Html.IdFor(m => m.ContainerCode)').val(),
+                DayCount: dayCount
+            };
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerSizeLoad")',*@
+                url: getPath('~/api/WorkOrderAPI/ContainerSizeLoad'),
+                data: JSON.stringify(data),
+                cache: false,
+                success: containerSizeLoadSuccess,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function containerRouteLoadSuccess(data) {
+            if (data.message != null) {
+                //alert(data.message);
+                return;
+            }
+
+            // Populate ContainerRoute dropdown
+            var list = $('select#@Html.IdFor(m => m.ContainerRoute)');
+            list.empty();
+            list.append('<option value=""></option>');
+            $(data.containerRouteSelectList).each(function (index, item) {
+                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+            });
+
+            // Set ContainerRoute dropdown option from hidden ContainerRoute value
+            $('select#@Html.IdFor(m => m.ContainerRoute)').val($('input#@Html.IdFor(m => m.ContainerRoute)').val());
+        }
+        function containerRouteLoad() {
+            var data = {
+
+            };
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerRouteLoad")',*@
+                url: getPath('~/api/WorkOrderAPI/ContainerRouteLoad'),
+                data: JSON.stringify(data),
+                cache: false,
+                success: containerRouteLoadSuccess,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function containerCodeLoadSuccess(data) {
+            if (data.message != null) {
+                //alert(data.message);
+                return;
+            }
+
+            // Populate ContainerCode dropdown
+            var list = $('select#@Html.IdFor(m => m.ContainerCode)');
+            list.empty();
+            list.append('<option value=""></option>');
+            $(data.containerCodeSelectList).each(function (index, item) {
+                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+            });
+
+            // Set ContainerCode dropdown option from hidden ContainerCode value
+            $('select#@Html.IdFor(m => m.ContainerCode)').val($('input#@Html.IdFor(m => m.ContainerCode)').val());
+        }
+        function containerCodeLoad() {
+            var data = {
+
+            };
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerCodeLoad")',*@
+                url: getPath('~/api/WorkOrderAPI/ContainerCodeLoad'),
+                data: JSON.stringify(data),
+                cache: false,
+                success: containerCodeLoadSuccess,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function customerIdChangeSuccess(data) {
+            if (data.message != null) {
+                if (data.message != 'Input string was not in a correct format.') {
+                    alert(data.message);
+                }
+                $('select#@Html.IdFor(m => m.ServiceAddressId)').prop('class', 'form-control hidden');
+                $('input#@Html.IdFor(m => m.CustomerAddress)').prop('class', 'form-control');
+                return;
+            }
+
+            // Set CustomerId data
+            $('input#@Html.IdFor(m => m.CustomerId)').val(data.customerId);
+
+            // Set CustomerType data
+            $('select#@Html.IdFor(m => m.CustomerType)').val(data.customerType);
+            $('input#@Html.IdFor(m => m.CustomerType)').val(data.customerType);
+            $('select#@Html.IdFor(m => m.CustomerType)').attr('disabled', true);
+
+            // Set CustomerName data
+            $('input#@Html.IdFor(m => m.CustomerName)').val(data.customerName);
+            $('input#@Html.IdFor(m => m.CustomerName)').attr('readonly', true);
+
+            // Populate ServiceAddressId dropdown
+            var list = $('select#@Html.IdFor(m => m.ServiceAddressId)');
+            list.empty();
+            list.append('<option value="">SELECT A SERVICE ADDRESS</option>');
+            $(data.serviceAddressSelectList).each(function (index, item) {
+                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+            });
+
+            // Enable ServiceAddressId dropdown and switch address fields
+            $('select#@Html.IdFor(m => m.ServiceAddressId)').prop('disabled', false);
+            $('select#@Html.IdFor(m => m.ServiceAddressId)').prop('class', 'form-control');
+            $('input#@Html.IdFor(m => m.CustomerAddress)').prop('class', 'form-control hidden');
+
+            // Enable ContainerId field
+            $('select#@Html.IdFor(m => m.ContainerId)').prop('disabled', false);
+
+            // Shift focus to ServiceAddressId dropdown
+            list.focus();
+        }
+        function customerIdChange() {
+            clearAfterCustomerId();
+            var data = {
+                CustomerId: $('input#@Html.IdFor(m => m.CustomerId)').val()
+            };
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                @*url: '@(envUrl + "api/WorkOrderAPI/CustomerIdChange")',*@
+                url: getPath('~/api/WorkOrderAPI/CustomerIdChange'),
+                data: JSON.stringify(data),
+                cache: false,
+                success: customerIdChangeSuccess,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function customerTypeChange() {
+            $('input#@Html.IdFor(m => m.CustomerType)').val($('select#@Html.IdFor(m => m.CustomerType)').val());
+        }
+        function serviceAddressIdChangeSuccess(data) {
+            if (data.message != null) {
+                //alert(data.message);
+                return;
+            }
+
+            // Populate Container dropdown
+            var list = $('select#@Html.IdFor(m => m.ContainerId)');
+            list.empty();
+            list.append('<option value="">SELECT A CONTAINER</option>');
+            $(data.containerSelectList).each(function (index, item) {
+                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+            });
+        }
+        function serviceAddressIdChange() {
+            $('input#@Html.IdFor(m => m.ServiceAddressId)').val($('select#@Html.IdFor(m => m.ServiceAddressId)').val());
+            clearAfterServiceAddressId();
+
+            var data = {
+                ServiceAddressId: $('select#@Html.IdFor(m => m.ServiceAddressId)').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                @*url: '@(envUrl + "api/WorkOrderAPI/ServiceAddressIdChange")',*@
+                url: getPath('~/api/WorkOrderAPI/ServiceAddressIdChange'),
+                data: JSON.stringify(data),
+                cache: false,
+                success: serviceAddressIdChangeSuccess,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function containerIdChangeSuccess(data) {
+            if (data.message != null) {
+                //alert(data.message);
+                containerRouteChange();
+                return;
+            }
+
+            // Set ContainerRoute data
+            $('input#@Html.IdFor(m => m.ContainerRoute)').val(data.containerRoute);
+            $('select#@Html.IdFor(m => m.ContainerRoute)').val(data.containerRoute);
+            containerRouteChange();
+
+            // Set Pickup Days data
+            $('input#@Html.IdFor(m => m.ContainerPickupMon)').prop('checked', data.pickupMon).prop('disabled', true).next().val(data.pickupMon);
+            $('input#@Html.IdFor(m => m.ContainerPickupTue)').prop('checked', data.pickupTue).prop('disabled', true).next().val(data.pickupTue);
+            $('input#@Html.IdFor(m => m.ContainerPickupWed)').prop('checked', data.pickupWed).prop('disabled', true).next().val(data.pickupWed);
+            $('input#@Html.IdFor(m => m.ContainerPickupThu)').prop('checked', data.pickupThu).prop('disabled', true).next().val(data.pickupThu);
+            $('input#@Html.IdFor(m => m.ContainerPickupFri)').prop('checked', data.pickupFri).prop('disabled', true).next().val(data.pickupFri);
+            $('input#@Html.IdFor(m => m.ContainerPickupSat)').prop('checked', data.pickupSat).prop('disabled', true).next().val(data.pickupSat);
+
+            // Set ContainerCode data
+            $('input#@Html.IdFor(m => m.ContainerCode)').val(data.containerType);
+            $('select#@Html.IdFor(m => m.ContainerCode)').val(data.containerType);
+            $('select#@Html.IdFor(m => m.ContainerCode)').prop('disabled', true);
+
+            // Set ContainerSize data
+            $('input#@Html.IdFor(m => m.ContainerSize)').val(data.containerSize);
+            containerSizeLoad();
+            $('select#@Html.IdFor(m => m.ContainerSize)').prop('disabled', true);
+        }
+        function containerIdChange() {
+            $('input#@Html.IdFor(m => m.ContainerId)').val($('select#@Html.IdFor(m => m.ContainerId)').val());
+            clearAfterContainerId();
+
+            var data = {
+                ContainerId: $('select#@Html.IdFor(m => m.ContainerId)').val()
+            };
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerIdChange")',*@
+                url: getPath('~/api/WorkOrderAPI/ContainerIdChange'),
+                data: JSON.stringify(data),
+                cache: false,
+                success: containerIdChangeSuccess,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function containerRouteChange() {
+            $('input#@Html.IdFor(m => m.ContainerRoute)').val($('select#@Html.IdFor(m => m.ContainerRoute)').val());
+
+            var route = $('select#@Html.IdFor(m => m.ContainerRoute) option:selected').text();
+
+            if ((route == 112) ||
+                (route >= 114 && route <= 119) ||
+                (route >= 829 && route <= 832)) {
+                $('input#@Html.IdFor(m => m.RecyclingFlag)').prop('checked', true).next().val(true);
+            }
+            else {
+                $('input#@Html.IdFor(m => m.RecyclingFlag)').prop('checked', false).next().val(false);
+            }
+        }
+        function containerCodeChange() {
+            $('input#@Html.IdFor(m => m.ContainerCode)').val($('select#@Html.IdFor(m => m.ContainerCode)').val());
+            clearAfterContainerCode();
+            containerSizeLoad();
+        }
+        function containerPickupDaysChange() {
+            $('input#@Html.IdFor(m => m.ContainerPickupMon)').next().val($('input#@Html.IdFor(m => m.ContainerPickupMon)').prop('checked'));
+            $('input#@Html.IdFor(m => m.ContainerPickupTue)').next().val($('input#@Html.IdFor(m => m.ContainerPickupTue)').prop('checked'));
+            $('input#@Html.IdFor(m => m.ContainerPickupWed)').next().val($('input#@Html.IdFor(m => m.ContainerPickupWed)').prop('checked'));
+            $('input#@Html.IdFor(m => m.ContainerPickupThu)').next().val($('input#@Html.IdFor(m => m.ContainerPickupThu)').prop('checked'));
+            $('input#@Html.IdFor(m => m.ContainerPickupFri)').next().val($('input#@Html.IdFor(m => m.ContainerPickupFri)').prop('checked'));
+            $('input#@Html.IdFor(m => m.ContainerPickupSat)').next().val($('input#@Html.IdFor(m => m.ContainerPickupSat)').prop('checked'));
+
+            clearAfterContainerCode();
+            containerSizeLoad();
+        }
+        function containerSizeChange() {
+            $('input#@Html.IdFor(m => m.ContainerSize)').val($('select#@Html.IdFor(m => m.ContainerSize)').val());
+        }
+        $(function () {
+            // DateRangePicker for Date Resolved field
+            $('#@Html.IdFor(m => m.ResolveDate)').daterangepicker({
+                locale: {
+                    format: 'MM/DD/YYYY'
+                },
+                singleDatePicker: true,
+                showDropdowns: true,
+                autoUpdateInput: false
+            },
+            function (start) {
+                $('#@Html.IdFor(m => m.ResolveDate)').val(start.format("MM/DD/YYYY"));
+            });
+
+            // Input mask for Date Resolved field
+            $('#@Html.IdFor(m => m.ResolveDate)').inputmask('mask', { 'mask': '99/99/9999' });
+        });
+        $(function () {
+            if ($('input#@Html.IdFor(m => m.CustomerId)').val() != '') {
+                customerIdLoad();
+            }
+
+            if ($('input#@Html.IdFor(m => m.ServiceAddressId)').val() != '') {
+                serviceAddressIdLoad();
+                containerIdLoad();
+            }
+
+            containerRouteLoad();
+            containerCodeLoad();
+            containerSizeLoad();
+        });
+        $(function () {
+            $('input#@Html.IdFor(m => m.CustomerId)').on('change', customerIdChange);
+            $('select#@Html.IdFor(m => m.CustomerType)').on('change', customerTypeChange);
+            $('select#@Html.IdFor(m => m.ServiceAddressId)').on('change', serviceAddressIdChange);
+            $('select#@Html.IdFor(m => m.ContainerId)').on('change', containerIdChange);
+            $('select#@Html.IdFor(m => m.ContainerRoute)').on('change', containerRouteChange);
+            $('select#@Html.IdFor(m => m.ContainerCode)').on('change', containerCodeChange);
+            $('input#@Html.IdFor(m => m.ContainerPickupMon)').on('change', containerPickupDaysChange);
+            $('input#@Html.IdFor(m => m.ContainerPickupTue)').on('change', containerPickupDaysChange);
+            $('input#@Html.IdFor(m => m.ContainerPickupWed)').on('change', containerPickupDaysChange);
+            $('input#@Html.IdFor(m => m.ContainerPickupThu)').on('change', containerPickupDaysChange);
+            $('input#@Html.IdFor(m => m.ContainerPickupFri)').on('change', containerPickupDaysChange);
+            $('input#@Html.IdFor(m => m.ContainerPickupSat)').on('change', containerPickupDaysChange);
+            $('select#@Html.IdFor(m => m.ContainerSize)').on('change', containerSizeChange);
+        });
+    </script>
+}

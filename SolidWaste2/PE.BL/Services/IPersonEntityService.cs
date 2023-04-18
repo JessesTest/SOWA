@@ -14,4 +14,15 @@ public interface IPersonEntityService
     Task SetDefaultPhone(int personEntityId, int phoneId);
     Task SetDefaultEmail(int personEntityId, int emailId);
     Task SetDefaultAddress(int personEntityId, int addressId);
+
+    Task<ICollection<PersonEntity>> Search(
+            string fullName,
+            string firstName,
+            string middleName,
+            string lastName,
+            string billingAddress,
+            string serviceAddress,
+            string departmentCodeCode,
+            string pin = null,
+            IEnumerable<int> personEntityIds = null);
 }
