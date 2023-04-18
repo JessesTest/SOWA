@@ -6,9 +6,9 @@
 
 @if (Model.Results != null)
 {
-    @Html.Partial("Results", Model.Results)
+    <partial name="Results" model="Model.Results" />
 }
-@Html.Partial("Params")
+<partial name="Params" />
 
 
 @section scripts

@@ -65,9 +65,12 @@ public class PersonEntityService : IPersonEntityService
         return await db.People
             .Where(e => e.Id == id)
             .Include(e => e.Code)
-            .Include(e => e.Addresses)
-            .Include(e => e.Emails)
-            .Include(e => e.Phones)
+            .Include(e => e.Addresses.Where(a => !a.Delete))
+            .ThenInclude(a => a.Code)
+            .Include(e => e.Emails.Where(e => !e.Delete))
+            .ThenInclude(e => e.Code)
+            .Include(e => e.Phones.Where(p => !p.Delete))
+            .ThenInclude(p => p.Code)
             .AsSplitQuery()
             .AsNoTracking()
             .SingleOrDefaultAsync();
