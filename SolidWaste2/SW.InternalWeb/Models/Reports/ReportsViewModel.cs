@@ -21,7 +21,7 @@ namespace SW.InternalWeb.Models.Reports
             BatchBilling = new SWBatchBilling();
         }
 
-        public struct ContractChargeValueType
+        public class ContractChargeValueType
         {
             public bool SpreadSheet { get; set; }
             public bool ContractChargeZero { get; set; }
@@ -48,7 +48,7 @@ namespace SW.InternalWeb.Models.Reports
         }
         public List<SelectListItem> ListAccounts { get; set; }
 
-        public struct WorkOrderType
+        public class WorkOrderType
         {
             public int? WorkOrderIdStart { get; set; }
             public int? WorkOrderIdEnd { get; set; }

@@ -171,6 +171,7 @@ namespace SW.InternalWeb.Controllers
             }
         }
 
+        [HttpPost]
         public async Task<IActionResult> WriteOffRecommendation()
         {
             //The Telerik Report WriteOffRecommendations uses a stored procedure sp_WriteOffRecommendations that needs to be created within the SolidWaste db for all
@@ -188,6 +189,7 @@ namespace SW.InternalWeb.Controllers
             }
         }
 
+        [HttpPost]
         public async Task<IActionResult> RecyclingOnlyDelinquency()
         {
             //The Telerik Report RecyclingOnlyDelinquency uses a stored procedure sp_RecyclingOnlyDelinquency that needs to be created within the SolidWaste db for all
@@ -205,6 +207,7 @@ namespace SW.InternalWeb.Controllers
             }
         }
 
+        [HttpPost]
         public async Task<IActionResult> Revenue(string revenueYear)
         {
             try
@@ -222,6 +225,157 @@ namespace SW.InternalWeb.Controllers
                 var report = await _reportingService.GenerateReportPDF("Revenue", parameters);
 
                 return File(report, "application/pdf", "revenue_" + revenueYear + "_" + DateTime.Now + ".pdf");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> WorkOrder(ReportsViewModel vm)
+        {
+            try
+            {
+                IDictionary<string, object> parameters = new Dictionary<string, object>();
+
+                if (vm.WorkOrder.WorkOrderIdStart.HasValue)
+                    parameters.Add(new KeyValuePair<string, object>("WorkOrderIdStart", vm.WorkOrder.WorkOrderIdStart.Value));
+                else
+                    parameters.Add(new KeyValuePair<string, object>("WorkOrderIdStart", 0));
+
+                if (vm.WorkOrder.WorkOrderIdEnd.HasValue)
+                    parameters.Add(new KeyValuePair<string, object>("WorkOrderIdEnd", vm.WorkOrder.WorkOrderIdEnd.Value));
+                else
+                    parameters.Add(new KeyValuePair<string, object>("WorkOrderIdEnd", int.MaxValue));
+
+                if (!string.IsNullOrWhiteSpace(vm.WorkOrder.TransDateStart))
+                    parameters.Add(new KeyValuePair<string, object>("TransDateStart", vm.WorkOrder.TransDateStart));
+                else
+                    parameters.Add(new KeyValuePair<string, object>("TransDateStart", "1753/01/01"));
+
+                if (!string.IsNullOrWhiteSpace(vm.WorkOrder.TransDateEnd))
+                    parameters.Add(new KeyValuePair<string, object>("TransDateEnd", vm.WorkOrder.TransDateEnd));
+                else
+                    parameters.Add(new KeyValuePair<string, object>("TransDateEnd", "9999/12/31"));
+
+                if (!string.IsNullOrWhiteSpace(vm.WorkOrder.DriverInitials))
+                    parameters.Add(new KeyValuePair<string, object>("DriverInitials", string.Format("%{0}%", vm.WorkOrder.DriverInitials)));
+                else
+                    parameters.Add(new KeyValuePair<string, object>("DriverInitials", "%%"));
+
+                if (!string.IsNullOrWhiteSpace(vm.WorkOrder.CustomerType))
+                    parameters.Add(new KeyValuePair<string, object>("CustomerType", string.Format("%{0}%", vm.WorkOrder.CustomerType)));
+                else
+                    parameters.Add(new KeyValuePair<string, object>("CustomerType", "%%"));
+
+                if (!string.IsNullOrWhiteSpace(vm.WorkOrder.ContainerRouteStart))
+                    parameters.Add(new KeyValuePair<string, object>("ContainerRouteStart", vm.WorkOrder.ContainerRouteStart));
+                else
+                    parameters.Add(new KeyValuePair<string, object>("ContainerRouteStart", 0));
+
+                if (!string.IsNullOrWhiteSpace(vm.WorkOrder.ContainerRouteEnd))
+                    parameters.Add(new KeyValuePair<string, object>("ContainerRouteEnd", vm.WorkOrder.ContainerRouteEnd));
+                else
+                    parameters.Add(new KeyValuePair<string, object>("ContainerRouteEnd", int.MaxValue));
+
+                if (vm.WorkOrder.IncludeResolved)
+                {
+                    parameters.Add(new KeyValuePair<string, object>("ResolveDateStart", "1753/01/01"));
+                    parameters.Add(new KeyValuePair<string, object>("ResolveDateEnd", "9999/12/31"));
+                }
+                else
+                {
+                    parameters.Add(new KeyValuePair<string, object>("ResolveDateStart", "9999/12/31"));
+                    parameters.Add(new KeyValuePair<string, object>("ResolveDateEnd", "1753/01/01"));
+                }
+                
+                var report = await _reportingService.GenerateReportPDF("WorkOrder", parameters);
+
+                return File(report, "application/pdf", "work_order_" + DateTime.Now + ".pdf");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ContractCharge(ReportsViewModel vm)
+        {
+            try 
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    {"contractCharge", vm.ContractChargeValue.ContractChargeZero}
+                };
+
+                if (vm.ContractChargeValue.SpreadSheet)
+                {
+                    var report = await _reportingService.GenerateReportXLS("ContractCharge", parameters);
+
+                    return File(report, "application/xlsx", "contract_charge_" + DateTime.Now + ".xlsx");
+                }
+                else 
+                {
+                    var report = await _reportingService.GenerateReportPDF("ContractCharge", parameters);
+
+                    return File(report, "application/pdf", "contract_charge_" + DateTime.Now + ".pdf");
+                }
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PaymentPlanCustomers()
+        {
+            try 
+            {
+                var report = await _reportingService.GenerateReportPDF("PaymentPlanCustomers");
+
+                return File(report, "application/pdf", "payment_plan_customers_" + DateTime.Now + ".pdf");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ActiveCustomerList()
+        {
+            try 
+            {
+                var report = await _reportingService.GenerateReportXLS("ActiveCustomerList");
+
+                return File(report, "application/xlsx", "active_customer_list_" + DateTime.Now + ".xlsx");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Routes(bool RoutesExporttoXls)
+        {
+            try
+            {
+                if (RoutesExporttoXls)
+                {
+                    var report = await _reportingService.GenerateReportXLS("Routes");
+
+                    return File(report, "application/xlsx", "routes_" + DateTime.Now + ".xlsx");
+                }
+                else
+                {
+                    var report = await _reportingService.GenerateReportPDF("Routes");
+
+                    return File(report, "application/pdf", "routes_" + DateTime.Now + ".pdf");
+                }
             }
             catch (Exception ex)
             {
