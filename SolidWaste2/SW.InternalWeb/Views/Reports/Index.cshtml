@@ -133,7 +133,7 @@
                 <section class="panel panel-primary">
                     <header class="panel-heading font-bold">Collection Agency Reports</header>
                     <div class="panel-body">
-                        @using (Html.BeginForm("Deliquents", "Reports", FormMethod.Post))
+                        @using (Html.BeginForm("Delinquents", "Reports", FormMethod.Post))
                         {
                             <div class="row">
                                 <div class="col-sm-8">
@@ -409,7 +409,8 @@
             </div>
         </section>
     </div>
-    <div class="col-md-6">
+    @*SOWA-56: SW Batch Billing Telerik Report Testing*@
+    @*<div class="col-md-6">
         <div class="panel panel-primary">
             <header class="panel-heading font-bold">SW Batch Billing</header>
             <div class="panel-body">
@@ -439,7 +440,7 @@
                 }
             </div>
         </div>
-    </div>
+    </div>*@
 </div>
 
 <br />
