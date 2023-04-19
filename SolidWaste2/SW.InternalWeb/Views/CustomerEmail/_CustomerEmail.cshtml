@@ -1,0 +1,112 @@
+﻿@model SW.InternalWeb.Models.CustomerEmail.CustomerEmailViewModel
+@using SW.InternalWeb.Extensions
+
+@using (Html.BeginForm("Update", "CustomerEmail", FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.HiddenFor(model => model.CustomerType)
+    @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.FullName)
+    @Html.HiddenFor(model => model.CurrentIndex)
+    @Html.HiddenFor(model => model.MaxIndex)
+
+    @*<div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-9">
+                    @if (Model.Id.HasValue)
+                    {
+                        <label class="control-label font-bold">Displaying @Model.CurrentIndex of @Model.MaxIndex Emails</label>
+                    }
+                    else
+                    {
+                        <label class="control-label font-bold">New Email</label>
+                    }
+                </div>
+                <div class="col-md-3 text-right">
+                    <button class="btn btn-dark" type="submit" data-form-action="@Url.Action("Previous", "CustomerEmail")">
+                        <span class="glyphicon glyphicon-arrow-left"></span>
+                    </button>
+                    &nbsp;
+                    <button class="btn btn-dark" type="submit" data-form-action="@Url.Action("Next", "CustomerEmail")">
+                        <span class="glyphicon glyphicon-arrow-right"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <hr />
+        </div>
+    </div>*@
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Type, new { @class = "control-label font-bold" })
+                </div>
+                <div class="col-md-9">
+                    <select asp-for="Type" asp-items="Helpers.EmailTypes" class="form-control"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Email1, new {@class = "control-label font-bold"}) *
+                </div>
+                <div class="col-md-9">
+                    @Html.TextBoxFor(model => model.Email1, new {@class = "form-control"})
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.PaperLess, new {@class = "control-label font-bold"})
+                </div>
+                <div class="col-md-9">
+                    <select asp-for="PaperLess" asp-items="Helpers.DeliveryOptions" class="form-control"></select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Status, new { @class = "control-label font-bold" })
+                </div>
+                <div class="col-md-9">
+                    <select asp-for="Status" asp-items="Helpers.EmailStatuses" class="form-control"></select>
+                </div>
+            </div>
+            <br />
+            <div class="col-md-12">
+                <div class="form-group">
+                    (* Denotes Required Field)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                @if (Model.Id.HasValue)
+                {
+                    <div class="col-md-4">
+                        <input class="btn btn-block btn-danger" type="submit" value="Update" data-form-action="@Url.Action("Update", "CustomerEmail")" />
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-4">
+                        <input class="btn btn-block btn-danger" type="submit" value="Add New Email" data-form-action="@Url.Action("Add", "CustomerEmail")" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
