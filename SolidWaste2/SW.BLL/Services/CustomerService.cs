@@ -24,6 +24,9 @@ public class CustomerService : ICustomerService
 
     public async Task<Customer> GetById(int id)
     {
+        if (id <= 0)
+            return null;
+
         using var db = dbFactory.CreateDbContext();
         return await db.GetCustomerById(id);
     }
