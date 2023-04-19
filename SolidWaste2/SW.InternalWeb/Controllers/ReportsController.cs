@@ -384,6 +384,59 @@ namespace SW.InternalWeb.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> KanPay(ReportsViewModel vm)
+        {
+            try 
+            {
+                string[] listPayTypes = new string[2];
+                switch (vm.KanPayActionCode.PayType)
+                {
+                    case "ALL":
+                        listPayTypes[0] = "CC";
+                        listPayTypes[1] = "ACH";
+                        break;
+                    default:
+                        listPayTypes[0] = vm.KanPayActionCode.PayType.Contains("CREDIT") ? "CC" : "ACH";
+                        break;
+                }
+
+                if (vm.KanPayActionCode.StartDate == null)
+                {
+                    return RedirectToAction("Index", "Reports").WithDanger("", "Please, select KanPay Start Date");
+                }
+                if (vm.KanPayActionCode.EndDate == null)
+                {
+                    return RedirectToAction("Index", "Reports").WithDanger("", "Please, select KanPay End Date");
+                }
+
+                var parameters = new Dictionary<string, object>
+                {
+                    {"payType", listPayTypes},
+                    {"startDate", vm.KanPayActionCode.StartDate.ToString()},
+                    {"endDate", vm.KanPayActionCode.EndDate.ToString()},
+                    {"customerNumber", vm.KanPayActionCode.CustomerNumber?.ToString()}
+                };
+
+                if (!vm.KanPayActionCode.SpreadSheet)
+                {
+                    var report = await _reportingService.GenerateReportPDF("KanPay", parameters);
+
+                    return File(report, "application/pdf", "kanpay_" + DateTime.Now + ".pdf");
+                }
+                else
+                {
+                    var report = await _reportingService.GenerateReportXLS("KanPay", parameters);
+
+                    return File(report, "application/xlsx", "kanpay_" + DateTime.Now + ".xlsx");
+                }
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }            
+        }
+
+        [HttpPost]
         public async Task<IActionResult> BatchBilling(ReportsViewModel vm)
         {
             try

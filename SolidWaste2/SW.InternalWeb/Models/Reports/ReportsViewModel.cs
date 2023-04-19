@@ -61,7 +61,7 @@ namespace SW.InternalWeb.Models.Reports
             public bool IncludeResolved { get; set; }
         }
 
-        public struct KanPayActionCodeType
+        public class KanPayActionCodeType
         {
             public string PayType { get; set; }
             public DateTime? StartDate { get; set; }
