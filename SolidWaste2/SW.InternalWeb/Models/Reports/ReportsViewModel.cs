@@ -38,7 +38,7 @@ namespace SW.InternalWeb.Models.Reports
         public MultiSelectList SelectedListCodes { get; set; }
         public List<SelectListItem> ListCodes { get; set; }
 
-        public struct DelinquentAccountType
+        public class DelinquentAccountType
         {
             public string Account { get; set; }
             public DateTime? StartDate { get; set; }

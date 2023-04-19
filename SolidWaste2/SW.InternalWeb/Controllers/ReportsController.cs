@@ -402,11 +402,11 @@ namespace SW.InternalWeb.Controllers
 
                 if (vm.KanPayActionCode.StartDate == null)
                 {
-                    return RedirectToAction("Index", "Reports").WithDanger("", "Please, select KanPay Start Date");
+                    return RedirectToAction("Index", "Reports").WithDanger("", "Select KanPay Start Date");
                 }
                 if (vm.KanPayActionCode.EndDate == null)
                 {
-                    return RedirectToAction("Index", "Reports").WithDanger("", "Please, select KanPay End Date");
+                    return RedirectToAction("Index", "Reports").WithDanger("", "Select KanPay End Date");
                 }
 
                 var parameters = new Dictionary<string, object>
@@ -437,6 +437,65 @@ namespace SW.InternalWeb.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> Delinquents(ReportsViewModel vm)
+        {
+            try 
+            {
+                if (vm.DelinquentAccount.StartDate == null)
+                {
+                    return RedirectToAction("Index", "Reports").WithDanger("", "Select Delinquent Start Date");
+                }
+                if (vm.DelinquentAccount.EndDate == null)
+                {
+                    return RedirectToAction("Index", "Reports").WithDanger("", "Select Delinquent End Date");
+                }
+
+                var parameters = new Dictionary<string, object>
+                {
+                    {"startDate", vm.DelinquentAccount.StartDate.ToString()},
+                    {"endDate", vm.DelinquentAccount.EndDate.ToString()},
+                    {"customerNumber", vm.DelinquentAccount.CustomerNumber?.ToString()}
+                };
+
+                if (vm.DelinquentAccount.Account == "Collections")
+                {
+                    if (vm.DelinquentAccount.SpreadSheet)
+                    {
+                        var report = await _reportingService.GenerateReportXLS("DelinquentCollections", parameters);
+
+                        return File(report, "application/xlsx", "delinquent_collections_" + DateTime.Now + ".xlsx");
+                    }
+                    else
+                    {
+                        var report = await _reportingService.GenerateReportPDF("DelinquentCollections", parameters);
+
+                        return File(report, "application/pdf", "delinquent_collections_" + DateTime.Now + ".pdf");
+                    }
+                }
+                else
+                {
+                    if (vm.DelinquentAccount.SpreadSheet)
+                    {
+                        var report = await _reportingService.GenerateReportXLS("DelinquentCounselors", parameters);
+
+                        return File(report, "application/xlsx", "delinquent_counselors_" + DateTime.Now + ".xlsx");
+                    }
+                    else
+                    {
+                        var report = await _reportingService.GenerateReportPDF("DelinquentCounselors", parameters);
+
+                        return File(report, "application/pdf", "delinquent_counselors_" + DateTime.Now + ".pdf");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
+            }      
+        }
+
+        //SOWA-56: SW Batch Billing Telerik Report Testing
+        [HttpPost]
         public async Task<IActionResult> BatchBilling(ReportsViewModel vm)
         {
             try
@@ -446,7 +505,6 @@ namespace SW.InternalWeb.Controllers
                     {"beg_datetime", vm.BatchBilling.BegDateTime},
                     {"end_datetime", vm.BatchBilling.EndDateTime},                    
                     {"customer_id", vm.BatchBilling.CustomerId}
-                    //{"customer_id", null}
                 };
                 var report = await _reportingService.GenerateReportPDF("SW_Bill", parameters);
 

@@ -25,6 +25,12 @@
     <None Update="Reports\DelinquencyPlus.trdp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Reports\DelinquentCollections.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\DelinquentCounselors.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Reports\KanPay.trdp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
