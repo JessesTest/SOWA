@@ -73,6 +73,19 @@ public class ContainerRateService : IContainerRateService
             .ToListAsync();
     }
 
+    public async Task<ICollection<ContainerRate>> GetContainerRateByCodeDays(int containerCodeId, int dayCount)
+    {
+        using var db = dbFactory.CreateDbContext();
+
+        return await db.ContainerRates
+            .Where(e => e.ContainerType == containerCodeId && e.NumDaysService == dayCount && !e.DeleteFlag)
+            .OrderBy(e => e.EffectiveDate)
+            .ThenBy(e => e.ContainerSubtypeId)
+            .ThenBy(e => e.BillingSize)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<ICollection<int>> GetDaysOfServiceByContainerSubtype(int containerSubtypeId)
     {
         using var db = dbFactory.CreateDbContext();

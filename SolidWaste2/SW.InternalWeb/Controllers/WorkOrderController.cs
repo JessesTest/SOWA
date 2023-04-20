@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using SW.BLL.Services;
 using SW.DM;
 using SW.InternalWeb.Models.WorkOrder;
-using System.ComponentModel;
 
 namespace SW.InternalWeb.Controllers;
 
@@ -20,7 +19,6 @@ public class WorkOrderController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(int? workOrderId)
     {
-        //WorkOrderViewModel vm = new WorkOrderViewModel();
         var vm = new WorkOrderViewModel();
 
         try
@@ -59,15 +57,6 @@ public class WorkOrderController : Controller
                 vm.ChgDateTime = workOrder.ChgDateTime?.ToString("MM/dd/yyyy hh:mm:ss tt");
             }
 
-            //if (!workOrderId.HasValue)
-            //    vm = new WorkOrderViewModel();
-            //else
-            //{
-            //    SW_BL.BusinessLayer swbl = new SW_BL.BusinessLayer();
-            //    SW_DM.WorkOrder workOrder = swbl.GetWorkOrderById(workOrderId.Value);
-            //    Mapper.Map<SW_DM.WorkOrder, WorkOrderViewModel>(workOrder, vm);
-            //}
-
             return View(vm);
         }
         catch (Exception ex)
@@ -83,8 +72,6 @@ public class WorkOrderController : Controller
         {
             var workOrder = new WorkOrder
             {
-                //WorkOrderId = vm.WorkOrderId.Value,
-                //TransDate = vm.TransDate,
                 ResolveDate = string.IsNullOrWhiteSpace(vm.ResolveDate) ? null : DateTime.Parse(vm.ResolveDate),
                 DriverInitials = vm.DriverInitials,
                 CustomerId = vm.CustomerId,
@@ -107,22 +94,11 @@ public class WorkOrderController : Controller
                 ResolutionNotes = vm.ResolutionNotes,
 
                 AddToi = User.GetNameOrEmail()
-                //AddDateTime = vm.AddDateTime,
-                //ChgToi = vm.ChgToi,
-                //ChgDateTime = vm.ChgDateTime
             };
 
             await _workOrderService.Add(workOrder);
 
             return RedirectToAction(nameof(Index), new { workOrderId = workOrder.WorkOrderId }).WithSuccess("Work Order successfully created", "");
-
-            //SW_DM.WorkOrder workOrder = Mapper.Map<SW_DM.WorkOrder>(vm);
-            //SW_BL.BusinessLayer swbl = new SW_BL.BusinessLayer();
-            //swbl.AddWorkOrder(workOrder, User.Identity.Name);
-
-            //ModelState.Clear();
-            //ModelState.AddModelError("success", "Work Order successfully created");
-            //return RedirectToAction("Index", "WorkOrder", new { workOrderId = workOrder.WorkOrderId });
         }
         catch (Exception ex)
         {
@@ -139,8 +115,6 @@ public class WorkOrderController : Controller
             if (workOrder == null)
                 throw new ArgumentException("[WorkOrderId] invalid");
 
-            //WorkOrderId = vm.WorkOrderId.Value,
-            //TransDate = vm.TransDate,
             workOrder.ResolveDate = string.IsNullOrWhiteSpace(vm.ResolveDate) ? null : DateTime.Parse(vm.ResolveDate);
             workOrder.DriverInitials = vm.DriverInitials;
             workOrder.CustomerId = vm.CustomerId;
@@ -162,22 +136,11 @@ public class WorkOrderController : Controller
             workOrder.RepairsNeeded = vm.RepairsNeeded;
             workOrder.ResolutionNotes = vm.ResolutionNotes;
 
-            //workOrder.AddToi = User.GetNameOrEmail();
-            //AddDateTime = vm.AddDateTime,
             workOrder.ChgToi = User.GetNameOrEmail();
-            //ChgDateTime = vm.ChgDateTime
 
             await _workOrderService.Update(workOrder);
 
             return RedirectToAction(nameof(Index), new { workOrderId = workOrder.WorkOrderId }).WithSuccess("Work Order successfully updated", "");
-
-            //SW_DM.WorkOrder workOrder = Mapper.Map<SW_DM.WorkOrder>(vm);
-            //SW_BL.BusinessLayer swbl = new SW_BL.BusinessLayer();
-            //swbl.UpdateWorkOrder(workOrder, User.Identity.Name);
-
-            //ModelState.Clear();
-            //ModelState.AddModelError("success", "Work Order successfully updated");
-            //return RedirectToAction("Index", "WorkOrder", new { workOrderId = workOrder.WorkOrderId });
         }
         catch (Exception ex)
         {
@@ -199,14 +162,6 @@ public class WorkOrderController : Controller
             await _workOrderService.Delete(workOrder);
 
             return RedirectToAction("Index", "WorkOrderInquiry").WithSuccess("Work Order successfully deleted", "");
-
-            //SW_BL.BusinessLayer swbl = new SW_BL.BusinessLayer();
-            //SW_DM.WorkOrder workOrder = swbl.GetWorkOrderById(workOrderId);
-            //swbl.DeleteWorkOrder(workOrder, User.Identity.Name);
-
-            //ModelState.Clear();
-            //ModelState.AddModelError("success", "Work Order successfully deleted");
-            //return RedirectToAction("Index", "WorkOrderInquiry");
         }
         catch (Exception ex)
         {

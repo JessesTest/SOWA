@@ -163,6 +163,8 @@ public class ContainerService : IContainerService
             .Include(c => c.ServiceAddress)
             .Include(c => c.ContainerCode)
             .Include(c => c.ContainerSubtype)
+            .Include(c => c.BillContainerDetails)
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }
