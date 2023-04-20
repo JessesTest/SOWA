@@ -54,6 +54,14 @@ public class ContainerCodeService : IContainerCodeService
             .SingleOrDefaultAsync();
     }
 
+    public async Task<ContainerCode> GetByType(string type)
+    {
+        using var db = dbFactory.CreateDbContext();
+        return await db.ContainerCodes
+            .Where(e => e.Type == type && !e.DeleteFlag)
+            .SingleOrDefaultAsync();
+    }
+
     public async Task Update(ContainerCode containerCode)
     {
         _ = containerCode ?? throw new ArgumentNullException(nameof(containerCode));

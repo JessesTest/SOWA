@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 
 namespace SW.BLL.Services;
 
-public class WorkOrderService :IWorkOrderService
+public class WorkOrderService : IWorkOrderService
 {
     private readonly IDbContextFactory<SwDbContext> dbFactory;
     private readonly IAddressService _addressService;
@@ -43,13 +43,11 @@ public class WorkOrderService :IWorkOrderService
 
         workOrder.TransDate = DateTime.Now;
         workOrder.AddDateTime = DateTime.Now;
-        //workOrder.AddToi = user;
 
         FormatWorkOrder(workOrder);
 
         db.WorkOrders.Add(workOrder);
         await db.SaveChangesAsync();
-        //_workOrderRepository.Add(workOrder);
     }
 
     public async Task Update(WorkOrder workOrder)
@@ -65,48 +63,24 @@ public class WorkOrderService :IWorkOrderService
 
         await ValidateWorkOrder(workOrder);
 
-        //WorkOrder old = GetWorkOrderById(workOrder.WorkOrderId);
-
-        //workOrder.AddDateTime = old.AddDateTime;
-        //workOrder.AddToi = old.AddToi;
         workOrder.ChgDateTime = DateTime.Now;
-        //workOrder.ChgToi = user;
 
         FormatWorkOrder(workOrder);
 
         db.WorkOrders.Update(workOrder);
         await db.SaveChangesAsync();
-        //_workOrderRepository.Update(workOrder);
     }
 
     public async Task Delete(WorkOrder workOrder)
     {
         using var db = dbFactory.CreateDbContext();
-
-        //if (workOrder.ServiceAddressId.HasValue)
-        //{
-        //    var serviceAddress = await db.GetServiceAddressById(workOrder.ServiceAddressId.Value);
-        //    var address = await _addressService.GetById(serviceAddress.PeaddressId);
-        //    workOrder.CustomerAddress = address.ToFullString();
-        //}
-
-        //await ValidateWorkOrder(workOrder);
-
-        //WorkOrder old = GetWorkOrderById(workOrder.WorkOrderId);
-
-        //workOrder.AddDateTime = old.AddDateTime;
-        //workOrder.AddToi = old.AddToi;
-        //workOrder.ChgDateTime = old.ChgDateTime;
-        //workOrder.ChgToi = old.ChgToi;
         workOrder.DelFlag = true;
         workOrder.DelDateTime = DateTime.Now;
-        //workOrder.DelToi = user;
 
         FormatWorkOrder(workOrder);
 
         db.WorkOrders.Update(workOrder);
         await db.SaveChangesAsync();
-        //_workOrderRepository.Update(workOrder);
     }
 
     public async Task<ICollection<WorkOrder>> GetInquiryResultList(int? workOrderId, string containerRoute, DateTime? transDate, string driverInitials, string customerName, string customerAddress, bool include)
@@ -164,7 +138,6 @@ public class WorkOrderService :IWorkOrderService
         if (workOrder.CustomerId.HasValue)
         {
             // Make sure CustomerId is valid
-            //Customer customer = _customerRepository.GetSingle(m => m.CustomerID == workOrder.CustomerId.Value || m.LegacyCustomerID == workOrder.CustomerId);
             var customer = await db.GetCustomerById(workOrder.CustomerId.Value);
             if (customer == null)
                 throw new ArgumentException("[CustomerId] invalid");
@@ -173,7 +146,6 @@ public class WorkOrderService :IWorkOrderService
             if (workOrder.ServiceAddressId.HasValue)
             {
                 // Make sure ServiceAddressId is valid
-                //ServiceAddress serviceAddress = _serviceAddressRepository.GetSingle(m => m.Id == workOrder.ServiceAddressId && !m.DeleteFlag);
                 var serviceAddress = await db.GetServiceAddressById(workOrder.ServiceAddressId.Value);
                 if (serviceAddress == null || serviceAddress.DeleteFlag)
                     throw new ArgumentException("[ServiceAddressId] invalid");
@@ -186,7 +158,6 @@ public class WorkOrderService :IWorkOrderService
                 if (workOrder.ContainerId.HasValue)
                 {
                     // Make sure ContainerId is valid
-                    //Container container = _containerRepository.GetSingle(m => m.Id == workOrder.ContainerId && !m.DeleteFlag);
                     var container = await db.GetContainerById(workOrder.ContainerId.Value);
                     if (container == null || container.DeleteFlag)
                         throw new ArgumentException("[ContainerId] invalid");

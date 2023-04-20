@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IMieDataService, MieDataService>()
             .AddTransient<IPaymentPlanService, PaymentPlanService>()
             .AddTransient<IRefuseRouteService, RefuseRouteService>()
+            .AddTransient<IRouteTypeService, RouteTypeService>()
             .AddTransient<IServiceAddressService, ServiceAddressService>()
             .AddTransient<ITransactionCodeService, TransactionCodeService>()
             .AddTransient<ITransactionService, TransactionService>()

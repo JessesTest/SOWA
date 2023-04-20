@@ -5,6 +5,7 @@ using Common.Extensions;
 using Identity.BL.Extensions;
 using Identity.DAL.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using Microsoft.Identity.Web.UI;
@@ -49,7 +50,12 @@ try
         {
             mvcOptions.EnableEndpointRouting = false;
         })
-        .AddRazorRuntimeCompilation();
+        .AddRazorRuntimeCompilation()
+        .AddViewOptions(options =>
+        {
+            // restores legacy mvc behaviour for auto-generated checkbox fields
+            options.HtmlHelperOptions.CheckBoxHiddenInputRenderMode = CheckBoxHiddenInputRenderMode.Inline;
+        });
         //.AddSessionStateTempDataProvider()
         //.AddMicrosoftIdentityUI()     // azure ad
 
