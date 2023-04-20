@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Telerik.Reporting.OpenXmlRendering;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Telerik.Barcode;
 
 namespace SW.InternalWeb.Controllers
 {
@@ -117,6 +118,21 @@ namespace SW.InternalWeb.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> TransactionsbyDateRange(DateTime startDate, DateTime endDate, int customerId)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"startDate", startDate.ToString()},
+                    {"endDate", endDate.ToString()},
+                    {"customerID", customerId.ToString()}
+                };
+
+            var report = await _reportingService.GenerateReportPDF("TransactionHistoryByCustomer", parameters);
+
+            return File(report, "application/pdf", "transaction_history_" + customerId.ToString() + "_" + DateTime.Now + ".pdf");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Delinquency(bool exportToXls)
         {
@@ -171,7 +187,7 @@ namespace SW.InternalWeb.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> WriteOffRecommendation()
         {
             //The Telerik Report WriteOffRecommendations uses a stored procedure sp_WriteOffRecommendations that needs to be created within the SolidWaste db for all
@@ -189,7 +205,7 @@ namespace SW.InternalWeb.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> RecyclingOnlyDelinquency()
         {
             //The Telerik Report RecyclingOnlyDelinquency uses a stored procedure sp_RecyclingOnlyDelinquency that needs to be created within the SolidWaste db for all
@@ -300,6 +316,26 @@ namespace SW.InternalWeb.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> WorkOrderByWorkOrderId(int workOrderId)
+        {
+            IDictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add(new KeyValuePair<string, object>("CustomerType", "%%"));
+            parameters.Add(new KeyValuePair<string, object>("WorkOrderIdStart", workOrderId));
+            parameters.Add(new KeyValuePair<string, object>("WorkOrderIdEnd", workOrderId));
+            parameters.Add(new KeyValuePair<string, object>("TransDateStart", "1753/01/01"));
+            parameters.Add(new KeyValuePair<string, object>("TransDateEnd", "9999/12/31"));
+            parameters.Add(new KeyValuePair<string, object>("DriverInitials", "%%"));
+            parameters.Add(new KeyValuePair<string, object>("ContainerRouteStart", int.MinValue));
+            parameters.Add(new KeyValuePair<string, object>("ContainerRouteEnd", int.MaxValue));
+            parameters.Add(new KeyValuePair<string, object>("ResolveDateStart", "1753/01/01"));
+            parameters.Add(new KeyValuePair<string, object>("ResolveDateEnd", "9999/12/31"));
+
+            var report = await _reportingService.GenerateReportPDF("WorkOrder", parameters);
+
+            return File(report, "application/pdf", "work_order_" + DateTime.Now + ".pdf");
+        }
+
         [HttpPost]
         public async Task<IActionResult> ContractCharge(ReportsViewModel vm)
         {
@@ -342,6 +378,19 @@ namespace SW.InternalWeb.Controllers
             {
                 return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PaymentPlanAgreement(int paymentPlanId)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"paymentPlanId", paymentPlanId}
+            };
+
+            var report = await _reportingService.GenerateReportPDF("PaymentPlanAgreement", parameters);
+
+            return File(report, "application/pdf", "payment_plan_agreement_" + DateTime.Now + ".pdf");
         }
 
         [HttpPost]

@@ -34,6 +34,9 @@
     <None Update="Reports\KanPay.trdp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Reports\PaymentPlanAgreement.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Reports\PaymentPlanCustomers.trdp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -47,6 +50,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Reports\SW_Bill.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\TransactionHistoryByCustomer.trdp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Reports\Transactions.trdp">

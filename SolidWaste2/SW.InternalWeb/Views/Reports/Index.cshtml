@@ -90,17 +90,8 @@
                                     @Html.TextBoxFor(m => m.WorkOrder.DriverInitials, new { @class = "form-control" })
                                 </div>
                                 <div class="col-md-6">
-                                    @{
-                                        var customerTypes = new List<SelectListItem>
-                                        {
-                                        new SelectListItem { Value =  "", Text = "All" },
-                                        new SelectListItem { Value = "C", Text = "Commercial" },
-                                        new SelectListItem { Value = "H", Text = "Home Owners Assocation" },
-                                        new SelectListItem { Value = "R", Text = "Residential" }
-                                        };
-                                    }
-                                    <label for="@Html.NameFor(m => m.WorkOrder.CustomerType)">Customer Type</label>
-                                    @Html.DropDownListFor(m => m.WorkOrder.CustomerType, customerTypes, new { @class = "form-control" })
+                                    <label for="@Html.NameFor(m => m.WorkOrder.CustomerType)">Customer Type</label>                                    
+                                    <select class="form-control" asp-for="WorkOrder.CustomerType" asp-items="Helpers.CustomerTypes"></select>
                                 </div>
                             </div>
                             <div class="row form-group">
