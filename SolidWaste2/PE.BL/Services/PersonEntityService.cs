@@ -61,13 +61,19 @@ public class PersonEntityService : IPersonEntityService
 
     public async Task<PersonEntity> GetById(int id)
     {
+        if (id <= 0)
+            return null;
+
         using var db = contextFactory.CreateDbContext();
         return await db.People
             .Where(e => e.Id == id)
             .Include(e => e.Code)
-            .Include(e => e.Addresses)
-            .Include(e => e.Emails)
-            .Include(e => e.Phones)
+            .Include(e => e.Addresses.Where(a => !a.Delete))
+            .ThenInclude(a => a.Code)
+            .Include(e => e.Emails.Where(e => !e.Delete))
+            .ThenInclude(e => e.Code)
+            .Include(e => e.Phones.Where(p => !p.Delete))
+            .ThenInclude(p => p.Code)
             .AsSplitQuery()
             .AsNoTracking()
             .SingleOrDefaultAsync();
