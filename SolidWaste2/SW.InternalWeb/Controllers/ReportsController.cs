@@ -33,8 +33,8 @@ namespace SW.InternalWeb.Controllers
             {
                 rm.ListCodes = new List<SelectListItem>();
 
-                List<TransactionCode> ListCodes = await transactionCodeService.GetTransactionCodes();
-                foreach (var c in ListCodes)
+                var listCodes = await transactionCodeService.GetAll();
+                foreach (var c in listCodes)
                 {
                     var item = new SelectListItem();
                     item.Value = c.Code.ToString();

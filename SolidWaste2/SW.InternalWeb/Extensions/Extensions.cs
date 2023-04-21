@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using PE.DM;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace SW.InternalWeb.Extensions;
@@ -88,5 +90,40 @@ public static class Extensions
             sb.Append(self.Zip);
 
         return sb.ToString().Trim();
+    }
+
+    public static string GetTransactionCodeSignDisplayName(this string code)
+    {
+        return code switch
+        {
+            "P" => "P (+) - Positive",
+            "N" => "N (-) - Negative",
+            "B" => "B (+|-) - Both",
+            //"" => "N/A",
+            _ => "N/A",
+        };
+    }
+
+    public static string GetTransactionCodeAccountTypeDisplayName(this string code)
+    {
+        return code switch
+        {
+            "B" => "B - Balance Type",
+            "M" => "M - Money Type",
+            "R" => "R - Receivable Type",
+            _ => string.Empty,
+        };
+    }
+
+    public static string GetTransactionCodeGroupTypeDisplayName(this string code)
+    {
+        return code switch
+        {
+            "S" => "S - Service",
+            "M" => "M - Miscellaneous",
+            "P" => "P - Payment",
+            //"A" => ,                  //SOWA-93  No logic for displaying "A" group code existed in the original
+            _ => string.Empty,
+        };
     }
 }
