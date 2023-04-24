@@ -3,7 +3,6 @@ using PE.BL.Services;
 using PE.DM;
 using SW.DAL.Contexts;
 using SW.DM;
-using System;
 
 namespace SW.BLL.Services;
 
@@ -12,9 +11,11 @@ public class ContainerService : IContainerService
     private readonly IDbContextFactory<SwDbContext> dbFactory;
     private readonly IAddressService addressService;
 
-    public ContainerService(IDbContextFactory<SwDbContext> dbFactroy, IAddressService addressService)
+    public ContainerService(
+        IDbContextFactory<SwDbContext> dbFactory,
+        IAddressService addressService)
     {
-        this.dbFactory = dbFactroy;
+        this.dbFactory = dbFactory;
         this.addressService = addressService;
     }
 
@@ -167,5 +168,119 @@ public class ContainerService : IContainerService
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<string> TryValidateContainer(Container c)
+    {
+        return await ValidateContainerNumDaysService(c) ??
+            await ValidateContainerServiceAddress(c) ??
+            await ValidateContainerContainerRate(c) ??
+            //await ValidateContainerAdditionalRate(c) ??
+            null;
+    }
+    private async Task<string> ValidateContainerNumDaysService(Container c)
+    {
+        var oc = await GetById(c.Id);
+
+        // Only validate for existing containers
+        if (c.Id == 0 || oc == null)
+            return null;
+
+        // Make sure num days service for the original container and the updated container match
+        if (c.NumDaysService != oc.NumDaysService)
+            return "Container number of days service cannot change";
+
+        return null;
+    }
+    private async Task<string> ValidateContainerServiceAddress(Container c)
+    {
+        using var db = dbFactory.CreateDbContext();
+        var sa = await db.ServiceAddresses.FindAsync(c.ServiceAddressId);
+
+        if (sa.EffectiveDate > c.EffectiveDate)   //8-3-2015mra
+            return "Container effective date before service address effective date";   //8-3-2015mra
+        if (sa.CancelDate.HasValue && !c.CancelDate.HasValue)
+            return "Container must have a cancel date";
+        if (sa.CancelDate.HasValue && sa.CancelDate.Value < c.CancelDate.Value)
+            return "Container cancel date after service address cancel date";
+        if (sa.CancelDate.HasValue && sa.CancelDate.Value < c.EffectiveDate)
+            return "Container effective date after service address cancel date";
+
+        return null;
+    }
+    private async Task<string> ValidateContainerContainerRate(Container container)
+    {
+        DateTime effective_date = DateTime.Today;
+        if (container.EffectiveDate >= DateTime.Today)
+        {
+            effective_date = container.EffectiveDate;
+        }
+
+        using var db = dbFactory.CreateDbContext();
+        var anyRates = await db.ContainerRates.Where(c =>
+                c.ContainerType == container.ContainerCodeId &&
+                c.ContainerSubtypeId == container.ContainerSubtypeId &&
+                c.NumDaysService == container.NumDaysService &&
+                c.BillingSize == container.BillingSize &&
+                !c.DeleteFlag &&
+                c.EffectiveDate <= effective_date)
+            .AnyAsync();
+
+        return anyRates ? null : "No container rates found";
+    }
+    //private async Task<string> ValidateContainerAdditionalRate(Container c)
+    //{
+    //    int otherSubtypeId = 0;
+    //    if (c.ContainerSubtypeId == 12)
+    //    {
+    //        otherSubtypeId = 11;
+    //    }
+    //    else if (c.ContainerSubtypeId == 14)
+    //    {
+    //        otherSubtypeId = 13;
+    //    }
+    //    if (otherSubtypeId != 0)
+    //    {
+    //        ICollection<Container> others = null;
+    //        if (c.CancelDate.HasValue)
+    //        {
+    //            others = _containerRepository.GetList(o => (o.CancelDate.HasValue == false || o.CancelDate.HasValue == true && o.CancelDate.Value >= c.CancelDate.Value) && o.ServiceAddressId == c.ServiceAddressId && o.ContainerSubtypeID == otherSubtypeId);
+    //        }
+    //        else
+    //        {
+    //            others = _containerRepository.GetList(o => o.CancelDate.HasValue == false && o.ServiceAddressId == c.ServiceAddressId && o.ContainerSubtypeID == otherSubtypeId);
+    //        }
+    //        //if (others != null && others.Count == 0)   //8-3-2015mra
+    //        //    return "additional container needs permanent container";   //8-3-2015mra
+    //    }
+    //    return null;
+    //}
+
+
+    private async Task ValidateContainer(Container c)
+    {
+        var msg = await TryValidateContainer(c);
+        if (string.IsNullOrWhiteSpace(msg))
+            return;
+
+        throw new InvalidOperationException(msg);
+    }
+
+    public async Task Add(Container c)
+    {
+        await ValidateContainer(c);
+
+        using var db = dbFactory.CreateDbContext();
+        db.Containers.Add(c);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task Update(Container c)
+    {
+        await ValidateContainer(c);
+
+        using var db = dbFactory.CreateDbContext();
+        db.Containers.Update(c);
+        await db.SaveChangesAsync();
     }
 }

@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Html;
 using PE.DM;
-using System.Linq.Expressions;
 using System.Text;
 
 namespace SW.InternalWeb.Extensions;
@@ -24,13 +22,13 @@ public static class Extensions
             if (a.Number.HasValue && a.Number.Value > 0)
                 sb.Append(a.Number.Value);
             if (!string.IsNullOrWhiteSpace(a.Direction))
-                sb.Append(" ").Append(a.Direction);
+                sb.Append(' ').Append(a.Direction);
             if (!string.IsNullOrWhiteSpace(a.StreetName))
-                sb.Append(" ").Append(a.StreetName);
+                sb.Append(' ').Append(a.StreetName);
             if (!string.IsNullOrWhiteSpace(a.Suffix))
-                sb.Append(" ").Append(a.Suffix);
+                sb.Append(' ').Append(a.Suffix);
             if (!string.IsNullOrWhiteSpace(a.Apt))
-                sb.Append(" ").Append(a.Apt);
+                sb.Append(' ').Append(a.Apt);
         }
         return sb.ToString().Trim();
     }
@@ -57,7 +55,7 @@ public static class Extensions
 
     public static string Ellipsis(this string self, int length)
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < length && i < self.Length; i++)
             sb.Append(self[i]);
@@ -92,6 +90,24 @@ public static class Extensions
         return sb.ToString().Trim();
     }
 
+    public static bool IsAjaxRequest(this HttpRequest request)
+    {
+        if (request == null)
+        {
+            throw new ArgumentNullException("request");
+        }
+
+        //return (request["X-Requested-With"] == "XMLHttpRequest") || ((request.Headers != null) && (request.Headers["X-Requested-With"] == "XMLHttpRequest"))
+        return request.Headers["X-Requested-With"] == "XMLHttpRequest";
+    }
+
+    public static void AddXAlertMessage(this HttpResponse response, string message)
+    {
+        if (response == null)
+            return;
+
+        response.Headers.TryAdd("X-Alert-Message", message);
+    }
     public static string GetTransactionCodeSignDisplayName(this string code)
     {
         return code switch
