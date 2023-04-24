@@ -9,6 +9,7 @@ public interface IContainerRateService
     Task<ICollection<ContainerRate>> GetAll();
     Task<ContainerRate> GetById(int id);
     Task<ICollection<ContainerRate>> GetContainerRateByCodeDaysSize(int containerSubtypeId, int dayCount, decimal billingSize, DateTime effective_date);
+    Task<ICollection<ContainerRate>> GetContainerRateByCodeDays(int containerCodeId, int dayCount);
     Task<ICollection<int>> GetDaysOfServiceByContainerSubtype(int containerSubtypeId);
     Task<ICollection<ContainerRateListing>> GetListing();
     Task Update(ContainerRate containerRate);

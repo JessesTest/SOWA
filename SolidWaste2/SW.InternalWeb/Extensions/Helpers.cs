@@ -12,6 +12,15 @@ public static class Helpers
             new SelectListItem { Value = "H", Text = "H - Home Owners Association" }
         };
 
+    public static IEnumerable<SelectListItem> CustomerTypes =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Value = "", Text = "All" },
+            new SelectListItem { Value = "C", Text = "Commercial" },
+            new SelectListItem { Value = "R", Text = "Residential" },
+            new SelectListItem { Value = "H", Text = "Home Owners Association" }
+        };
+
     public static IEnumerable<SelectListItem> EmailTypes =>
         new SelectListItem[]
         {
@@ -48,6 +57,32 @@ public static class Helpers
         {
             new SelectListItem { Value = "true", Text = "Active" },
             new SelectListItem { Value = "false", Text = "Inactive" }
+        };
+
+    public static IEnumerable<SelectListItem> TransactionCodeSigns =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Text = "P (+) - Positive", Value = "P" },
+            new SelectListItem { Text = "N (-) - Negative", Value = "N" },
+            new SelectListItem { Text = "B (+|-) - Both", Value = "B" },
+            new SelectListItem { Text = "  N/A", Value = "" }
+        };
+
+    public static IEnumerable<SelectListItem> TransactionCodeAccountTypes =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Text = "B - Balance Type", Value = "B" },
+            new SelectListItem { Text = "M - Money Type", Value = "M" },
+            new SelectListItem { Text = "R - Receivable Type", Value = "R" }
+        };
+
+    public static IEnumerable<SelectListItem> TransactionCodeGroupTypes =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Text = "" },
+            new SelectListItem { Text = "S - Service", Value = "S" },
+            new SelectListItem { Text = "M - Miscellaneous", Value = "M" },
+            new SelectListItem { Text = "P - Payment", Value = "P" }
         };
 
     public static IEnumerable<SelectListItem> ContainerDeliveredTypes =>

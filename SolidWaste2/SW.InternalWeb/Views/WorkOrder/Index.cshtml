@@ -1,5 +1,4 @@
-﻿@model SW.InternalWeb.Models.WorkOrder.WorkOrderViewModel
-@*@using System.Configuration;*@
+@model SW.InternalWeb.Models.WorkOrder.WorkOrderViewModel
 @using SW.InternalWeb.Extensions;
 @{
     ViewBag.Title = "Work Order";
@@ -22,7 +21,6 @@
                             <div class="col-xs-3">
                                 @Html.LabelFor(m => m.CustomerType, new { @class = "font-bold" })
                                 <select class="form-control" asp-for="CustomerType" asp-items="Helpers.CustomerCodes"></select>
-                                @*@Html.SncoDropDownListFor(m => m.CustomerType, Helpers.GenerateCustomerCodeSelectList(), new { @class = "form-control" })*@
                                 @{ string customerTypeValue = string.IsNullOrWhiteSpace(Model.CustomerType) ? Helpers.CustomerCodes.FirstOrDefault().Value : Model.CustomerType; }
                                 <input type="hidden" name="@Html.NameFor(m => m.CustomerType)" id="@Html.IdFor(m => m.CustomerType)" value="@customerTypeValue" />
                             </div>
@@ -38,20 +36,17 @@
                                 {
                                     @Html.TextBoxFor(m => m.CustomerAddress, new { @class = "form-control hidden" })
                                     <select class="form-control" asp-for="ServiceAddressId" disabled></select>
-                                    @*@Html.SncoDropDownListFor(m => m.ServiceAddressId, new List<SelectListItem>(), new { @class = "form-control", @disabled = "disabled" })*@
                                 }
                                 else
                                 {
                                     @Html.TextBoxFor(m => m.CustomerAddress, new { @class = "form-control" })
                                     <select class="form-control hidden" asp-for="ServiceAddressId" disabled></select>
-                                    @*@Html.SncoDropDownListFor(m => m.ServiceAddressId, new List<SelectListItem>(), new { @class = "form-control hidden", @disabled = "disabled" })*@
                                 }
                                 @Html.HiddenFor(m => m.ServiceAddressId)
                             </div>
                             <div class="col-xs-6">
                                 @Html.LabelFor(m => m.ContainerId, new { @class = "font-bold" })
                                 <select class="form-control" asp-for="ContainerId" disabled></select>
-                                @*@Html.SncoDropDownListFor(m => m.ContainerId, new List<SelectListItem>(), new { @class = "form-control", @disabled = "disabled" })*@
                                 @Html.HiddenFor(m => m.ContainerId)
                             </div>
                         </div>
@@ -95,13 +90,11 @@
                                     </label>
                                 </div>
                                 <select class="form-control" asp-for="ContainerRoute"></select>
-                                @*@Html.SncoDropDownListFor(m => m.ContainerRoute, new List<SelectListItem>(), new { @class = "form-control" })*@
                                 @Html.HiddenFor(m => m.ContainerRoute)
                             </div>
                             <div class="col-xs-3">
                                 @Html.LabelFor(m => m.ContainerCode, new { @class = "font-bold" })
                                 <select class="form-control" asp-for="ContainerCode"></select>
-                                @*@Html.SncoDropDownListFor(m => m.ContainerCode, new List<SelectListItem>(), new { @class = "form-control" })*@
                                 @Html.HiddenFor(m => m.ContainerCode)
                             </div>
                             <div class="col-xs-3">
@@ -138,7 +131,6 @@
                             <div class="col-xs-3">
                                 @Html.LabelFor(m => m.ContainerSize, new { @class = "font-bold" })
                                 <select class="form-control" asp-for="ContainerSize"></select>
-                                @*@Html.SncoDropDownListFor(m => m.ContainerSize, new List<SelectListItem>(), new { @class = "form-control" })*@
                                 @Html.HiddenFor(m => m.ContainerSize)
                             </div>
                         </div>
@@ -237,8 +229,6 @@
 
 @section scripts
 {
-    @*@{ string envUrl = ConfigurationManager.AppSettings["EnvironmentHttps"].ToString(); }
-    @Scripts.Render("~/bundles/jqueryval")*@
     <script type="text/javascript">
         function clearAfterCustomerId() {
             $('input#@Html.IdFor(m => m.CustomerType)').val('C');
@@ -292,9 +282,6 @@
             $('input#@Html.IdFor(m => m.CustomerName)').prop('readonly', true);
             $('input#@Html.IdFor(m => m.CustomerAddress)').prop('readonly', true);
         }
-        function customerTypeLoad() {
-
-        }
         function serviceAddressIdLoadSuccess(data) {
             if (data.message != null) {
                 //alert(data.message);
@@ -306,7 +293,7 @@
             list.empty();
             list.append('<option value="">SELECT A SERVICE ADDRESS</option>');
             $(data.serviceAddressSelectList).each(function (index, item) {
-                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                list.append('<option value="' + item.value + '">' + item.text + '</option>');
             });
 
             $('select#@Html.IdFor(m => m.ServiceAddressId)').val($('input#@Html.IdFor(m => m.ServiceAddressId)').val());
@@ -320,14 +307,10 @@
             };
 
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                @*url: '@(envUrl + "api/WorkOrderAPI/ServiceAddressIdLoad")',*@
-                url: getPath('~/api/WorkOrderAPI/ServiceAddressIdLoad'),
-                data: JSON.stringify(data),
-                cache: false,
+                url: getPath('~/api/WorkOrderApi/ServiceAddressIdLoad'),
+                data: data,
                 success: serviceAddressIdLoadSuccess,
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
@@ -345,7 +328,7 @@
             list.empty();
             list.append('<option value="">SELECT A CONTAINER</option>');
             $(data.containerSelectList).each(function (index, item) {
-                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                list.append('<option value="' + item.value + '">' + item.text + '</option>');
             });
 
             $('select#@Html.IdFor(m => m.ContainerId)').val($('input#@Html.IdFor(m => m.ContainerId)').val());
@@ -366,14 +349,10 @@
             };
 
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerIdLoad")',*@
-                url: getPath('~/api/WorkOrderAPI/ContainerIdLoad'),
-                data: JSON.stringify(data),
-                cache: false,
+                url: getPath('~/api/WorkOrderApi/ContainerIdLoad'),
+                data: data,
                 success: containerIdLoadSuccess,
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
@@ -392,7 +371,7 @@
             list.empty();
             list.append('<option value=""></option>');
             $(data.containerSizeSelectList).each(function (index, item) {
-                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                list.append('<option value="' + item.value + '">' + item.text + '</option>');
             });
 
             // Set ContainerSize dropdown option from hidden ContainerSize value
@@ -430,14 +409,10 @@
                 DayCount: dayCount
             };
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerSizeLoad")',*@
-                url: getPath('~/api/WorkOrderAPI/ContainerSizeLoad'),
-                data: JSON.stringify(data),
-                cache: false,
+                url: getPath('~/api/WorkOrderApi/ContainerSizeLoad'),
+                data: data,
                 success: containerSizeLoadSuccess,
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
@@ -455,25 +430,17 @@
             list.empty();
             list.append('<option value=""></option>');
             $(data.containerRouteSelectList).each(function (index, item) {
-                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                list.append('<option value="' + item.value + '">' + item.text + '</option>');
             });
 
             // Set ContainerRoute dropdown option from hidden ContainerRoute value
             $('select#@Html.IdFor(m => m.ContainerRoute)').val($('input#@Html.IdFor(m => m.ContainerRoute)').val());
         }
         function containerRouteLoad() {
-            var data = {
-
-            };
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerRouteLoad")',*@
-                url: getPath('~/api/WorkOrderAPI/ContainerRouteLoad'),
-                data: JSON.stringify(data),
-                cache: false,
+                url: getPath('~/api/WorkOrderApi/ContainerRouteLoad'),
                 success: containerRouteLoadSuccess,
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
@@ -491,25 +458,17 @@
             list.empty();
             list.append('<option value=""></option>');
             $(data.containerCodeSelectList).each(function (index, item) {
-                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                list.append('<option value="' + item.value + '">' + item.text + '</option>');
             });
 
             // Set ContainerCode dropdown option from hidden ContainerCode value
             $('select#@Html.IdFor(m => m.ContainerCode)').val($('input#@Html.IdFor(m => m.ContainerCode)').val());
         }
         function containerCodeLoad() {
-            var data = {
-
-            };
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerCodeLoad")',*@
-                url: getPath('~/api/WorkOrderAPI/ContainerCodeLoad'),
-                data: JSON.stringify(data),
-                cache: false,
+                url: getPath('~/api/WorkOrderApi/ContainerCodeLoad'),
                 success: containerCodeLoadSuccess,
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
@@ -543,7 +502,7 @@
             list.empty();
             list.append('<option value="">SELECT A SERVICE ADDRESS</option>');
             $(data.serviceAddressSelectList).each(function (index, item) {
-                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                list.append('<option value="' + item.value + '">' + item.text + '</option>');
             });
 
             // Enable ServiceAddressId dropdown and switch address fields
@@ -563,14 +522,10 @@
                 CustomerId: $('input#@Html.IdFor(m => m.CustomerId)').val()
             };
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                @*url: '@(envUrl + "api/WorkOrderAPI/CustomerIdChange")',*@
-                url: getPath('~/api/WorkOrderAPI/CustomerIdChange'),
-                data: JSON.stringify(data),
-                cache: false,
+                url: getPath('~/api/WorkOrderApi/CustomerIdChange'),
+                data: data,
                 success: customerIdChangeSuccess,
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
@@ -591,7 +546,7 @@
             list.empty();
             list.append('<option value="">SELECT A CONTAINER</option>');
             $(data.containerSelectList).each(function (index, item) {
-                list.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                list.append('<option value="' + item.value + '">' + item.text + '</option>');
             });
         }
         function serviceAddressIdChange() {
@@ -603,14 +558,10 @@
             };
 
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                @*url: '@(envUrl + "api/WorkOrderAPI/ServiceAddressIdChange")',*@
-                url: getPath('~/api/WorkOrderAPI/ServiceAddressIdChange'),
-                data: JSON.stringify(data),
-                cache: false,
+                url: getPath('~/api/WorkOrderApi/ServiceAddressIdChange'),
+                data: data,
                 success: serviceAddressIdChangeSuccess,
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
@@ -655,14 +606,10 @@
                 ContainerId: $('select#@Html.IdFor(m => m.ContainerId)').val()
             };
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                @*url: '@(envUrl + "api/WorkOrderAPI/ContainerIdChange")',*@
-                url: getPath('~/api/WorkOrderAPI/ContainerIdChange'),
-                data: JSON.stringify(data),
-                cache: false,
+                url: getPath('~/api/WorkOrderApi/ContainerIdChange'),
+                data: data,
                 success: containerIdChangeSuccess,
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);

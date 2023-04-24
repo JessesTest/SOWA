@@ -1,0 +1,100 @@
+﻿@model SW.InternalWeb.Models.TransactionCode.TransactionCodeEditViewModel
+@using SW.InternalWeb.Extensions
+@{
+    ViewBag.Title = "Edit Transaction Code";
+    ViewBag.ATitle = "Edit Transaction Code";
+}
+
+@using (Html.BeginForm("Edit", "TransactionCode", FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    <div class="panel panel-default">
+        <div class="panel-body">
+            @Html.HiddenFor(model => model.TransactionCodeID)
+            <div class="row">
+                <div class="col-md-9 col-lg-8">
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.Code, new { @class = "control-label" }) *
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.Code, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Code, null, new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.Description, new { @class = "control-label" }) *
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.Description, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Description, null, new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.TransactionSign, new { @class = "control-label" })
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" asp-for="TransactionSign" asp-items="Helpers.TransactionCodeSigns"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.CollectionsBalanceSign, new { @class = "control-label" })
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" asp-for="CollectionsBalanceSign" asp-items="Helpers.TransactionCodeSigns"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.CounselorsBalanceSign, new { @class = "control-label" })
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" asp-for="CounselorsBalanceSign" asp-items="Helpers.TransactionCodeSigns"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.UncollectableBalanceSign, new { @class = "control-label" })
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" asp-for="UncollectableBalanceSign" asp-items="Helpers.TransactionCodeSigns"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.AccountType, new { @class = "control-label" })
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" asp-for="AccountType" asp-items="Helpers.TransactionCodeAccountTypes"></select>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            (* Denotes Required Field)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input class="btn btn-block btn-info" type="submit" value="Update" data-form-action="@Url.Action("Edit", "TransactionCode")" />
+                                </div>
+                                <div class="col-md-4">
+                                    @Html.ActionLink("Back", "Index", null, null, new { @class = "btn btn-block btn-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

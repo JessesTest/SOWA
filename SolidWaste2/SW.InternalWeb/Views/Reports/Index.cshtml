@@ -90,17 +90,8 @@
                                     @Html.TextBoxFor(m => m.WorkOrder.DriverInitials, new { @class = "form-control" })
                                 </div>
                                 <div class="col-md-6">
-                                    @{
-                                        var customerTypes = new List<SelectListItem>
-                                        {
-                                        new SelectListItem { Value =  "", Text = "All" },
-                                        new SelectListItem { Value = "C", Text = "Commercial" },
-                                        new SelectListItem { Value = "H", Text = "Home Owners Assocation" },
-                                        new SelectListItem { Value = "R", Text = "Residential" }
-                                        };
-                                    }
-                                    <label for="@Html.NameFor(m => m.WorkOrder.CustomerType)">Customer Type</label>
-                                    @Html.DropDownListFor(m => m.WorkOrder.CustomerType, customerTypes, new { @class = "form-control" })
+                                    <label for="@Html.NameFor(m => m.WorkOrder.CustomerType)">Customer Type</label>                                    
+                                    <select class="form-control" asp-for="WorkOrder.CustomerType" asp-items="Helpers.CustomerTypes"></select>
                                 </div>
                             </div>
                             <div class="row form-group">
@@ -133,7 +124,7 @@
                 <section class="panel panel-primary">
                     <header class="panel-heading font-bold">Collection Agency Reports</header>
                     <div class="panel-body">
-                        @using (Html.BeginForm("Deliquents", "Reports", FormMethod.Post))
+                        @using (Html.BeginForm("Delinquents", "Reports", FormMethod.Post))
                         {
                             <div class="row">
                                 <div class="col-sm-8">
@@ -318,12 +309,12 @@
                                 </div>
                             </div>
                         }
-                        @using (Html.BeginForm("HolidayCalendar", "Reports", FormMethod.Post))
+                        @using (Html.BeginForm("ActiveCustomerList", "Reports", FormMethod.Post))
                         {
                             <div class="col-xs-12">
                                 <div class="row form-group" style="background-color: gainsboro">
                                     <div class="col-xs-10">
-                                        Holiday Calendar
+                                        Active Customer List
                                     </div>
                                     <div class="col-xs-2">
                                         <button type="submit" class="btn btn-sm btn-default">Submit</button>
@@ -409,7 +400,8 @@
             </div>
         </section>
     </div>
-    <div class="col-md-6">
+    @*SOWA-56: SW Batch Billing Telerik Report Testing*@
+    @*<div class="col-md-6">
         <div class="panel panel-primary">
             <header class="panel-heading font-bold">SW Batch Billing</header>
             <div class="panel-body">
@@ -439,7 +431,7 @@
                 }
             </div>
         </div>
-    </div>
+    </div>*@
 </div>
 
 <br />
