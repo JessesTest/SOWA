@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using PE.DM;
-using System.Linq.Expressions;
 using System.Text;
 
 namespace SW.InternalWeb.Extensions;
@@ -68,5 +64,24 @@ public static class Extensions
             sb.Append("...");
 
         return sb.ToString();
+    }
+
+    public static bool IsAjaxRequest(this HttpRequest request)
+    {
+        if (request == null)
+        {
+            throw new ArgumentNullException("request");
+        }
+
+        //return (request["X-Requested-With"] == "XMLHttpRequest") || ((request.Headers != null) && (request.Headers["X-Requested-With"] == "XMLHttpRequest"))
+        return request.Headers["X-Requested-With"] == "XMLHttpRequest";
+    }
+
+    public static void AddXAlertMessage(this HttpResponse response, string message)
+    {
+        if (response == null)
+            return;
+
+        response.Headers.TryAdd("X-Alert-Message", message);
     }
 }

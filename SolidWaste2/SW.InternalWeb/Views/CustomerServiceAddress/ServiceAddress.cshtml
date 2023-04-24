@@ -1,0 +1,304 @@
+﻿@model SW.InternalWeb.Models.CustomerServiceAddress.ServiceAddressMasterViewModel
+
+@Html.HiddenFor(m => m.ServiceAddress.Id)
+@Html.HiddenFor(m => m.ServiceAddress.CustomerId)
+@Html.HiddenFor(m => m.ServiceAddress.CustomerType)
+@Html.HiddenFor(m => m.AddressCount)
+@Html.HiddenFor(m => m.AddressIndex)
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-horizontal">
+            <div class="row">
+                <div class="col-md-3">
+                    <button class="btn btn-sm btn-dark ajax-button" type="submit" data-no-val-action="@Url.Action("PreviousAddress", "CustomerServiceAddress")">
+                        <span class="glyphicon glyphicon-arrow-left"></span>
+                    </button>
+                    &nbsp;
+                    <button class="btn btn-sm btn-dark ajax-button" type="submit" data-no-val-action="@Url.Action("NextAddress", "CustomerServiceAddress")">
+                        <span class="glyphicon glyphicon-arrow-right"></span>
+                    </button>
+                </div>
+                <div class="col-md-9">
+                    @if (Model.ServiceAddress.Id > 0)
+                    {
+                        <label class="control-label font-bold">Displaying @Model.AddressIndex of @Model.AddressCount service addresses</label>
+                    }
+                    else
+                    {
+                        <label class="control-label font-bold">New Service Address</label>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 text-right">
+        @if (Model.ServiceAddress.Id > 0)
+        {
+            if (Model.Customer.CancelDate == null)
+            {
+                <button type="submit" class="btn btn-info btn-s-xs" data-form-action='@Url.Action("ClearAddress", "CustomerServiceAddress")'>New Address</button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-info btn-s-xs" data-form-action='@Url.Action("ReactivateCustomer", "CustomerServiceAddress")'>Reactivate Customer</button>
+            }
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <hr />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default margin-vertical-0">
+                    <div class="panel-body" id="ServiceAddressPanel">
+                        @if (Model.ServiceAddressList != null)
+                        {
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <select name="ServiceAddressListIndex" class="form-control">
+                                        @{ int i = 0; }
+                                        @foreach(var temp in Model.ServiceAddressList)
+                                        {
+                                            <option value="@i">@temp.Address @temp.City @temp.State @temp.Zip</option>
+                                            i++;
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-block btn-primary" data-form-action="@Url.Action("SelectAddress", "CustomerServiceAddress")">Select</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <hr />
+                                </div>
+                            </div>
+                        }
+                        <div class="row form-group">
+                            <div class="col-md-6">
+                                @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.EffectiveDate, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.ServiceAddress.EffectiveDate, "{0:MM/dd/yyyy}", new { @class = "form-control address-group", @readonly = "readonly", @autocomplete = "off" })
+                                }
+                                else
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.EffectiveDate, new { @class = "control-label font-bold" }) <em>*</em>
+                                    @Html.TextBoxFor(m => m.ServiceAddress.EffectiveDate, "{0:MM/dd/yyyy}", new { @class = "form-control address-group", data_provide = "datepicker", @autocomplete = "off" })
+                                }
+                                <span asp-validation-for="ServiceAddress.EffectiveDate"></span>
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.ServiceAddress.CancelDate, new { @class = "control-label font-bold" })
+                                @Html.TextBoxFor(m => m.ServiceAddress.CancelDate, "{0:MM/dd/yyyy}", new { @class = "form-control address-group", data_provide = "datepicker", @autocomplete = "off" })
+                                <span asp-validation-for="ServiceAddress.CancelDate"></span>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-12">
+                                @Html.LabelFor(m => m.ServiceAddress.LocationName, new { @class = "control-label font-bold" }) <em>*</em>
+                                @Html.TextBoxFor(m => m.ServiceAddress.LocationName, new { @class = "form-control address-group" })
+                                <span asp-validation-for="ServiceAddress.LocationName"></span>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-12">
+                                @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.AddressLine, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.ServiceAddress.AddressLine, new { @class = "form-control address-group", @readonly = "readonly"})
+                                }
+                                else
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.AddressLine, new { @class = "control-label font-bold" }) <em>*</em>
+                                    @Html.TextBoxFor(m => m.ServiceAddress.AddressLine, new { @class = "form-control address-group" })
+                                }
+                                <span asp-validation-for="ServiceAddress.AddressLine"></span>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-6">
+                                @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.City, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.ServiceAddress.City, new { @class = "form-control address-group", @readonly = "readonly" })
+                                }
+                                else
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.City, new { @class = "control-label font-bold" }) <em>*</em>
+                                    @Html.TextBoxFor(m => m.ServiceAddress.City, new { @class = "form-control address-group" })
+                                }
+                                <span asp-validation-for="ServiceAddress.City"></span>
+                            </div>
+                            <div class="col-md-2 text-nowrap">
+                                @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.State, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.ServiceAddress.State, new { @class = "form-control address-group", @readonly = "readonly" })
+                                }
+                                else
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.State, new { @class = "control-label font-bold" }) <em>*</em>
+                                    @Html.TextBoxFor(m => m.ServiceAddress.State, new { @class = "form-control address-group" })
+                                }
+                                <span asp-validation-for="ServiceAddress.State"></span>
+                            </div>
+                            <div class="col-md-4">
+                                @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.Zip, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.ServiceAddress.Zip, new { @class = "form-control address-group", @readonly = "readonly" })
+                                }
+                                else
+                                {
+                                    @Html.LabelFor(m => m.ServiceAddress.Zip, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.ServiceAddress.Zip, new { @class = "form-control address-group" })
+                                }
+                                <span asp-validation-for="ServiceAddress.Zip"></span>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-12">
+                                @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
+                                {
+                                    @Html.CheckBoxFor(m => m.ServiceAddress.AddressOverride, new { @class = "checkbox-inline address-group", @onclick = "return false" })
+                                    @Html.LabelFor(m => m.ServiceAddress.AddressOverride, new { @class = "control-label font-bold" })
+
+                                    <br />
+                                }
+                                else
+                                {
+                                    @Html.CheckBoxFor(m => m.ServiceAddress.AddressOverride, new { @class = "checkbox-inline address-group" })
+                                    @Html.LabelFor(m => m.ServiceAddress.AddressOverride, new { @class = "control-label font-bold" })
+
+                                    <br />
+                                }
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-12">
+                                @Html.LabelFor(m => m.ServiceAddress.LocationContact, new { @class = "control-label font-bold" })
+                                @Html.TextBoxFor(m => m.ServiceAddress.LocationContact, new { @class = "form-control address-group" })
+                                <span asp-validation-for="ServiceAddress.LocationContact"></span>
+                            </div>
+                        </div>
+
+                        <div class="row ">
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.ServiceAddress.Phone, new { @class = "control-label font-bold" })
+                                @Html.TextBoxFor(m => m.ServiceAddress.Phone, new { @class = "form-control address-group mask-phone" })
+                                <span asp-validation-for="ServiceAddress.Phone"></span>
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.ServiceAddress.Email, new { @class = "control-label font-bold" })
+                                @Html.TextBoxFor(m => m.ServiceAddress.Email, new { @class = "form-control address-group" })
+                                <span asp-validation-for="ServiceAddress.Email"></span>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                (* Denotes Required Field)
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <hr />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                @if (Model.ServiceAddress.Id > 0)
+                                {
+                                    if (Model.ServiceAddress.CancelDate == null)
+                                    {
+                                        <button type="submit" class="btn btn-danger btn-s-xs" data-form-action='@Url.Action("SaveAddress", "CustomerServiceAddress")' data-form-group="address-group">Update</button>
+                                    }
+                                    else
+                                    {
+                                        if (Model.Customer.CancelDate == null)
+                                        {
+                                            <button type="submit" class="btn btn-danger btn-s-xs" data-form-action='@Url.Action("SaveAddress", "CustomerServiceAddress")' data-form-group="address-group">Update</button>
+                                            <button type="submit" class="btn btn-info btn-s-xs" data-form-action='@Url.Action("ReactivateAddress", "CustomerServiceAddress")' data-form-group="address-group">Reactivate Service Address</button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="btn btn-danger btn-s-xs" data-form-action='@Url.Action("SaveAddress", "CustomerServiceAddress")' data-form-group="address-group">Update</button>
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-danger btn-s-xs" data-form-action='@Url.Action("SaveAddress", "CustomerServiceAddress")' data-form-group="address-group">Save New Address</button>
+                                    <button class="btn btn-s-xs btn-info" type="submit" data-no-val-action="@Url.Action("NextAddress", "CustomerServiceAddress")">Cancel</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    @if (Model.ServiceAddress.Id > 0)
+    {
+        <div class="col-md-6">
+            <div class="row form-group">
+                <div class="col-md-12">
+                    <div class="panel panel-default margin-vertical-0">
+                        <div class="panel-body" id="ContainerPanel">
+                            <partial name="Container" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default margin-vertical-0">
+                        <div class="panel-body" id="NotePanel">
+                            <partial name="Note" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-6" style="display: none">
+            <div class="row form-group">
+                <div class="col-md-12">
+                    <div class="panel panel-default margin-vertical-0">
+                        <div class="panel-body" id="ContainerPanel">
+                            <partial name="Container" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default margin-vertical-0">
+                        <div class="panel-body" id="NotePanel">
+                            <partial name="Note" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

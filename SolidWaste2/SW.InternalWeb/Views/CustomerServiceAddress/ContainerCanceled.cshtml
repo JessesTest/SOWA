@@ -1,0 +1,110 @@
+﻿@model SW.InternalWeb.Models.CustomerServiceAddress.ServiceAddressMasterViewModel
+@inject SW.InternalWeb.Services.BillingSizeSelectItemsService billingSizeService
+@inject SW.InternalWeb.Services.ContainerCodeSelectItemsService containerCodeService
+@inject SW.InternalWeb.Services.ContainerSubtypeSelectItemsService containerSubtypeService
+@{
+    var billingSizes = await billingSizeService.Get(
+        Model.Container.ContainerCodeId,
+        Model.Container.ContainerSubtypeID,
+        Model.Container.DaysOfService,
+        Model.Container.EffectiveDate);
+    var deliveredTypes = SW.InternalWeb.Extensions.Helpers.ContainerDeliveredTypes;
+    var containerCodes = await containerCodeService.Get();
+    var containerSubtypes = await containerSubtypeService.Get();
+}
+
+<div class="row form-group">
+    <div class="col-md-4">
+        @Html.LabelFor(m => m.Container.EffectiveDate, new { @class = "control-label font-bold " })
+        @Html.TextBoxFor(m => m.Container.EffectiveDate, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", @readonly = "readonly", @autocomplete = "off" })
+    </div>
+    <div class="col-md-8">
+        @Html.LabelFor(m => m.Container.Delivered, new { @class = "control-label font-bold" })
+        @Html.DropDownListFor(m => m.Container.Delivered, deliveredTypes, new { @class = "form-control container-group" })
+        <span asp-validation-for="Container.Delivered"></span>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col-md-12">
+        @Html.LabelFor(m => m.Container.ContainerCodeId, new { @class = "control-label font-bold" })
+        @Html.DropDownListFor(m => m.Container.ContainerCodeId, containerCodes, new { @class = "form-control container-group", @disabled = "disabled" })
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col-md-12">
+        @Html.LabelFor(m => m.Container.ContainerSubtypeID, new { @class = "control-label font-bold" })
+        @Html.DropDownListFor(m => m.Container.ContainerSubtypeID, containerSubtypes, new { @class = "form-control container-group", @disabled = "disabled" })
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-2 text-center">
+                @Html.LabelFor(m => m.Container.MonService, new { @class = "control-label font-bold" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.LabelFor(m => m.Container.TueService, new { @class = "control-label font-bold" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.LabelFor(m => m.Container.WedService, new { @class = "control-label font-bold" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.LabelFor(m => m.Container.ThuService, new { @class = "control-label font-bold" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.LabelFor(m => m.Container.FriService, new { @class = "control-label font-bold" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.LabelFor(m => m.Container.SatService, new { @class = "control-label font-bold" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 text-center">
+                @Html.CheckBoxFor(m => m.Container.MonService, new { @class = "checkbox-inline container-group", @onclick = "return false" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.CheckBoxFor(m => m.Container.TueService, new { @class = "checkbox-inline container-group", @onclick = "return false" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.CheckBoxFor(m => m.Container.WedService, new { @class = "checkbox-inline container-group", @onclick = "return false" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.CheckBoxFor(m => m.Container.ThuService, new { @class = "checkbox-inline container-group", @onclick = "return false" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.CheckBoxFor(m => m.Container.FriService, new { @class = "checkbox-inline container-group", @onclick = "return false" })
+            </div>
+            <div class="col-md-2 text-center">
+                @Html.CheckBoxFor(m => m.Container.SatService, new { @class = "checkbox-inline container-group", @onclick = "return false" })
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        @Html.LabelFor(m => m.Container.RouteNumber, new { @class = "control-label font-bold" })
+        @Html.TextBoxFor(m => m.Container.RouteNumber, new { @class = "form-control container-group", @readonly = "readonly" })
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col-md-8">
+        @Html.LabelFor(m => m.Container.BillingSize, new { @class = "control-label font-bold" })
+        @*@Html.TextBoxFor(m => m.Container.BillingSize, new { @class = "form-control container-group", @readonly = "readonly" })*@
+        @Html.DropDownListFor(m => m.Container.BillingSize, billingSizes, new { @class = "form-control container-group", @disabled = "disabled" })
+    </div>
+    <div class="col-md-4">
+        @Html.LabelFor(m => m.Container.ActualSize, new { @class = "control-label font-bold" })
+        @Html.TextBoxFor(m => m.Container.ActualSize, new { @class = "form-control container-group", @readonly = "readonly" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        @Html.LabelFor(m => m.Container.CancelDate, new { @class = "control-label font-bold" })
+        @Html.TextBoxFor(m => m.Container.CancelDate, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", @readonly = "readonly", @autocomplete = "off" })
+    </div>
+    <div class="col-md-4">
+        @Html.LabelFor(m => m.Container.AdditionalCharge, new { @class = "control-label font-bold" })
+        @Html.TextBoxFor(m => m.Container.AdditionalCharge, new { @class = "form-control container-group", @readonly = "readonly" })
+    </div>
+</div>
