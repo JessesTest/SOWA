@@ -19,6 +19,8 @@ public class BillMasterService : IBillMasterService
         return await db.BillMasters
             .Where(e => e.TransactionId == transactionId)
             .Include(e => e.BillServiceAddresses)
+            .ThenInclude(e => e.BillContainerDetails)
+            .AsSplitQuery()
             .AsNoTracking()
             .SingleOrDefaultAsync();
     }
@@ -32,7 +34,6 @@ public class BillMasterService : IBillMasterService
             .AsNoTracking()
             .FirstOrDefaultAsync();
     }
-
 
     public async Task<BillMaster> GetPreviousBillMaster(int customerId)
     {
