@@ -14,4 +14,18 @@ public class ServiceAddressNote
     public string DelToi { get; set; }
 
     public virtual ServiceAddress ServiceAddress { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        return obj is ServiceAddressNote other &&
+            Id == other.Id &&
+            Id > 0;
+    }
+
+    public override int GetHashCode()
+    {
+        HashCode hash = new();
+        hash.Add(Id);
+        return hash.ToHashCode();
+    }
 }

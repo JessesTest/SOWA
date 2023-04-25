@@ -1,0 +1,10 @@
+﻿@model SW.InternalWeb.Models.CustomerServiceAddress.ServiceAddressMasterViewModel
+@inject SW.InternalWeb.Services.BillingSizeSelectItemsService itemsService
+@{
+    var billingSizes = await itemsService.Get(
+        Model.Container.ContainerCodeId,
+        Model.Container.ContainerSubtypeID,
+        Model.Container.DaysOfService,
+        Model.Container.EffectiveDate);
+}
+<select asp-for="Container.BillingSize" asp-items="billingSizes" class="form-control container-group"></select>

@@ -44,4 +44,16 @@ public class ServiceAddress
 
     [NotMapped]
     public PE.DM.Address PEAddress { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        return obj is ServiceAddress other &&
+            Id == other.Id &&
+            Id > 0;
+    }
+
+    public override int GetHashCode()
+    {
+        return $"ServiceAddress:{Id}".GetHashCode();
+    }
 }

@@ -16,6 +16,7 @@ using PE.DAL.Extensions;
 using StackifyLib;
 using SW.BLL.Extensions;
 using SW.DAL.Extensions;
+using SW.InternalWeb.Extensions;
 using SW.InternalWeb.Identity;
 using SW.Reporting.Services;
 
@@ -67,7 +68,8 @@ try
         .AddIdentityDbContext(configuration)
         .AddIdentityServices()
         .AddSolidWasteDbContext(configuration)
-        .AddSolidWasteServices(configuration);
+        .AddSolidWasteServices(configuration)
+        .AddInternalWebServices();
 
     // session state
     builder.Services

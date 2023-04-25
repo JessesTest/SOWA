@@ -84,4 +84,16 @@ public static class Helpers
             new SelectListItem { Text = "M - Miscellaneous", Value = "M" },
             new SelectListItem { Text = "P - Payment", Value = "P" }
         };
+
+    public static IEnumerable<SelectListItem> ContainerDeliveredTypes =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Text = " ", Value = " " },
+            new SelectListItem { Text = "Scheduled for Delivery", Value = "Scheduled for Delivery" },
+            new SelectListItem { Text = "Delivered", Value = "Delivered" },
+            new SelectListItem { Text = "Customer Container", Value = "Customer Container" },
+            new SelectListItem { Text = "Rejected", Value = "Rejected" },
+            new SelectListItem { Text = "Returned", Value = "Returned" },
+            new SelectListItem { Text = "Scheduled for Pick Up", Value = "Scheduled for Pick Up" }
+        };
 }
