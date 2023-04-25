@@ -97,6 +97,22 @@ public class TransactionService : ITransactionService
             .FirstOrDefaultAsync();
     }
 
+    public async Task<ICollection<Transaction>> GetAllUnpaidLateFeesByCustomerId(int customerId)
+    {
+        using var db = dbFactory.CreateDbContext();
+        var customer = await db.GetCustomerById(customerId);
+        var code = await db.GetTransactionCodeByCode("LF");
+
+        return await db.Transactions
+            .Where(e => e.CustomerId == customer.CustomerId
+                && e.TransactionCodeId == code.TransactionCodeId
+                && (!e.PaidFull.HasValue || !e.PaidFull.Value)
+                && !e.DeleteFlag)
+            .Include(e => e.TransactionCode)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     #endregion
 
     #region Delinquency
