@@ -29,4 +29,7 @@ public interface ITransactionService
 
     // KanPay
     Task AddKanpayTransaction(Transaction transaction, TransactionKanPayFee fee, int kanpayid, string user);
+
+
+    Task<DateTime> GetLastBillTranDateTime(int customerID, DateTime billAddDateTime);
 }
