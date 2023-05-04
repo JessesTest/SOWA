@@ -1,0 +1,6 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.ContainerViewModel
+@inject SW.InternalWeb.Services.ContainerSubtypeSelectItemsService subtypeService
+@{
+    var containerSubtypes = await subtypeService.Get(Model.ContainerCodeId);
+}
+@Html.DropDownListFor(m => m.ContainerSubtypeId, containerSubtypes, new { @class = "form-control" })

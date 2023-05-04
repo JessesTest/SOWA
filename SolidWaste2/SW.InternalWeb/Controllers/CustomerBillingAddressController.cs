@@ -1,4 +1,5 @@
 ﻿using Common.Services.AddressValidation;
+using Common.Web.Extensions.Alerts;
 using Microsoft.AspNetCore.Mvc;
 using PE.BL.Services;
 using PE.DM;
@@ -39,15 +40,11 @@ public class CustomerBillingAddressController : Controller
         HttpContext.Session.Remove("CustomerBillingAddress.Addresses");
 
         var customer = await customerService.GetById(customerId);
-        if (customer == null || customer.DelDateTime != null)
-            return NotFound();
+        if (customer == null)
+            return RedirectToAction("Index", "CustomerInquiry")
+                .WithWarning("", "Customer not found");
 
         var personEntity = await personEntityService.GetById(customer.Pe);
-        if (personEntity.Pab == true)
-        {
-            ModelState.AddModelError("warning", "Account has undeliverable address.");
-        }
-
         var addresses = await addressService.GetByPerson(personEntity.Id, false);
         var ad = addresses.SingleOrDefault(a => !a.Delete && a.Code.Code1 == "B" && a.IsDefault);
 
@@ -56,134 +53,127 @@ public class CustomerBillingAddressController : Controller
         {
             model = new()
             {
-                //Addresses
-                AddressLine1 = ad.FormatAddress(),
-                Apt = ad.Apt,
-                City = ad.City,
-                //CustomerID 
-                //CustomerType
-                Direction = ad.Direction,
                 Id = ad.Id,
-                Number = ad.Number?.ToString(),
                 Override = ad.Override,
-                //SelectIndex
+                AddressLine1 = ad.FormatAddressLine1(),
+                AddressLine2 = ad.FormatAddressLine2(),
+                City = ad.City,
                 State = ad.State,
-                StreetName = ad.StreetName,
-                Suffix = ad.Suffix,
-                //Undeliverable
-                Zip = ad.Zip
+                Zip = ad.Zip,
+                CustomerId = customer.CustomerId,
+                Undeliverable = personEntity.Pab
             };
         }
         else
         {
             model = new()
             {
-                State = "KS"
+                State = "KS",
+                CustomerId = customer.CustomerId,
+                Undeliverable = personEntity.Pab
             };
         }
-        model.CustomerID = customer.CustomerId;
-        model.CustomerType = customer.CustomerType;
-        model.Undeliverable = personEntity.Pab;
 
-        if (customer.PaymentPlan)
-            ModelState.AddModelError("info", "Customer has a payment plan.");
-
-        return View(model);
+        return View(model)
+            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.")
+            .WithInfoWhen(personEntity.Pab == true, "", "Account has undeliverable address.");
     }
 
     [HttpPost]
     public async Task<IActionResult> Index(CustomerBillingAddressViewModel model)
     {
-        var customer = await customerService.GetById(model.CustomerID);
-        if (customer.PaymentPlan)
-            ModelState.AddModelError("info", "Customer has a payment plan.");
+        var customer = await customerService.GetById(model.CustomerId);
+        if (customer == null)
+            return RedirectToAction("Index", "CustomerInquiry")
+                .WithWarning("", "Customer not found");
+
+        var personEntity = await personEntityService.GetById(customer.Pe);
+        var updated = false;
+        string additionalInfo = null;
 
         if (!ModelState.IsValid)
         {
-            ModelState.AddModelError("exception", "There are field errors");
+            return View(model)
+                .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.")
+                .WithInfoWhen(personEntity.Pab == true, "", "Account has undeliverable address.")
+                .WithWarning("", "There are field errors");
         }
-        else if (model.Override && model.Zip == null)
+        if (model.Override && model.Zip == null)
         {
-            ModelState.AddModelError("exception", "Zip code Required if address override is checked");
+            ModelState.AddModelError(nameof(model.Zip), "Zip code Required if address override is checked");
         }
         else if (model.State.ToUpper() != "KS" && model.Zip == null)
         {
-            ModelState.AddModelError("exception", "Zip code Required if State is not KS");
+            ModelState.AddModelError(nameof(model.Zip), "Zip code Required if State is not KS");
         }
-        else if (await Process(model))
+        else
         {
-            await Update(model, customer);
+            additionalInfo = await Process(model);
+
+            if(ModelState.ErrorCount == 0 && additionalInfo == null)
+            {
+                await Update(model, customer);
+                updated = true;
+            }
         }
 
-        return View(model);
+        return View(model)
+            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.")
+            .WithInfoWhen(personEntity.Pab == true, "", "Account has undeliverable address.")
+            .WithInfoWhen(additionalInfo != null, "", additionalInfo)
+            .WithSuccessWhen(updated, "", "Billing address updated");
     }
 
-    private async Task<bool> Process(CustomerBillingAddressViewModel model)
+    private async Task<string> Process(CustomerBillingAddressViewModel model)
     {
         if (model.Override || (model.State != null && model.State.ToUpper() != "KS"))
         {
-            model.Number = "";
-            model.Direction = "";
-            model.StreetName = model.AddressLine1;
-            model.Suffix = "";
-            model.Apt = "";
-            return true;
+            return null;
         }
-        if (!model.Override)
+        if (model.City == null || model.City.Trim().Length == 0)
         {
-            if (model.City == null || model.City.Trim().Length == 0)
-            {
-                ModelState.AddModelError("exception", "City is required.");
-                return false;
-            }
-            if (model.State == null || model.State.Trim().Length == 0)
-            {
-                ModelState.AddModelError("exception", "State is required.");
-                return false;
-            }
+            ModelState.AddModelError(nameof(model.City), "City is required.");
+            return null;
+        }
+        if (model.State == null || model.State.Trim().Length == 0)
+        {
+            ModelState.AddModelError(nameof(model.State), "State is required.");
+            return null;
         }
 
         ICollection<ValidAddress> temp;
         try
         {
-            temp = await addressValidationService.GetCandidates(model.AddressLine1, model.City, model.Zip, 2);
+            temp = await addressValidationService.GetCandidates(model.AddressLine1, model.City, model.Zip, 8);
         }
         catch (Exception)
         {
-            ModelState.AddModelError("exception", "Address not found.");
-            return false;
+            return "Address not found.";
         }
 
         if (temp.Count == 0)
         {
-            ModelState.AddModelError("exception", "Address not found");
-            return false;
+            return "Address not found";
         }
 
         if (temp.Count == 1)
         {
             var a = temp.First();
-            model.Number = "";
-            model.Direction = "";
-            model.StreetName = a.Address;
-            model.Suffix = "";
-            model.Apt = "";
+            model.AddressLine1 = a.Address;
+            //model.AddressLine2
             model.City = a.City;
             model.State = a.State;
             model.Zip = a.Zip;
-            return true;
+            return null;
         }
 
         ModelState.Clear();
 
         model.Addresses = temp
-            .Select(a => new CustomerBillingAddressViewModel
+            .Select(a => new ValidAddressDto
             {
-                Number = "",
-                Direction = "",
-                StreetName = a.Address,
-                Suffix = "",
-                Apt = "",
+                AddressLine1 = a.Address,
+                AddressLine2 = model.AddressLine2,
                 City = a.City,
                 State = a.State,
                 Zip = a.Zip
@@ -192,16 +182,15 @@ public class CustomerBillingAddressController : Controller
 
         HttpContext.Session.SetString("CustomerBillingAddress.Addresses", System.Text.Json.JsonSerializer.Serialize(model.Addresses));
 
-        ModelState.AddModelError("info", "Select an address from the list");
-        return false;
+        return "Select an address from the list";
     }
 
     private async Task Update(CustomerBillingAddressViewModel model, Customer customer)
     {
         Address ad;
-        if (model.Id.HasValue && model.Id.Value > 0)
+        if (model.Id > 0)
         {
-            ad = await addressService.GetById(model.Id.Value);
+            ad = await addressService.GetById(model.Id);
             ad.ChgDateTime = DateTime.Now;
             ad.ChgToi = User.Identity.Name;
         }
@@ -217,43 +206,53 @@ public class CustomerBillingAddressController : Controller
                 Type = addressType.Id,
             };
         }
-        ad.Number = int.TryParse(model.Number, out var parsedInt) ? parsedInt : null;
-        ad.Direction = model.Direction;
-        ad.StreetName = model.StreetName;
-        ad.Suffix = model.Suffix;
-        ad.Apt = model.Apt;
+        ad.Number = null;
+        ad.Direction = null;
+        ad.StreetName = model.AddressLine1;
+        ad.Suffix = null;
+        ad.Apt = model.AddressLine2;
         ad.City = model.City;
         ad.State = model.State;
         ad.Zip = model.Zip;
 
-        if (model.Id.HasValue)
+        if (model.Id > 0)
             await addressService.Update(ad);
         else
             await addressService.Add(ad);
 
         HttpContext.Session.Remove("CustomerBillingAddress.Addresses");
         ModelState.Clear();
-        model.AddressLine1 = ad.FormatAddress();
-        ModelState.AddModelError("success", "Address updated");
     }
-    #endregion
 
+    #endregion
 
     [HttpPost]
     public async Task<IActionResult> SelectBillingAddress(CustomerBillingAddressViewModel model)
     {
-        var customer = await customerService.GetById(model.CustomerID);
+        var customer = await customerService.GetById(model.CustomerId);
         if (customer == null || customer.DelDateTime != null)
-            return NotFound();
+            return RedirectToAction("Index", "Home").WithDanger("", "Customer not found");
 
         var json = HttpContext.Session.GetString("CustomerBillingAddress.Addresses");
-        var addresses = System.Text.Json.JsonSerializer.Deserialize<CustomerBillingAddressViewModel[]>(json);
+        var addresses = System.Text.Json.JsonSerializer.Deserialize<ValidAddressDto[]>(json);
         var address = addresses[model.SelectIndex];
-        
-        await Update(address, customer);
-        if (customer.PaymentPlan)
-            ModelState.AddModelError("info", "Customer has a payment plan.");
 
-        return View("Index", address);
+        var cbavm = new CustomerBillingAddressViewModel
+        {
+            AddressLine1 = address.AddressLine1,
+            AddressLine2 = address.AddressLine2,
+            City = address.City,
+            State = address.State,
+            Zip = address.Zip,
+            CustomerId = model.CustomerId,
+            Id = model.Id
+            //Override = false,
+            //SelectIndex = 0,
+            //Undeliverable = model.Undeliverable
+        };
+
+        await Update(cbavm, customer);
+
+        return RedirectToAction("Index", new { customerId = customer.CustomerId });
     }
 }

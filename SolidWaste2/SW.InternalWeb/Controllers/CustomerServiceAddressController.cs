@@ -63,6 +63,7 @@ public class CustomerServiceAddressController : Controller
         
         var address = addresses
             .OrderBy(a => a.CancelDate)
+            .ThenByDescending(a => a.LocationNumber)
             .FirstOrDefault();
 
         return RedirectToAction(nameof(EditAddress), new { id = address?.Id });
@@ -76,6 +77,7 @@ public class CustomerServiceAddressController : Controller
 
         var serviceAddresses = (await serviceAddressService.GetByCustomer(serviceAddress.CustomerId))
             .OrderBy(a => a.CancelDate)
+            .ThenByDescending(a => a.LocationNumber)
             .ToList();
 
         var customer = await customerService.GetById(serviceAddress.CustomerId);
@@ -120,7 +122,8 @@ public class CustomerServiceAddressController : Controller
             AddressIndex = serviceAddresses.IndexOf(serviceAddress) + 1,
             ServiceAddress = new()
             {
-                AddressLine = address?.FormatAddress(),
+                AddressLine1 = address?.FormatAddressLine1(),
+                AddressLine2 = address?.FormatAddressLine2(),
                 City = address?.City,
                 State = address?.State,
                 Zip = address?.Zip,
@@ -150,34 +153,8 @@ public class CustomerServiceAddressController : Controller
             ContainerCount = serviceAddress.Containers.Count,
             ContainerIndex = 1,
 
-            Customer = new()
-            {
-                //Account
-                //ActiveImages
-                CancelDate = customer.CancelDate,
-                //CollectionsBalance
-                Contact = customer.Contact,
-                ContractCharge = customer.ContractCharge?.ToString("0.00"),
-                //CounselorsBalance
-                //CurrentBalance
-                CustomerID = customer.CustomerId,
-                CustomerType = customer.CustomerType,
-                EffectiveDate = customer.EffectiveDate,
-                //FullName
-                //InactiveImages
-                LegacyCustomerID = customer.LegacyCustomerId,
-                NameAttn = customer.NameAttn,
-                //NameTypeFlag
-                Notes = customer.Notes,
-                //PastDue30Days
-                //PastDue60Days
-                //PastDue90Days
-                //PastDueAmount
-                PurchaseOrder = customer.PurchaseOrder,
-                //UncollectableBalance
-            },
-
-            FullName = person.FullName
+            FullName = person.FullName,
+            CustomerCancelDate = customer.CancelDate
         };
 
         ModelState.Clear();
@@ -217,33 +194,8 @@ public class CustomerServiceAddressController : Controller
         {
             AddressCount = serviceAddresses.Count,
             AddressIndex = 0,
-            Customer = new()
-            {
-                //Account
-                //ActiveImages
-                CancelDate = customer.CancelDate,
-                //CollectionsBalance
-                Contact = customer.Contact,
-                ContractCharge = customer.ContractCharge?.ToString("0.00"),
-                //CounselorsBalance
-                //CurrentBalance
-                CustomerID = customer.CustomerId,
-                CustomerType = customer.CustomerType,
-                EffectiveDate = customer.EffectiveDate,
-                //FullName
-                //InactiveImages
-                LegacyCustomerID = customer.LegacyCustomerId,
-                NameAttn = customer.NameAttn,
-                //NameTypeFlag
-                Notes = customer.Notes,
-                //PastDue30Days
-                //PastDue60Days
-                //PastDue90Days
-                //PastDueAmount
-                PurchaseOrder = customer.PurchaseOrder,
-                //UncollectableBalance
-            },
             FullName = person.FullName,
+            CustomerCancelDate = customer.CancelDate,
             ServiceAddress = new()
             {
                 CustomerId = customer.CustomerId,
@@ -292,29 +244,34 @@ public class CustomerServiceAddressController : Controller
     [HttpPost]
     public async Task<IActionResult> SaveAddress(ServiceAddressMasterViewModel model)
     {
-        ModelState.Clear();
+        return await SaveAddressInternal(model);
+    }
+
+    private async Task<IActionResult> SaveAddressInternal(ServiceAddressMasterViewModel model)
+    {
         if (!TryValidateModel(model.ServiceAddress))
         {
-            ModelState.AddModelError("exception", "Invalid Service Address");
-            return View("Index", model);
+            return View("Index", model)
+                .WithWarning("", "Invalid Service Address");
         }
 
         var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
-        var serviceAddresses = await serviceAddressService.GetByCustomer(customer.CustomerId);
-        var person = await personService.GetById(customer.Pe);
 
         ServiceAddress serviceAddress;
-        Address address;
-        if(model.ServiceAddress.Id > 0)
+        if (model.ServiceAddress.Id > 0)
         {
-            serviceAddress = serviceAddresses.First(a => a.Id == model.ServiceAddress.Id);
-            serviceAddress.PEAddress = person.Addresses.First(a => a.Id == serviceAddress.PeaddressId);
-            address = serviceAddress.PEAddress;
+            serviceAddress = await serviceAddressService.GetById(model.ServiceAddress.Id);
+            serviceAddress.ChgDateTime = DateTime.Now;
+            serviceAddress.ChgToi = User.GetNameOrEmail();
+            serviceAddress.EffectiveDate = model.ServiceAddress.EffectiveDate;
+            serviceAddress.CancelDate = model.ServiceAddress.CancelDate;
+            serviceAddress.Email = model.ServiceAddress.Email;
+            serviceAddress.LocationContact = model.ServiceAddress.LocationContact?.ToUpper();
+            serviceAddress.LocationName = model.ServiceAddress.LocationName?.ToUpper();
+            serviceAddress.Phone = model.ServiceAddress.Phone?.ToUpper();
         }
         else
         {
-            var peAddressType = await codeService.Get("Address", "S");
-
             serviceAddress = new()
             {
                 AddDateTime = DateTime.Now,
@@ -323,24 +280,52 @@ public class CustomerServiceAddressController : Controller
                 CustomerType = customer.CustomerType,
                 EffectiveDate = model.ServiceAddress.EffectiveDate,
                 Email = model.ServiceAddress.Email,
-                LocationContact = model.ServiceAddress.LocationContact,
-                LocationName = model.ServiceAddress.LocationName,
-                //LocationNumber not used
-                Phone = model.ServiceAddress.Phone,
+                LocationContact = model.ServiceAddress.LocationContact?.ToUpper(),
+                LocationName = model.ServiceAddress.LocationName?.ToUpper(),
+                //LocationNumber assigned in add
+                Phone = model.ServiceAddress.Phone?.ToUpper(),
                 //ServiceType not used
+                CancelDate = model.ServiceAddress.CancelDate
             };
+        }
+
+        Address address;
+        if (serviceAddress.PeaddressId == 0)
+        {
+            var peAddressType = await codeService.Get("Address", "S");
+
             address = new()
             {
                 AddDateTime = DateTime.Now,
                 AddToi = User.GetNameOrEmail(),
                 Override = model.ServiceAddress.AddressOverride,
-                PersonEntityID = person.Id,
-                StreetName = model.ServiceAddress.AddressLine,
-                City = model.ServiceAddress.City,
-                State = model.ServiceAddress.State,
-                Zip = model.ServiceAddress.Zip,
+                PersonEntityID = customer.Pe, //person.Id,
+                StreetName = model.ServiceAddress.AddressLine1?.ToUpper(),
+                Apt = model.ServiceAddress.AddressLine2?.ToUpper(),
+                City = model.ServiceAddress.City?.ToUpper(),
+                State = model.ServiceAddress.State?.ToUpper(),
+                Zip = model.ServiceAddress.Zip?.ToUpper(),
                 Type = peAddressType.Id
+                //Direction = null,
+                //Number = null,
+                //Suffix = null
             };
+        }
+        else
+        {
+            address = await addressService.GetById(serviceAddress.PeaddressId);
+            address.ChgDateTime = DateTime.Now;
+            address.ChgToi = User.GetNameOrEmail();
+            address.StreetName = model.ServiceAddress.AddressLine1?.ToUpper();
+            address.Apt = model.ServiceAddress.AddressLine2?.ToUpper();
+            address.City = model.ServiceAddress.City?.ToUpper();
+            address.State = model.ServiceAddress.State?.ToUpper();
+            address.Zip = model.ServiceAddress.Zip?.ToUpper();
+            //address.Type
+            address.Direction = null;
+            address.Number = null;
+            address.Override = model.ServiceAddress.AddressOverride;
+            address.Suffix = null;
         }
 
         if (serviceAddress.CancelDate != null && serviceAddress.CancelDate.Value <= DateTime.Today)
@@ -350,84 +335,67 @@ public class CustomerServiceAddressController : Controller
         }
 
         var additionalError = await serviceAddressService.TryValidateServiceAddress(serviceAddress);
-        if(additionalError != null)
+        if (additionalError != null)
         {
             return View("Index", model)
                 .WithWarning("Error", additionalError);
         }
 
         // validate address
-        if (model.ServiceAddress.Id == 0 || model.ServiceAddress.EffectiveDate > DateTime.Today.Date)
+        if (model.ServiceAddress.AddressOverride || model.ServiceAddress.State.ToUpper() != "KS")
         {
-            if (model.ServiceAddress.AddressOverride || model.ServiceAddress.State.ToUpper() != "KS")
+            if (string.IsNullOrWhiteSpace(address.Zip))
             {
-                address.Number = null;
-                address.Direction = "";
-                address.StreetName = model.ServiceAddress.AddressLine;
-                address.Suffix = "";
-                address.Apt = "";
-                address.City = model.ServiceAddress.City;
-                address.State = model.ServiceAddress.State;
-                address.Zip = model.ServiceAddress.Zip;
-                if (string.IsNullOrWhiteSpace(address.Zip))
-                {
-                    return View("Index", model)
-                        .WithWarning("Error", "Address Override, Zip code required");
-                }
-                if (string.IsNullOrWhiteSpace(address.State))
-                {
-                    return View("Index", model)
-                        .WithWarning("Error", "Address Override, State required");
-                }
-                if (string.IsNullOrWhiteSpace(address.City))
-                {
-                    return View("Index", model)
-                        .WithWarning("Error", "Address Override, City required");
-                }
+                return View("Index", model)
+                    .WithWarning("Error", "Address Override, Zip code required");
             }
-            else
+            if (string.IsNullOrWhiteSpace(address.State))
             {
-                if (string.IsNullOrWhiteSpace(model.ServiceAddress.City))
-                {
-                    return View("Index", model)
-                        .WithWarning("Error", "City required");
-                }
-                if (model.ServiceAddress.CancelDate < DateTime.Today)
-                {
-                    return View("Index", model)
-                        .WithWarning("Error", $"Cancel Date Before {DateTime.Today:d}");
-                }
-
-                var validAddresses = await addressValidationService.GetCandidates(
-                    model.ServiceAddress.AddressLine,
-                    model.ServiceAddress.City,
-                    model.ServiceAddress.Zip,
-                    10);
-                if (validAddresses.Count == 0)
-                {
-                    return View("Index", model)
-                        .WithWarning("Error", "Address not found");
-                }
-                else if (validAddresses.Count == 1)
-                {
-                    var valid = validAddresses[0];
-                    address.StreetName = valid.Address;
-                    address.City = valid.City;
-                    address.State = valid.State;
-                    address.Zip = valid.Zip;
-
-                    model.ServiceAddress.AddressLine = valid.Address;
-                    model.ServiceAddress.City = valid.City;
-                    model.ServiceAddress.State = valid.State;
-                    model.ServiceAddress.Zip = valid.Zip;
-                }
-                else
-                {
-                    model.ServiceAddressList = validAddresses;
-                    return View("Index", model)
-                        .WithInfo("info", "Select an adddress from the list");
-                }
+                return View("Index", model)
+                    .WithWarning("Error", "Address Override, State required");
             }
+            if (string.IsNullOrWhiteSpace(address.City))
+            {
+                return View("Index", model)
+                    .WithWarning("Error", "Address Override, City required");
+            }
+        }
+
+        if (model.ServiceAddress.CancelDate.HasValue && model.ServiceAddress.CancelDate < DateTime.Today)
+        {
+            return View("Index", model)
+                .WithWarning("Error", $"Cancel Date Before {DateTime.Today:d}");
+        }
+
+        var validAddresses = await addressValidationService.GetCandidates(
+            model.ServiceAddress.AddressLine1,
+            model.ServiceAddress.City,
+            model.ServiceAddress.Zip,
+            8);
+        if (validAddresses.Count == 0)
+        {
+            return View("Index", model)
+                .WithWarning("Error", "Address not found");
+        }
+        else if (validAddresses.Count == 1 || model.ServiceAddressListIndex != null)
+        {
+            var valid = validAddresses[model.ServiceAddressListIndex ?? 0];
+            address.StreetName = valid.Address?.ToUpper();
+            address.Apt = model.ServiceAddress.AddressLine2?.ToUpper();
+            address.City = valid.City?.ToUpper();
+            address.State = valid.State?.ToUpper();
+            address.Zip = valid.Zip?.ToUpper();
+
+            model.ServiceAddress.AddressLine1 = valid.Address;
+            model.ServiceAddress.City = valid.City;
+            model.ServiceAddress.State = valid.State;
+            model.ServiceAddress.Zip = valid.Zip;
+        }
+        else
+        {
+            model.ServiceAddressList = validAddresses;
+            return View("Index", model)
+                .WithInfo("", "Select an adddress from the list");
         }
 
 
@@ -451,98 +419,43 @@ public class CustomerServiceAddressController : Controller
     [HttpPost]
     public async Task<IActionResult> SelectAddress(ServiceAddressMasterViewModel model)
     {
-        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
-        var person = await personService.GetById(customer.Pe);
-        var peAddressType = await codeService.Get("Address", "S");
+        return await SaveAddressInternal(model);
+    }
 
-        //var serviceAddresses = await serviceAddressService.GetByCustomer(customer.CustomerId)
+    private async Task<IActionResult> PageAddress(int step, int customerId, int serviceAddressId)
+    {
+        var addresses = (await serviceAddressService.GetByCustomer(customerId))
+            .OrderBy(a => a.CancelDate)
+            .ThenByDescending(a => a.LocationNumber)
+            .ToList();
 
-        var validAddresses = await addressValidationService.GetCandidates(
-            model.ServiceAddress.AddressLine,
-            model.ServiceAddress.City,
-            model.ServiceAddress.Zip,
-            10);
-        var validAddress = validAddresses[model.ServiceAddressListIndex];
+        if (!addresses.Any())
+            return RedirectToAction(nameof(ClearAddress), new { customerId });
 
-        Address address = new()
-        {
-            Number = null,
-            Direction = null,
-            StreetName = validAddress.Address,
-            Suffix = null,
-            Apt = null,
-            City = validAddress.City,
-            State = validAddress.State,
-            Zip = validAddress.Zip,
-            Override = false,
-            AddDateTime = DateTime.Now,
-            AddToi = User.GetNameOrEmail(),
-            PersonEntityID = person.Id,
-            Type = peAddressType.Id,
-            
-        };
-        ServiceAddress serviceAddress = new()
-        {
-            AddDateTime = DateTime.Now,
-            AddToi = User.GetNameOrEmail(),
-            CustomerId = customer.CustomerId,
-            CustomerType = customer.CustomerType,
-            EffectiveDate = model.ServiceAddress.EffectiveDate,
-            Email = model.ServiceAddress.Email,
-            LocationContact = model.ServiceAddress.LocationContact,
-            LocationName = model.ServiceAddress.LocationName,
-            //LocationNumber = (serviceAddresses.Count + 1).ToString("00"),
-            //PeaddressId
-            Phone = model.ServiceAddress.Phone,
-            ServiceType = null
-        };
+        var address = addresses.FirstOrDefault(a => a.Id == serviceAddressId);
 
-        await addressService.Add(address);
-        serviceAddress.PeaddressId = address.Id;
-        await serviceAddressService.Add(serviceAddress);
+        if (address == null)
+            return RedirectToAction(nameof(EditAddress), new { id = addresses[0].Id });
 
-        //ModelState.Clear();
-        //model.ServiceAddress.AddressLine = validAddress.Address;
-        //model.ServiceAddress.City = validAddress.City;
-        //model.ServiceAddress.State = validAddress.State;
-        //model.ServiceAddress.Zip = validAddress.Zip;
+        var index = addresses.IndexOf(address);
+        index += step;
 
-        return RedirectToAction("EditAddress", new { id = serviceAddress.Id })
-            .WithSuccess("Success", $"Added service address {serviceAddress.LocationNumber} {serviceAddress.LocationName}");
+        if (index < 0)
+            index = addresses.Count - 1;
+        else if (index >= addresses.Count)
+            index = 0;
+
+        return RedirectToAction(nameof(EditAddress), new { id = addresses[index].Id });
     }
 
     public async Task<IActionResult> NextAddress(ServiceAddressMasterViewModel model)
     {
-        ModelState.Clear();
-
-        var serviceAddresses = (await serviceAddressService.GetByCustomer(model.ServiceAddress.CustomerId))
-            .OrderBy(a => a.CancelDate)
-            .ToList();
-
-        if (!serviceAddresses.Any())
-            return await ClearAddress(model);
-
-        int nextIndex = model.AddressIndex; // this is actually the display index
-        if (nextIndex >= serviceAddresses.Count)
-            nextIndex = 0;
-
-        return await EditAddress(serviceAddresses.ElementAt(nextIndex).Id);
+        return await PageAddress(1, model.ServiceAddress.CustomerId, model.ServiceAddress.Id);
     }
 
     public async Task<IActionResult> PreviousAddress(ServiceAddressMasterViewModel model)
     {
-        var serviceAddresses = (await serviceAddressService.GetByCustomer(model.ServiceAddress.CustomerId))
-            .OrderBy(a => a.CancelDate)
-            .ToList();
-
-        if (!serviceAddresses.Any())
-            return await ClearAddress(model);
-
-        int prevIndex = model.AddressIndex - 1;
-        if (prevIndex <= 0 )
-            prevIndex = serviceAddresses.Count - 1;
-
-        return await EditAddress(serviceAddresses.ElementAt(prevIndex).Id);
+        return await PageAddress(-1, model.ServiceAddress.CustomerId, model.ServiceAddress.Id);
     }
 
     #endregion
@@ -586,7 +499,7 @@ public class CustomerServiceAddressController : Controller
     private async Task ContainerTypeChanged_RInfo(Dictionary<string, object> dict, int serviceAddressId)
     {
         var serviceAddress = await serviceAddressService.GetById(serviceAddressId);
-        Address address = serviceAddress != null ?
+        var address = serviceAddress != null ?
             await addressService.GetById(serviceAddress.PeaddressId) :
             null;
 
@@ -718,7 +631,7 @@ public class CustomerServiceAddressController : Controller
         if (Request.IsAjaxRequest())
             return PartialView("Container", model);
 
-        var customer = await customerService.GetById(model.Customer.CustomerID.Value);
+        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
 
         return View("Index", model)
             .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
@@ -746,7 +659,7 @@ public class CustomerServiceAddressController : Controller
         if (Request.IsAjaxRequest())
             return PartialView("Container", model);
 
-        var customer = await customerService.GetById(model.Customer.CustomerID.Value);
+        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
 
         return View("Index", model)
             .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");

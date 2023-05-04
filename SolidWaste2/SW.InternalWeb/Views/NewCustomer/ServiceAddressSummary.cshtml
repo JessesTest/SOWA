@@ -1,0 +1,44 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.ServiceAddressList
+@{
+    ViewBag.ATitle = "New Customer : Service Address";
+}
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li><a>Customer Information</a></li>
+        <li><a>Billing Address</a></li>
+        <li><a>Phone Number</a></li>
+        <li><a>Email</a></li>
+        <li class="active">@Html.ActionLink("Service Address", "ServiceAddress", "NewCustomer")</li>
+        <li><a>Summary</a></li>
+    </ul>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <partial name="ServiceAddressSummary2" />
+                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <text>Additional service locations and containers may be added by using Add Service Address or Add Container on the left.</text>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            @Html.ActionLink("Previous", "CustomerEmail", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
+                            @Html.ActionLink("Next", "Summary", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+<br />

@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SW.InternalWeb.Models.CustomerServiceAddress;
 
@@ -29,7 +28,10 @@ public class ServiceAddressViewModel
     [Required]
     [StringLength(255)]
     [Display(Name = "Address")]
-    public string AddressLine { get; set; }
+    public string AddressLine1 { get; set; }
+
+    [StringLength(255)]
+    public string AddressLine2 { get; set; }
 
     [Required]
     [StringLength(50)]
