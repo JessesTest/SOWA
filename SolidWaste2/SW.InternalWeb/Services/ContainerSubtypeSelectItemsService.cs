@@ -27,4 +27,19 @@ public class ContainerSubtypeSelectItemsService
             })
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<SelectListItem>> Get(int containerCodeId)
+    {
+        using var db = dbFactory.CreateDbContext();
+        return await db.ContainerSubtypes
+            .Where(s => !s.DeleteFlag)
+            .Where(s => s.ContainerCodeId == containerCodeId)
+            .OrderBy(s => s.Description)
+            .Select(s => new SelectListItem
+            {
+                Value = s.ContainerSubtypeId.ToString(),
+                Text = $"{s.BillingFrequency} - {s.Description}"
+            })
+            .ToListAsync();
+    }
 }

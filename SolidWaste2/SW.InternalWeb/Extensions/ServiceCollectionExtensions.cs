@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using SW.InternalWeb.Services;
+﻿using SW.InternalWeb.Services;
 
 namespace SW.InternalWeb.Extensions;
 
@@ -9,5 +8,7 @@ public static class ServiceCollectionExtensions
         => services
         .AddTransient<BillingSizeSelectItemsService>()
         .AddTransient<ContainerCodeSelectItemsService>()
-        .AddTransient<ContainerSubtypeSelectItemsService>();
+        .AddTransient<ContainerSubtypeSelectItemsService>()
+        .AddTransient<EmailTypeSelectItemsService>()
+        .AddTransient<PhoneTypeSelectItemsService>();
 }

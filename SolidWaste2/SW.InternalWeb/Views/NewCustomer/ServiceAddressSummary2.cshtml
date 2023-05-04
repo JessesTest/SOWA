@@ -1,0 +1,287 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.ServiceAddressList
+@inject SW.InternalWeb.Services.ContainerCodeSelectItemsService codeService
+@inject SW.InternalWeb.Services.ContainerSubtypeSelectItemsService subtypeService
+@{
+    var containerCodes = await codeService.Get();
+    var containerSubtypes = await subtypeService.Get();
+}
+@if (Model == null || Model.Count == 0)
+{
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    Service address information not found.
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="form-horizontal">
+        @foreach (var sa in Model)
+        {
+            <div class="panel panel-default bg-gradient">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-6">
+                            <label class="control-label font-bold text-ul">Service Address</label>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <a href="@Url.Action("EditAddress", new { id = sa.Id })" title="Edit"><i class="fa fa-pencil-square fa-2x"></i></a>
+                            &nbsp;
+                            <a href="@Url.Action("RemoveAddress", new { id = sa.Id })" title="Remove"><i class="fa fa-minus-square fa-2x"></i></a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 font-bold">
+                            Address
+                        </div>
+                        <div class="col-md-6 text-ellipsis">
+                            @sa.AddressLine1 @sa.AddressLine2
+                            <br />
+                            @sa.City @sa.State @sa.Zip
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(sa.LocationName))
+                    {
+                        <div class="row">
+                            <div class="col-md-6 font-bold">
+                                Location Name
+                            </div>
+                            <div class="col-md-6 text-ellipsis">
+                                @sa.LocationName
+                            </div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(sa.LocationContact))
+                    {
+                        <div class="row">
+                            <div class="col-md-6 font-bold">
+                                Location Contact
+                            </div>
+                            <div class="col-md-6 text-ellipsis">
+                                @sa.LocationContact
+                            </div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(sa.Phone))
+                    {
+                        <div class="row">
+                            <div class="col-md-6 font-bold">
+                                Contact Phone
+                            </div>
+                            <div class="col-md-6 text-ellipsis">
+                                @sa.Phone
+                            </div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(sa.Email))
+                    {
+                        <div class="row">
+                            <div class="col-md-6 font-bold">
+                                Contact Email
+                            </div>
+                            <div class="col-md-6 text-ellipsis">
+                                @sa.Email
+                            </div>
+                        </div>
+                    }
+                    @*@if (!string.IsNullOrWhiteSpace(sa.RouteNumber))
+            {
+            <div class="row">
+            <div class="col-md-6 font-bold">
+            Route
+            </div>
+            <div class="col-md-6">
+            @sa.RouteNumber
+            </div>
+            </div>
+            }*@
+                    <div class="form-group">
+                        <div class="col-md-6 font-bold">
+                            Effective Date
+                        </div>
+                        <div class="col-md-6 text-ellipsis">
+                            @string.Format("{0:d}", sa.EffectiveDate)
+                        </div>
+                    </div>
+                    @foreach (var container in sa.Containers)
+                    {
+                        <div class="panel panel-default bg-gradient-blue">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <div class="col-md-6">
+                                        <label class="control-label font-bold text-ul">Container</label>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <a href="@Url.Action("EditContainer", new { id = container.Id })" title="Edit"><i class="fa fa-pencil-square fa-2x"></i></a>
+                                        &nbsp;
+                                        <a href="@Url.Action("RemoveContainer", new { id = container.Id })" title="Remove"><i class="fa fa-minus-square fa-2x"></i></a>
+                                    </div>
+                                </div>
+                                @*
+                    <div class="row">
+                    <div class="col-md-6 font-bold">
+                    Delivered
+                    </div>
+                    <div class="col-md-6">
+                    @container.Delivered
+                    </div>
+                    </div>
+                    *@
+                                <div class="row">
+                                    <div class="col-md-6 font-bold">
+                                        Route Number
+                                    </div>
+                                    <div class="col-md-6 text-ellipsis">
+                                        @container.RouteNumber
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 font-bold">
+                                        Type
+                                    </div>
+                                    <div class="col-md-6 text-ellipsis">
+                                        @containerCodes.Where(c => Int32.Parse(c.Value) == container.ContainerCodeId).Select(c => c.Text).FirstOrDefault() ?? "*"
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 font-bold">
+                                        Subtype
+                                    </div>
+                                    <div class="col-md-6">
+                                        @containerSubtypes.Where(c => Int32.Parse(c.Value) == container.ContainerSubtypeId).Select(c => c.Text).FirstOrDefault() ?? "*"
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 font-bold">
+                                        Days
+                                    </div>
+                                    <div class="col-md-6 text-ellipsis">
+                                        @if (container.MonService)
+                                        {
+                                            <span>M</span>
+                                        }
+                                        else
+                                        {
+                                            <span>.</span>
+                                        }
+                                        @if (container.TueService)
+                                        {
+                                            <span>T</span>
+                                        }
+                                        else
+                                        {
+                                            <span>.</span>
+                                        }
+                                        @if (container.WedService)
+                                        {
+                                            <span>W</span>
+                                        }
+                                        else
+                                        {
+                                            <span>.</span>
+                                        }
+                                        @if (container.ThuService)
+                                        {
+                                            <span>T</span>
+                                        }
+                                        else
+                                        {
+                                            <span>.</span>
+                                        }
+                                        @if (container.FriService)
+                                        {
+                                            <span>F</span>
+                                        }
+                                        else
+                                        {
+                                            <span>.</span>
+                                        }
+                                        @if (container.SatService)
+                                        {
+                                            <span>S</span>
+                                        }
+                                        else
+                                        {
+                                            <span>.</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 font-bold">
+                                        Billing Size
+                                    </div>
+                                    <div class="col-md-6 text-ellipsis">
+                                        @container.BillingSize
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 font-bold">
+                                        Actual Size
+                                    </div>
+                                    <div class="col-md-6 text-ellipsis">
+                                        @container.ActualSize
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 font-bold">
+                                        Additional Charge
+                                    </div>
+                                    <div class="col-md-6 text-ellipsis">
+                                        @(container.AdditionalCharge > 0 ? string.Format("{0:c}", container.AdditionalCharge) : "n/a")
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 font-bold">
+                                        Effective Date
+                                    </div>
+                                    <div class="col-md-6 text-ellipsis">
+                                        @string.Format("{0:d}", container.EffectiveDate)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @foreach (var note in sa.Notes)
+                    {
+                        <div class="panel panel-default bg-gradient-green">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <div class="col-md-6">
+                                        <label class="control-label font-bold text-ul">Note</label>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <a href="@Url.Action("EditNote", new { id = note.Id })" title="Edit"><i class="fa fa-pencil-square fa-2x"></i></a>
+                                        &nbsp;
+                                        <a href="@Url.Action("RemoveNote", new { id = note.Id })" title="Remove"><i class="fa fa-minus-square fa-2x"></i></a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 text-ellipsis">
+                                        @note.Note
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        <div class="col-md-6">
+                            @Html.ActionLink("Add Container", "AddContainer", "NewCustomer", new { id = sa.Id }, new { @class = "btn btn-block btn-xs btn-primary" })
+                        </div>
+                        <div class="col-md-6">
+                            @Html.ActionLink("Add Note", "AddNote", "NewCustomer", new { id = sa.Id }, new { @class = "btn btn-block btn-xs btn-primary" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                @Html.ActionLink("Add Service Address", "AddAddress", "NewCustomer", null, new { @class = "btn btn-block btn-xs btn-primary" })
+            </div>
+        </div>
+    </div>
+}

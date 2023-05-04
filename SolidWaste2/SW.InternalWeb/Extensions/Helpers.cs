@@ -21,6 +21,14 @@ public static class Helpers
             new SelectListItem { Value = "H", Text = "Home Owners Association" }
         };
 
+    public static IEnumerable<SelectListItem> NewCustomerTypes =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Value = "C", Text = "Commercial" },
+            new SelectListItem { Value = "R", Text = "Residential" },
+            new SelectListItem { Value = "H", Text = "Home Owners Association" }
+        };
+
     public static IEnumerable<SelectListItem> EmailTypes =>
         new SelectListItem[]
         {
