@@ -60,6 +60,13 @@ public static class Helpers
             new SelectListItem { Value = "6", Text = "F - Fax"}
         };
 
+    public static IEnumerable<SelectListItem> RouteTypes =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Text = "C - Commercial", Value = "C" },
+            new SelectListItem { Text = "R - Residential", Value = "R" }
+        };
+
     public static IEnumerable<SelectListItem> PhoneStatuses =>
         new SelectListItem[]
         {
