@@ -1,6 +1,7 @@
 ﻿using Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Notify.BL.Services;
+using SW.InternalWeb.Views.NotifyAPI;
 
 namespace SW.InternalWeb.Controllers;
 
@@ -34,10 +35,16 @@ public class NotifyApiController : ControllerBase
     [Route("NotificationsListAllJson")]
     public async Task<object> NotificationsListAllJson()
     {
-        var email = User.GetEmail();
+        var email = User.GetEmail(); // ?? "DEANNA.STARKEBAUM@SNCO.US"
         var list = await notifyService.GetByTo(email);
         var value = list
-            .Select(n => new { n.AddDateTime, n.From, n.NotificationID, n.Read, n.Subject })
+            .Select(n => new ItemViewModel
+            {
+                AddDateTime = n.AddDateTime?.ToString("yyyy/MM/dd hh:mm:ss tt"),
+                From = n.From,
+                NotificationID = n.NotificationID.ToString(),
+                Subject = n.Subject
+            })
             .ToList();
 
         return new { Notifications = value };

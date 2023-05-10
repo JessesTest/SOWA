@@ -1,0 +1,79 @@
+﻿
+@{
+    ViewBag.ATitle = "View All Notifications";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <partial name="_List" />
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function isNumber(obj) {
+            return !isNaN(parseFloat(obj))
+        }
+
+        function generateViewLinks() {
+            $('.notification-id').each(function () {
+                var notificationID = $(this).text();
+                if (isNumber(notificationID)) {
+                    let baseUrl = '@Url.Action("Detail", "Notify")';
+                    $(this).parent().attr("onclick", "document.location='" + baseUrl + "?notificationID=" + notificationID + "'");
+                    $(this).parent().attr('class', 'linkme');
+                }
+                $(this).remove();
+            });
+        }
+
+        $(function () {
+            var data;
+            var array;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: false,
+                url: '@Url.Action("NotificationsListAllJson", "NotifyAPI")',
+                data: data,
+                cache: false,
+                success: function (data) {
+                    array = data.notifications;
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+
+            $('#Notifications').dataTable({
+                'fnDrawCallback': function () {
+                    generateViewLinks();
+                },
+                'aaData': array,
+                'aoColumns': [
+                    {
+                        'mDataProp': 'addDateTime',
+                        'sClass': 'text-left'
+                    },
+                    {
+                        'mDataProp': 'from',
+                        'sClass': 'text-left'
+                    },
+                    {
+                        'mDataProp': 'subject',
+                        'sClass': 'text-left'
+                    },
+                    {
+                        'mDataProp': 'notificationID',
+                        'sClass': 'text-left notification-id',
+                        'bSortable': false,
+                        'bSearchable': false
+                    }
+                ],
+                'order': [[0, 'desc']]
+            });
+        });
+    </script>
+}
