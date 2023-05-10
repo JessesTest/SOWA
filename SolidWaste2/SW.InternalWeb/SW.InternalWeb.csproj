@@ -27,6 +27,7 @@
     <ProjectReference Include="..\Common.Web\Common.Web.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Identity.BL\Identity.BL.csproj" />
+    <ProjectReference Include="..\Notify.BL\Notify.BL.csproj" />
     <ProjectReference Include="..\PE.BL\PE.BL.csproj" />
     <ProjectReference Include="..\SW.BLL\SW.BLL.csproj" />
     <ProjectReference Include="..\SW.Reporting\SW.Reporting.csproj" />
