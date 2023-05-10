@@ -5,7 +5,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 
-namespace Common.Web.Services.Common;
+namespace Common.Services.Common;
 
 public static class Extensions
 {

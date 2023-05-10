@@ -1,4 +1,4 @@
-﻿namespace Common.Web.Services.Common;
+﻿namespace Common.Services.Common;
 
 public class ApiRequest
 {
