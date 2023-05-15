@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PE.BL.Services;
 using SW.BLL.Services;
 using SW.InternalWeb.Models.CustomerTransactionHistory;
-using SW.Reporting.Services;
+//using SW.Reporting.Services;
 
 namespace SW.InternalWeb.Controllers;
 
@@ -14,22 +14,22 @@ public class CustomerTransactionHistoryController : Controller
     private readonly ITransactionService transactionService;
     private readonly IBillMasterService billMasterService;
     private readonly IBillBlobService billBlobService;
-    private readonly IReportingService reportingService;
+    //private readonly IReportingService reportingService;
 
     public CustomerTransactionHistoryController(
         ICustomerService customerService,
         IPersonEntityService personService,
         ITransactionService transactionService,
         IBillMasterService billMasterService,
-        IBillBlobService billBlobService,
-        IReportingService reportingService)
+        IBillBlobService billBlobService)
+        //IReportingService reportingService)
     {
         this.customerService = customerService;
         this.personService = personService;
         this.transactionService = transactionService;
         this.billMasterService = billMasterService;
         this.billBlobService = billBlobService;
-        this.reportingService = reportingService;
+        //this.reportingService = reportingService;
     }
 
     public async Task<IActionResult> Index(int customerId)
@@ -185,9 +185,10 @@ public class CustomerTransactionHistoryController : Controller
                 { "customer_id", transaction.CustomerId }
             };
 
-            var pdfBytes = await reportingService.GenerateReportPDF("SW_Bill", parameters);
+            //var pdfBytes = await reportingService.GenerateReportPDF("SW_Bill", parameters);
 
-            return File(pdfBytes, "application/pdf", "sw_bill.pdf");
+            //return File(pdfBytes, "application/pdf", "sw_bill.pdf");
+            return null;
         }
         else
         {
