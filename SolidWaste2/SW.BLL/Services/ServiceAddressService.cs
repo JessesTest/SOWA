@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Common.Extensions;
+using Microsoft.EntityFrameworkCore;
 using PE.BL.Services;
 using PE.DM;
 using SW.DAL.Contexts;
@@ -10,16 +11,16 @@ public class ServiceAddressService : IServiceAddressService
 {
     private readonly IDbContextFactory<SwDbContext> dbFactory;
     private readonly IAddressService addressService;
-    private readonly IContainerService containerService;
+    private readonly IPersonEntityService personService;
 
     public ServiceAddressService(
         IDbContextFactory<SwDbContext> dbFactory,
         IAddressService addressService,
-        IContainerService containerService)
+        IPersonEntityService personService)
     {
         this.dbFactory = dbFactory;
         this.addressService = addressService;
-        this.containerService = containerService;
+        this.personService = personService;
     }
 
     public async Task<ServiceAddress> GetById(int serviceAddressId)
@@ -28,8 +29,8 @@ public class ServiceAddressService : IServiceAddressService
         return await db.ServiceAddresses
             .Where(e => e.Id == serviceAddressId)
             .Include(e => e.Customer)
-            .Include(e => e.Containers)
-            .Include(e => e.ServiceAddressNotes)
+            .Include(e => e.Containers.OrderBy(c => c.CancelDate))
+            .Include(e => e.ServiceAddressNotes.OrderByDescending(a => a.AddDateTime))
             .Include(e => e.BillServiceAddresses)
             .AsSplitQuery()
             .AsNoTracking()
@@ -38,6 +39,8 @@ public class ServiceAddressService : IServiceAddressService
 
     public async Task CustomerCancelServiceAddress(DateTime cancelDate, PersonEntity person, int serviceAddressId, string userName)
     {
+        var now = DateTime.Now;
+
         using var db = dbFactory.CreateDbContext();
 
         var customer = await db.Customers
@@ -54,7 +57,7 @@ public class ServiceAddressService : IServiceAddressService
             throw new InvalidOperationException("Service address already canceled");
 
         serviceAddress.CancelDate = cancelDate;
-        serviceAddress.ChgDateTime = DateTime.Now;
+        serviceAddress.ChgDateTime = now;
         serviceAddress.ChgToi = userName;
 
         var containers = await db.Containers
@@ -62,25 +65,30 @@ public class ServiceAddressService : IServiceAddressService
             .Include(c => c.ContainerCode)
             .ToListAsync();
 
+        var peaddress = await addressService.GetById(serviceAddress.PeaddressId);
+
         foreach (var container in containers)
         {
-            await CustomerCancelPart(db, container, serviceAddress, cancelDate, person, userName);
+            await CancelContainerAndHandleWorkOrders(db, container, serviceAddress, person, userName, now, peaddress);
         }
 
         await db.SaveChangesAsync();
     }
 
-    private async Task CustomerCancelPart(
+    private async Task<bool> CancelContainerAndHandleWorkOrders(
             SwDbContext db,
             Container container,
             ServiceAddress serviceAddress,
-            DateTime cancelDate,
-            PersonEntity person,
-            string userName)
+            PersonEntity person,    // FullName
+            string userName,
+            DateTime now,
+            Address peaddress)      // address line
     {
+        var cancelDate = serviceAddress.CancelDate;
+
         if (container.CancelDate.HasValue && container.CancelDate <= cancelDate)
         {
-            return;
+            return false;
         }
 
         // check for work orders
@@ -90,16 +98,14 @@ public class ServiceAddressService : IServiceAddressService
         foreach (var wo in workOrdersToCancel)
         {
             wo.DelFlag = true;
-            wo.DelDateTime = DateTime.Now;
+            wo.DelDateTime = now;
             wo.DelToi = userName;
         }
-
-        var peaddress = await addressService.GetById(serviceAddress.PeaddressId);
 
         // new work order
         var o = new WorkOrder
         {
-            AddDateTime = DateTime.Now,
+            AddDateTime = now,
             AddToi = userName,
             //o.ChgDateTime
             //o.ChgToi
@@ -135,9 +141,11 @@ public class ServiceAddressService : IServiceAddressService
         db.WorkOrders.Add(o);
 
         container.CancelDate = cancelDate;
-        container.ChgDateTime = DateTime.Now;
+        container.ChgDateTime = now;
         container.ChgToi = userName;
         container.Delivered = "Scheduled for Pick Up";
+
+        return true;
     }
 
     public async Task<ICollection<ServiceAddress>> GetByCustomer(int customerId)
@@ -146,11 +154,121 @@ public class ServiceAddressService : IServiceAddressService
         return await db.ServiceAddresses
             .Where(e => e.CustomerId == customerId && !e.DeleteFlag)
             .Include(e => e.Customer)
-            .Include(e => e.Containers)
-            .Include(e => e.ServiceAddressNotes)
+            .Include(e => e.Containers.OrderBy(c => c.CancelDate))
+            .Include(e => e.ServiceAddressNotes.OrderByDescending(a => a.AddDateTime))
             .Include(e => e.BillServiceAddresses)
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task Update(ServiceAddress serviceAddress)
+    {
+        var customer = serviceAddress.Customer;
+        var containers = serviceAddress.Containers;
+        var notes = serviceAddress.ServiceAddressNotes;
+        var bills = serviceAddress.BillServiceAddresses;
+        var holdings = serviceAddress.TransactionHoldings;
+        var transactions = serviceAddress.Transactions;
+        var work = serviceAddress.WorkOrders;
+        var now = DateTime.Now;
+
+        serviceAddress.Customer = null;
+        serviceAddress.Containers = null;
+        serviceAddress.ServiceAddressNotes = null;
+        serviceAddress.BillServiceAddresses = null;
+        serviceAddress.TransactionHoldings = null;
+        serviceAddress.Transactions = null;
+        serviceAddress.WorkOrders = null;
+
+        serviceAddress.ChgDateTime ??= now;
+        serviceAddress.ChgToi ??= System.Security.Claims.ClaimsPrincipal.Current?.GetNameOrEmail();
+
+        using var db = dbFactory.CreateDbContext();
+        db.ServiceAddresses.Update(serviceAddress);
+
+        if(serviceAddress.CancelDate != null && containers != null && containers.Any())
+        {
+            customer ??= await db.Customers.FirstAsync(c => c.CustomerId == serviceAddress.CustomerId);
+            var person = await personService.GetById(customer.Pe);
+            var peaddress = await addressService.GetById(serviceAddress.PeaddressId);
+
+            foreach(var container in containers)
+            {
+                var updatedContainer = await CancelContainerAndHandleWorkOrders(db, container, serviceAddress, person, serviceAddress.ChgToi, now, peaddress);
+
+                if(updatedContainer)
+                {
+                    db.Containers.Update(container);
+                }
+            }
+        }
+
+        await db.SaveChangesAsync();
+
+
+
+        serviceAddress.Customer = customer;
+        serviceAddress.Containers = containers;
+        serviceAddress.ServiceAddressNotes = notes;
+        serviceAddress.BillServiceAddresses = bills;
+        serviceAddress.TransactionHoldings = holdings;
+        serviceAddress.Transactions = transactions;
+        serviceAddress.WorkOrders = work;
+    }
+
+    public async Task<string> TryValidateServiceAddress(ServiceAddress sa)
+    {
+        if (sa.CancelDate.HasValue && DateTime.Today.Date > sa.EffectiveDate && sa.CancelDate < DateTime.Today.Date)
+            return ("Service address Cancel Date before " + DateTime.Today.Date.ToShortDateString());
+
+
+        Customer c = sa.Customer;
+        if(c == null)
+        {
+            using var db = dbFactory.CreateDbContext();
+            c = await db.Customers.Where(c => c.CustomerId == sa.CustomerId).FirstOrDefaultAsync();
+            if (c == null)
+                return "Customer not found";
+        }
+
+        if (sa.EffectiveDate < c.EffectiveDate)
+            return "Service address effective date before customer effective date";
+        if (c.CancelDate.HasValue && !sa.CancelDate.HasValue)
+            return "Service address does not have cancel date";
+        if (sa.CancelDate.HasValue && c.CancelDate.HasValue && sa.CancelDate.Value > c.CancelDate.Value)
+            return "Service address cancel date after customer cancel date";
+        if (c.CancelDate.HasValue && sa.EffectiveDate > c.CancelDate.Value)
+            return "Service address effective date after customer cancel date";
+
+        return null;
+    }
+
+    public async Task Add(ServiceAddress serviceAddress)
+    {
+        var additionalError = await TryValidateServiceAddress(serviceAddress);
+        if (additionalError != null)
+            throw new InvalidOperationException(additionalError);
+
+        serviceAddress.LocationNumber = await GenerateLocationNumber(serviceAddress);
+
+        using var db = dbFactory.CreateDbContext();
+        db.ServiceAddresses.Add(serviceAddress);
+        await db.SaveChangesAsync();
+    }
+    private async Task<string> GenerateLocationNumber(ServiceAddress s)
+    {
+        using var db = dbFactory.CreateDbContext();
+
+        var max = await db.ServiceAddresses
+            .Where(a => a.CustomerId == s.CustomerId)
+            .MaxAsync(a => a.LocationNumber);
+
+        if (max == null)
+            return "01";
+
+        var number = int.Parse(max) + 1;
+
+        return $"{number:00}";
     }
 }

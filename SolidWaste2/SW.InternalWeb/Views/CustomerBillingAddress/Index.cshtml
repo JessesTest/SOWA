@@ -1,43 +1,43 @@
 ﻿@model SW.InternalWeb.Models.CustomerBillingAddress.CustomerBillingAddressViewModel
 @{
     ViewBag.faTitleClass = "wrench";
-    ViewBag.ATitle = "Customer Maintenance : Account#" + Model.CustomerID;
+    ViewBag.ATitle = "Customer Maintenance : Account#" + Model.CustomerId;
     var index = 0;
 }
 
 <div id="crumbs">
     <ul class="v-bottom">
-        <li class=""><a href="@Url.Action("Index", "Customer", new { customerID = Model.CustomerID })">Customer Information</a></li>
-        <li class="active"><a href="@Url.Action("Index", "CustomerBillingAddress", new { customerID = Model.CustomerID })">Billing Address</a></li>
-        <li class=""><a href="@Url.Action("Index", "CustomerPhoneNumber", new { customerID = Model.CustomerID })">Phone Number</a></li>
-        <li class=""><a href="@Url.Action("Index", "CustomerEmail", new { customerID = Model.CustomerID })">Email</a></li>
-        <li class=""><a href="@Url.Action("Index", "CustomerServiceAddress", new { customerID = Model.CustomerID })">Service Address</a></li>
-        <li class=""><a href="@Url.Action("Index", "CustomerTransactionHistory", new { customerID = Model.CustomerID })">Transaction History</a></li>
+        <li class=""><a href="@Url.Action("Index", "Customer", new { customerID = Model.CustomerId })">Customer Information</a></li>
+        <li class="active"><a href="@Url.Action("Index", "CustomerBillingAddress", new { customerID = Model.CustomerId })">Billing Address</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerPhoneNumber", new { customerID = Model.CustomerId })">Phone Number</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerEmail", new { customerID = Model.CustomerId })">Email</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerServiceAddress", new { customerID = Model.CustomerId })">Service Address</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerTransactionHistory", new { customerID = Model.CustomerId })">Transaction History</a></li>
     </ul>
     <div class="panel panel-default">
         <div class="panel-body">
+            
+            <form asp-action="SelectBillingAddress"
+                  asp-controller="CustomerBillingAddress"
+                  method="post"
+                  class="form-horizontal">
 
-            <form
-                asp-action="Index"
-                asp-controller="CustomerBillingAddress"
-                method="post"
-                class="form-horizontal">
-
-                @Html.HiddenFor(m => m.CustomerID)
-                @Html.HiddenFor(m => m.CustomerType)
                 @if (Model.Addresses != null)
                 {
-                    @Html.HiddenFor(m => m.AddressLine1)
-                    @Html.HiddenFor(m => m.City)
                     @Html.HiddenFor(m => m.Id)
+                    @Html.HiddenFor(m => m.AddressLine1)
+                    @Html.HiddenFor(m => m.AddressLine2)
+                    @Html.HiddenFor(m => m.City)
                     @Html.HiddenFor(m => m.State)
                     @Html.HiddenFor(m => m.Zip)
+                    @Html.HiddenFor(m => m.CustomerId)
+                    @Html.HiddenFor(m => m.Undeliverable)
                     <div class="row">
                         <div class="col-md-6">
                             <select name="SelectIndex" class="form-control">
                                 @foreach (var address in Model.Addresses)
                                 {
-                                    <option value="@index">@address.Number @address.Direction @address.StreetName @address.Suffix @address.Apt @address.City @address.State @address.Zip</option>
+                                    <option value="@index">@address.AddressLine1 @address.AddressLine2 @address.City @address.State @address.Zip</option>
                                     index++;
                                 }
                             </select>
@@ -53,6 +53,15 @@
                         </div>
                     </div>
                 }
+            </form>
+
+            <form asp-action="Index"
+                  asp-controller="CustomerBillingAddress"
+                  method="post"
+                  class="form-horizontal">
+
+                @Html.HiddenFor(m => m.Id)
+                @Html.HiddenFor(m => m.CustomerId)
 
                 <div class="row">
                     <div class="col-md-8">
@@ -60,6 +69,12 @@
                             <div class="col-md-12">
                                 @Html.LabelFor(m => m.AddressLine1, new { @class = "font-bold" }) *
                                 @Html.TextBoxFor(m => m.AddressLine1, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @Html.LabelFor(m => m.AddressLine2, new { @class = "font-bold" })
+                                @Html.TextBoxFor(m => m.AddressLine2, new { @class = "form-control" })
                             </div>
                         </div>
                         <div class="form-group">

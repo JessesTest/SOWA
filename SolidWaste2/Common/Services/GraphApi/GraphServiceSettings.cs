@@ -1,6 +1,6 @@
-﻿using Common.Web.Services.Common;
+﻿using Common.Services.Common;
 
-namespace Common.Web.Services.GraphApi;
+namespace Common.Services.GraphApi;
 
 public class GraphServiceSettings
 {

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
+using Notify.BL.Extensions;
+using Notify.DAL.Extensions;
 using PE.BL.Extensions;
 using PE.DAL.Extensions;
 using StackifyLib;
@@ -42,6 +44,8 @@ try
         .AddPersonEntityServices()
         .AddIdentityDbContext(configuration)
         .AddIdentityServices()
+        .AddNotifyDbContext(configuration)
+        .AddNotifyServices(configuration)
         .AddSolidWasteDbContext(configuration)
         .AddSolidWasteServices(configuration);
 

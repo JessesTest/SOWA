@@ -67,4 +67,16 @@ public class Container
             return temp;
         }
     }
+
+    public override bool Equals(object obj)
+    {
+        return obj is Container other &&
+            Id == other.Id &&
+            Id > 0;
+    }
+
+    public override int GetHashCode()
+    {
+        return $"Container:{Id}".GetHashCode();
+    }
 }

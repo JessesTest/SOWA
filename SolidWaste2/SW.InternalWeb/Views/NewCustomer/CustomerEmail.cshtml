@@ -1,0 +1,81 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.EmailViewModel
+@inject SW.InternalWeb.Services.EmailTypeSelectItemsService emailTypeService
+@{
+    ViewBag.faTitleClass = "user-plus";
+    ViewBag.ATitle = "New Customer : Email Address";
+
+    var emailTypes = await emailTypeService.Get();
+}
+
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li class=""><a>Customer Information</a></li>
+        <li class=""><a>Billing Address</a></li>
+        <li class=""><a>Phone Number</a></li>
+        <li class="active">@Html.ActionLink("Email", "CustomerEmail")</li>
+        <li class=""><a>Service Address</a></li>
+        <li class=""><a>Summary</a></li>
+    </ul>
+    <div class="panel panel-default">
+        @using (Html.BeginForm("CustomerEmail", "NewCustomer", FormMethod.Post, new { @class = "form-horizontal" }))
+        {
+            <div class="panel-body default-click-parent">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.Type, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                <select asp-for="Type" asp-items="emailTypes" class="form-control"></select>
+                                @Html.ValidationMessageFor(model => model.Type, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.Email, new { @class = "control-label font-bold" }) *
+                            </div>
+                            <div class="col-md-9">
+                                @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Email, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12">
+                                (* Denotes Required Field)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <hr />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <input type="submit" value="Previous" class="btn btn-primary btn-s-xs" name="Previous" data-form-action="@Url.Action("CustomerEmail_Prev", "NewCustomer")" />
+                        <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".default-click-parent input").keypress(function ($event) {
+                if ($event.which == 13) {
+                    $event.preventDefault();
+                    $(this).closest(".default-click-parent").find(".default-click").click();
+                }
+            });
+        });
+    </script>
+}

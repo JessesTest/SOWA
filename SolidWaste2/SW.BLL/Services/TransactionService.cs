@@ -97,6 +97,22 @@ public class TransactionService : ITransactionService
             .FirstOrDefaultAsync();
     }
 
+    public async Task<ICollection<Transaction>> GetAllUnpaidLateFeesByCustomerId(int customerId)
+    {
+        using var db = dbFactory.CreateDbContext();
+        var customer = await db.GetCustomerById(customerId);
+        var code = await db.GetTransactionCodeByCode("LF");
+
+        return await db.Transactions
+            .Where(e => e.CustomerId == customer.CustomerId
+                && e.TransactionCodeId == code.TransactionCodeId
+                && (!e.PaidFull.HasValue || !e.PaidFull.Value)
+                && !e.DeleteFlag)
+            .Include(e => e.TransactionCode)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     #endregion
 
     #region Delinquency
@@ -604,5 +620,25 @@ public class TransactionService : ITransactionService
              })
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<DateTime> GetLastBillTranDateTime(int customerID, DateTime billAddDateTime)
+    {
+        var codes = new[] { "MB", "MBR", "FB" };
+
+        using var db = dbFactory.CreateDbContext();
+        var temp = await db.Transactions
+            .Where(t => t.CustomerId == customerID)
+            .Where(t => !t.DeleteFlag)
+            .Where(t => t.AddDateTime < billAddDateTime)
+            .Where(t => codes.Contains(t.TransactionCode.Code))
+            .OrderByDescending(t => t.AddDateTime)
+            .ThenByDescending(t => t.Sequence)
+            .FirstOrDefaultAsync();
+
+        if (temp != null)
+            return temp.AddDateTime;
+
+        return new DateTime(billAddDateTime.Year, billAddDateTime.Month, 1).AddMonths(-1);
     }
 }

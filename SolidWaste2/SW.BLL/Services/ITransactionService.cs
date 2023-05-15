@@ -11,6 +11,7 @@ public interface ITransactionService
     Task<decimal> GetCurrentBalance(int customerId);
     Task<Transaction> GetLatest(int customerId);
     Task<Transaction> GetById(int transactionId);
+    Task<ICollection<Transaction>> GetAllUnpaidLateFeesByCustomerId(int customerId);
     Task<ICollection<TransactionListingItem>> GetListingByCustomer(int customerId, bool includeDeleted = false);
 
     // Delinquency 
@@ -29,4 +30,7 @@ public interface ITransactionService
 
     // KanPay
     Task AddKanpayTransaction(Transaction transaction, TransactionKanPayFee fee, int kanpayid, string user);
+
+
+    Task<DateTime> GetLastBillTranDateTime(int customerID, DateTime billAddDateTime);
 }

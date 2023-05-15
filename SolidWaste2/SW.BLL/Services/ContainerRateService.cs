@@ -73,6 +73,21 @@ public class ContainerRateService : IContainerRateService
             .ToListAsync();
     }
 
+    public async Task<ICollection<ContainerRate>> GetByCodeDaysSizeEffDate(int containerCodeId, int containerSubtypeId, int dayCount, decimal billingSize, DateTime effectiveDate)
+    {
+        using var db = dbFactory.CreateDbContext();
+        return await db.ContainerRates
+            .Where(c => c.ContainerType == containerCodeId
+            && c.ContainerSubtypeId == containerSubtypeId
+            && c.NumDaysService == dayCount
+            && c.BillingSize == billingSize
+            && c.EffectiveDate <= effectiveDate
+            && !c.DeleteFlag)
+            .OrderByDescending(c => c.EffectiveDate)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<ICollection<ContainerRate>> GetContainerRateByCodeDays(int containerCodeId, int dayCount)
     {
         using var db = dbFactory.CreateDbContext();
