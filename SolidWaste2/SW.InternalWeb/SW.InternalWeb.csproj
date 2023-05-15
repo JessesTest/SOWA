@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -30,7 +30,6 @@
     <ProjectReference Include="..\Notify.BL\Notify.BL.csproj" />
     <ProjectReference Include="..\PE.BL\PE.BL.csproj" />
     <ProjectReference Include="..\SW.BLL\SW.BLL.csproj" />
-    <ProjectReference Include="..\SW.Reporting\SW.Reporting.csproj" />
   </ItemGroup>
 
   <ItemGroup>
