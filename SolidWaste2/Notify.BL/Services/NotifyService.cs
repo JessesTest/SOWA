@@ -135,6 +135,7 @@ public class NotifyService : INotifyService
         return await GetApprovalUsersFromUserIds(userIds);
     }
 
+    // Redo this as get users in role?
     private async Task<ICollection<ApprovalUser>> GetApprovalUsersFromUserIds(IEnumerable<Guid> userIds)
     {
         List<ApprovalUser> value = new();
@@ -145,12 +146,14 @@ public class NotifyService : INotifyService
 
             foreach (var user in users)
             {
-                var email = user.GetEmails().FirstOrDefault(e => e.Contains("@snco.us"))?.ToUpper();
+                var email = user.GetEmails()
+                    .FirstOrDefault(e => e.Contains("@snco.us", StringComparison.InvariantCultureIgnoreCase))
+                    ?.ToUpper();
                 if (email == null)
                     continue;
                 value.Add(new ApprovalUser
                 {
-                    EmailAddress = user.GetEmails().FirstOrDefault(e => e.Contains("@snco.us"))?.ToUpper(),
+                    EmailAddress = email,
                     Id = Guid.Parse(user.Id),
                     DisplayName = user.GetName()?.ToUpper()
                 });
