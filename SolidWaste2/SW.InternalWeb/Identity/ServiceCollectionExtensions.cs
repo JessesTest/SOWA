@@ -13,13 +13,18 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString))
-            //.AddIdentity<ApplicationUser, IdentityRole>(options =>
             .SetupIdentityManagement<ApplicationUser, IdentityRole>(options =>
             {
-                options.SignIn.RequireConfirmedAccount = true;  // ?
+                options.SignIn.RequireConfirmedAccount = true;
+                //options.Password.RequireDigit = true
+                //options.Password.RequiredLength = 6
+                //options.Password.RequiredUniqueChars = 1
+                //options.Password.RequireLowercase = true
+                //options.Password.RequireNonAlphanumeric = true
+                //options.Password.RequireUppercase = true
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>();
-            //.AddDefaultTokenProviders()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
         return services;
     }

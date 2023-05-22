@@ -18,7 +18,7 @@ namespace SW.InternalWeb.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Index", "CustomerInquiry");
 		}
 
 		public IActionResult ResetSessionTimeout()

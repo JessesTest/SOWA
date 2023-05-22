@@ -66,8 +66,12 @@ try
         );
     builder.Services
         //.AddIdentity(configuration.GetConnectionString("Identity"))
-        .AddIdentity<ApplicationUser, IdentityRole>()
-        .AddEntityFrameworkStores<ApplicationDbContext>();
+        .AddIdentity<ApplicationUser, IdentityRole>(options =>
+        {
+            options.SignIn.RequireConfirmedAccount = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
 
     // logging
     if (environment.IsEnvironment("Local"))

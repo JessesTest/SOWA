@@ -77,6 +77,11 @@ public class BillingSummaryService : IBillingSummaryService
 
     public async Task<BillingSummary> GetBillingSummary(int customerId, DateTime onDate)
     {
+        if(customerId <= 0)
+        {
+            return new BillingSummary();
+        }
+
         onDate = onDate.Date;
 
         using var db = dbFactory.CreateDbContext();
