@@ -20,7 +20,7 @@ using SW.BLL.Extensions;
 using SW.DAL.Extensions;
 using SW.InternalWeb.Extensions;
 using SW.InternalWeb.Identity;
-//using SW.Reporting.Services;
+using Common.Services.TelerikReporting;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
@@ -127,16 +127,13 @@ try
         options.MinimumSameSitePolicy = SameSiteMode.None;
     });
 
-
-    //SOWA-56
-    //builder.Services.AddTransient<IReportingService, ReportingService>()
-    //.AddOptions<ReportingServiceOptions>()
-    //.Configure(options =>
-    //{
-    //    options.ConnectionString = configuration.GetConnectionString("SolidWaste");
-    //});
-
-
+    //SOWA - 56
+    builder.Services.AddTransient<IReportingService, ReportingService>()
+    .AddOptions<ReportingServiceOptions>()
+    .Configure(options =>
+    {
+        options.ConnectionString = configuration.GetConnectionString("SolidWaste");
+    });
 
     var app = builder.Build();
 
