@@ -76,7 +76,7 @@ namespace SW.ExternalWeb.Controllers
             var paymentChoice = x.KanPayPaymentChoice.ToUpper().Trim();
             var paymentChoicess = new string[] { "CC", "ACH" };
             if (!paymentChoicess.Contains(paymentChoice))
-                throw new ApplicationException($"Unknown payment choice {paymentChoice}");
+                throw new InvalidOperationException($"Unknown payment choice {paymentChoice}");
 
             var customerType = currentBillMaster.CustomerType.ToUpper().Trim();
             var commercialCustomerTypes = new string[] { "C", "H" };
@@ -95,7 +95,7 @@ namespace SW.ExternalWeb.Controllers
             }
             else
             {
-                throw new ApplicationException($"Unknown customer type {customerType}");
+                throw new InvalidOperationException($"Unknown customer type {customerType}");
             }
 
             string KanPayCommonCheckoutPage = kanPaySettings.CommonCheckoutPage.ToString();

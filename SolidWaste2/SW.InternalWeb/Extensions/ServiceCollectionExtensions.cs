@@ -10,5 +10,6 @@ public static class ServiceCollectionExtensions
         .AddTransient<ContainerCodeSelectItemsService>()
         .AddTransient<ContainerSubtypeSelectItemsService>()
         .AddTransient<EmailTypeSelectItemsService>()
-        .AddTransient<PhoneTypeSelectItemsService>();
+        .AddTransient<PhoneTypeSelectItemsService>()
+        .AddTransient<WriteoffCodeSelectItemService>();
 }

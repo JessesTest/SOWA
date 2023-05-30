@@ -1,0 +1,70 @@
+﻿@model SW.InternalWeb.Models.PendingWork.PendingWorkViewModel
+@{
+    ViewBag.ATitle = "Pending Work";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <partial name="_List" />
+    </div>
+</div>
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            table = $('#PendingWork').dataTable({
+                "columnDefs": [ {
+                    "targets": 0,
+                    "orderable": false
+                },
+                {
+                    "targets": 1,
+                    "orderable": false
+                },
+                {
+                    "targets": 2,
+                    "orderable": false
+                },
+                {
+                    "targets": 3,
+                    "orderable": false
+                },
+                {
+                    "targets": 4,
+                    "orderable": false
+                }
+                , {
+                    "targets": 5,
+                    "orderable": false
+                },
+                {
+                    "targets": 6,
+                    "orderable": false
+                }],
+                "order": [[0, "asc"], [1, "desc"]],
+                stateSave: true,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            });
+        });
+        $(document).ready(function () {
+            $('[id^="modal-form-reject-"]').on('shown.bs.modal', function () {
+                var id = $(this).prop('id').substring(18);
+                $('#Comment_' + id).focus();
+            })
+
+            $("body").on("click", "a.thumbs_up[data-confirm2]", function (event) {
+
+                if (confirm($(this).attr("data-confirm2"))) {
+                    var url = $(this).attr("href");
+                    var thumbs = $("a.thumbs_up");
+                    thumbs.removeAttr("href");
+                    thumbs.removeAttr("data-confirm2");
+                    if (url)
+                        window.location.href = url;
+                }
+            });
+        });
+    </script>
+}
