@@ -23,7 +23,11 @@ public class ContainerCodeSelectItemsService
             .ToListAsync();
 
         return temp
-            .Select(c => new SelectListItem { Value = $"{c.ContainerCodeId}", Text = $"{c.Type} - {c.Description}" })
+            .Select(c => new SelectListItem
+            {
+                Value = $"{c.ContainerCodeId}",
+                Text = $"{c.Type} - {c.Description}"
+            })
             .ToList();
     }
 }

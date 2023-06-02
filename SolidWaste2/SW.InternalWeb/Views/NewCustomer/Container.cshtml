@@ -1,0 +1,346 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.ContainerViewModel
+@using SW.InternalWeb.Extensions
+@inject SW.InternalWeb.Services.ContainerCodeSelectItemsService codeService
+@{
+    ViewBag.ATitle = "New Customer : Service Address : Container";
+
+    var containerCodes = await codeService.Get();
+}
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li><a>Customer Information</a></li>
+        <li><a>Billing Address</a></li>
+        <li><a>Phone Number</a></li>
+        <li><a>Email</a></li>
+        <li class="active">@Html.ActionLink("Service Address", "ServiceAddress", "NewCustomer")</li>
+        <li><a>Summary</a></li>
+    </ul>
+    <div class="panel panel-default">
+        <div class="panel-body default-click-parent">
+            <div class="row">
+                <div class="col-md-4" id="ServiceAddressSummary2Target"></div>
+                <div class="col-md-8">
+                    @using (Html.BeginForm("SaveContainer", "NewCustomer", FormMethod.Post, new { @class = "form-horizontal" }))
+                    {
+                        @Html.HiddenFor(m => m.ServiceAddressId)
+                        @Html.HiddenFor(m => m.Id)
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.RouteNumber, new { @class = "control-label font-bold route-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.TextBoxFor(m => m.RouteNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.RouteNumber, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.ContainerCodeId, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.DropDownListFor(m => m.ContainerCodeId, containerCodes, new { @class = "form-control", @cr_option = "true" })
+                                @Html.ValidationMessageFor(m => m.ContainerCodeId, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.Delivered, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.DropDownListFor(m => m.Delivered, Helpers.ContainerDeliveredTypes, new { @class = "form-control container-group" })
+                                @Html.ValidationMessageFor(m => m.Delivered, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <label class="control-label font-bold">Days Serviced</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-2 text-center">
+                                        @Html.DisplayNameFor(m => m.MonService)
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.DisplayNameFor(m => m.TueService)
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.DisplayNameFor(m => m.WedService)
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.DisplayNameFor(m => m.ThuService)
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.DisplayNameFor(m => m.FriService)
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.DisplayNameFor(m => m.SatService)
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2 text-center">
+                                        @Html.CheckBoxFor(m => m.MonService, new { @class = "checkbox-inline billing-size-changer" })
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.CheckBoxFor(m => m.TueService, new { @class = "checkbox-inline billing-size-changer" })
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.CheckBoxFor(m => m.WedService, new { @class = "checkbox-inline billing-size-changer" })
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.CheckBoxFor(m => m.ThuService, new { @class = "checkbox-inline billing-size-changer" })
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.CheckBoxFor(m => m.FriService, new { @class = "checkbox-inline billing-size-changer" })
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        @Html.CheckBoxFor(m => m.SatService, new { @class = "checkbox-inline billing-size-changer" })
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        @Html.ValidationMessageFor(m => m.MonService, null, new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.ContainerSubtypeId, new { @class = "control-label font-bold" }) *
+                            </div>
+                            <div class="col-md-9">
+                                <partial name="SubtypeSelect">
+                                @Html.ValidationMessageFor(m => m.ContainerSubtypeId, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.BillingSize, new { @class = "control-label font-bold" }) *
+                            </div>
+                            <div class="col-md-9">
+                                <partial name="BillingSizeSelect">
+                                @Html.ValidationMessageFor(m => m.BillingSize, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.ActualSize, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.TextBoxFor(m => m.ActualSize, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.ActualSize, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.AdditionalCharge, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                @* @if (User.IsInRole(System.Configuration.ConfigurationManager.AppSettings["Access.Admin"].ToString())) *@
+                                @if ("SNCO\\ITData" == "SNCO\\ITData")
+                                {
+                                    @Html.TextBoxFor(m => m.AdditionalCharge, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(m => m.AdditionalCharge, null, new { @class = "text-danger" })
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(m => m.AdditionalCharge, new { @class = "form-control", @readonly = "readonly" })
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.EffectiveDate, new { @class = "control-label font-bold" }) *
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="EffectiveDate" type="text" data-provide="datepicker" class="form-control" asp-format="{0:MM/dd/yyyy}" />
+                                @Html.ValidationMessageFor(m => m.EffectiveDate, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12">
+                                (* Denotes Required Field)
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <hr />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-7">
+                                @Html.ActionLink("Cancel", "ServiceAddress", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
+                                <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>
+                            </div>
+                            <div class="col-md-5 text-right rate-amount asims-not-as-big-money"></div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        function getFormData() {
+            let form = $("form.form-horizontal")[0];
+            return {
+                serviceAddressId: $("#ServiceAddressId", form).val(),
+                id: $("#Id", form).val(),
+                containerCodeId: $("#ContainerCodeId", form).val(),
+                delivered: $("#Delivered", form).val(),
+                monService: $("#MonService", form).prop("checked"),
+                tueService: $("#TueService", form).prop("checked"),
+                wedService: $("#WedService", form).prop("checked"),
+                thuService: $("#ThuService", form).prop("checked"),
+                friService: $("#FroService", form).prop("checked"),
+                satService: $("#SatService", form).prop("checked"),
+                containerSubtypeId: $("#ContainerSubtypeId", form).val(),
+                billingSize: $("#BillingSize", form).val(),
+                actualSize: $("#ActualSize", form).val(),
+                additionalCharge: $("#AdditionalCharge", form).val(),
+                effectiveDate: $("#EffectiveDate", form).val()
+            };
+        }
+
+        // billingSizeChanged (rateChanged)
+        function billingSizeChanged(event) {    
+            let postData = {
+                containerSubtypeId: $("#ContainerSubtypeId").val(),
+                daysOfService: $("input.billing-size-changer:checked").length,
+                size: $("#BillingSize").val(),
+                effectiveDate: $("#EffectiveDate").val() //SCMB-243-New-Container-Rates-For-2022
+            };
+            if(event)
+                $("#ActualSize").val(postData.size);
+            $.post(
+                "@Url.Action("ContainerBillingSizeChanged", "Common")",
+                postData,
+                function (data) {
+                    $(".rate-amount").text(data.amount + " " + data.frequency);
+                });
+        }
+
+        // effectiveDateChanged
+        // daysofServiceChanged
+        function changeBillingSize(event) {
+            let $billingSelect = $("#BillingSize");
+            let postData = getFormData();
+            $.post(
+                "@Url.Action("ContainerBillingSize", "NewCustomer")",
+                postData,
+                function (data) {
+                    $billingSelect.replaceWith(data);
+                    $("#BillingSize").change();
+                });
+        }
+
+        // containerSubtypeChanged
+        function subtypeChanged(event) {
+            let $subtypes = $("#ContainerSubtypeId");
+            let formData = {
+                containerSubtypeId: $subtypes.val()
+            };
+            $.post(
+                "@Url.Action("ContainerSubtypeChanged", "Common")",
+                formData,
+                function (data) {
+                    $subtypes.data("daysOfService", data.daysOfService);
+                    let $checkboxes = $("input.billing-size-changer");
+                    if (data.daysOfService.length == 1 && data.daysOfService[0] == 0)
+                        $checkboxes.prop("checked", false);
+                    if (data.daysOfService.length == 1 && data.daysOfService[0] == 0 && selectedText($subtypes) == "Temporary") {
+                        $checkboxes.prop("disabled", true);
+                    } else {
+                        $checkboxes.prop("disabled", false);
+                    }
+                    $checkboxes.first().change();
+                });
+        }
+        function selectedText($ddl) {
+            let selectedValue = $ddl.val();
+            let ddl = $ddl[0];
+            let index = ddl.selectedIndex;
+            if (index >= 0)
+                return ddl.options[index].text;
+            return null;
+        }
+
+        // containerTypeChanged
+        function typeChanged(event) {
+            let formData = getFormData();
+
+            $.post(
+                "@Url.Action("ContainerTypeChanged", "NewCustomer")",
+                formData,
+                function (data) {
+                    let $routeLabel = $(".route-label");
+                    $routeLabel.removeClass("route-number-blue route-number-red");
+                    if (data.routeInfo == true) {
+                        if (data.isRed) {
+                            $routeLabel.addClass("route-number-red");
+                        } else if (data.isBlue) {
+                            $routeLabel.addClass("route-number-blue");
+                        }
+                        $("#RouteNumber").val(data.routeNum);
+                        $("#MonService")[0].checked = data.isMon;
+                        $("#TueService")[0].checked = data.isTue;
+                        $("#WedService")[0].checked = data.isWed;
+                        $("#ThuService")[0].checked = data.isThu;
+                        $("#FriService")[0].checked = data.isFri;
+                        $("#SatService")[0].checked = data.isSat;
+                    }
+                    $("#ContainerSubtypeId").replaceWith(data.subtypeSelect);
+                    $("#ContainerSubtypeId").change();
+                });
+        }
+
+        function validateDaysOfService(value, element, params) {
+            let count = $("input.billing-size-changer:checked").length;
+            let array = $("#ContainerSubtypeId").data("daysOfService");
+            return array.indexOf(count) >= 0;
+        }
+
+        $(document).ready(function () {
+            $("[data-provide='datepicker']").mask("99/99/9999", { placeholder: "mm/dd/yyyy" });
+
+            let $form = $("form");
+            $form.on("change", "#ContainerCodeId", typeChanged);
+            $form.on("change", "#ContainerSubtypeId", subtypeChanged);
+            $form.on("change", ".billing-size-changer", changeBillingSize);
+            $form.on("change", "#BillingSize", billingSizeChanged);
+            //$form.on("change", "#EffectiveDate", billingSizeChanged); //SCMB-243-New-Container-Rates-For-2022
+            $form.on("change", "#EffectiveDate", changeBillingSize); //SCMB-243-New-Container-Rates-For-2022
+
+            $.validator.addMethod("daysOfService", validateDaysOfService, "Invalid number of days");
+            $("#MonService").rules("add", "daysOfService");
+            $("input.billing-size-changer").change(function () { $("#MonService").valid(); });
+
+            typeChanged(null);
+            //subtypeChanged(null);
+        });
+
+        // replacement for Html.Action
+        $.ajax({
+            url: '@Url.Action("ServiceAddressSummary2", "NewCustomer")',
+            success: function (result) {
+                $("#ServiceAddressSummary2Target").html(result);
+            }
+        });
+
+    </script>
+}

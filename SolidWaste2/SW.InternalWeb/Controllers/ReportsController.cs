@@ -1,17 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using SW.DM;
 using SW.InternalWeb.Models.Reports;
 using SW.BLL.Services;
-using PE.BL.Services;
-using SW.Reporting.Services;
 using Common.Web.Extensions.Alerts;
-using PE.DM;
-using System.Collections.Generic;
-using System.Linq;
-using Telerik.Reporting.OpenXmlRendering;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Telerik.Barcode;
+using Microsoft.Extensions.Options;
+using Common.Services.TelerikReporting;
 
 namespace SW.InternalWeb.Controllers
 {
@@ -19,11 +12,13 @@ namespace SW.InternalWeb.Controllers
     {
         private readonly ITransactionCodeService transactionCodeService;
         private readonly IReportingService _reportingService;
-
-        public ReportsController(ITransactionCodeService transactionCodeService, IReportingService reportingService)
+        private readonly ReportingServiceOptions _options;
+        
+        public ReportsController(ITransactionCodeService transactionCodeService, IReportingService reportingService, IOptions<ReportingServiceOptions> options)
         {
             this.transactionCodeService = transactionCodeService;
-            _reportingService = reportingService;
+            this._reportingService = reportingService;
+            _options = options.Value;
         }
 
         public async Task<IActionResult> Index()
@@ -75,8 +70,8 @@ namespace SW.InternalWeb.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Transactions(ReportsViewModel vm, string[] listCodes)
-        {            
-            try 
+        {
+            try
             {
                 if (listCodes == null)
                 {
@@ -84,7 +79,7 @@ namespace SW.InternalWeb.Controllers
                 }
                 if (vm.TransActionCode.StartDate == null)
                 {
-                    return RedirectToAction("Index", "Reports").WithInfo("", "Select a Transaction End Date");
+                    return RedirectToAction("Index", "Reports").WithInfo("", "Select a Transaction Start Date");
                 }
                 if (vm.TransActionCode.EndDate == null)
                 {
@@ -96,16 +91,17 @@ namespace SW.InternalWeb.Controllers
                     {"transCode", listCodes},
                     {"startDate", vm.TransActionCode.StartDate.ToString()},
                     {"endDate", vm.TransActionCode.EndDate.ToString()},
-                    {"customerNumber", vm.TransActionCode.CustomerNumber?.ToString()}
+                    {"customerNumber", vm.TransActionCode.CustomerNumber?.ToString()},
+                    {"connectionString", _options.ConnectionString}
                 };
 
-                if (!vm.TransActionCode.SpreadSheet) 
-                { 
+                if (!vm.TransActionCode.SpreadSheet)
+                {
                     var report = await _reportingService.GenerateReportPDF("Transactions", parameters);
 
                     return File(report, "application/pdf", "transactions_" + DateTime.Now + ".pdf");
                 }
-                else 
+                else
                 {
                     var report = await _reportingService.GenerateReportXLS("Transactions", parameters);
 
@@ -118,15 +114,17 @@ namespace SW.InternalWeb.Controllers
             }
         }
 
-        [HttpGet]
+        //[HttpGet]
+        [HttpPost]
         public async Task<IActionResult> TransactionsbyDateRange(DateTime startDate, DateTime endDate, int customerId)
         {
             var parameters = new Dictionary<string, object>
-                {
-                    {"startDate", startDate.ToString()},
-                    {"endDate", endDate.ToString()},
-                    {"customerID", customerId.ToString()}
-                };
+            {
+                {"startDate", startDate.ToString()},
+                {"endDate", endDate.ToString()},
+                {"customerID", customerId.ToString()},
+                {"connectionString", _options.ConnectionString}
+            };
 
             var report = await _reportingService.GenerateReportPDF("TransactionHistoryByCustomer", parameters);
 
@@ -139,17 +137,22 @@ namespace SW.InternalWeb.Controllers
             //The Telerik Report Delinquency uses a stored procedure sp_DelinquencyPlus that needs to be created within the SolidWaste db for all
             //environments
 
-            try 
+            try
             {
+                var parameters = new Dictionary<string, object>
+                {
+                    {"connectionString", _options.ConnectionString}
+                };
+
                 if (exportToXls)
                 {
-                    var report = await _reportingService.GenerateReportXLS("Delinquency");
+                    var report = await _reportingService.GenerateReportXLS("Delinquency", parameters);
 
                     return File(report, "application/xlsx", "delinquency_" + DateTime.Now + ".xlsx");
                 }
                 else
                 {
-                    var report = await _reportingService.GenerateReportPDF("Delinquency");
+                    var report = await _reportingService.GenerateReportPDF("Delinquency", parameters);
 
                     return File(report, "application/pdf", "delinquency_" + DateTime.Now + ".pdf");
                 }
@@ -157,7 +160,7 @@ namespace SW.InternalWeb.Controllers
             catch (Exception ex)
             {
                 return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
-            }            
+            }
         }
 
         [HttpPost]
@@ -168,17 +171,22 @@ namespace SW.InternalWeb.Controllers
 
             try
             {
+                var parameters = new Dictionary<string, object>
+                {
+                    {"connectionString", _options.ConnectionString}
+                };
+
                 if (exportToXls)
                 {
-                    var report = await _reportingService.GenerateReportXLS("DelinquencyPlus");
+                    var report = await _reportingService.GenerateReportXLS("DelinquencyPlus", parameters);
 
-                    return File(report, "application/xlsx", "balances_" + DateTime.Now + ".xlsx");
+                    return File(report, "application/xlsx", "acct_balances_aging_" + DateTime.Now + ".xlsx");
                 }
                 else
                 {
-                    var report = await _reportingService.GenerateReportPDF("DelinquencyPlus");
+                    var report = await _reportingService.GenerateReportPDF("DelinquencyPlus", parameters);
 
-                    return File(report, "application/pdf", "aging_" + DateTime.Now + ".pdf");
+                    return File(report, "application/pdf", "acct_balances_aging_" + DateTime.Now + ".pdf");
                 }
             }
             catch (Exception ex)
@@ -195,7 +203,12 @@ namespace SW.InternalWeb.Controllers
 
             try
             {
-                var report = await _reportingService.GenerateReportPDF("WriteOffRecommendations");
+                var parameters = new Dictionary<string, object>
+                {
+                    {"connectionString", _options.ConnectionString}
+                };
+
+                var report = await _reportingService.GenerateReportPDF("WriteOffRecommendations", parameters);
 
                 return File(report, "application/pdf", "write_off_recommendations_" + DateTime.Now + ".pdf");
             }
@@ -213,7 +226,12 @@ namespace SW.InternalWeb.Controllers
 
             try
             {
-                var report = await _reportingService.GenerateReportPDF("RecyclingOnlyDelinquency");
+                var parameters = new Dictionary<string, object>
+                {
+                    {"connectionString", _options.ConnectionString}
+                };
+
+                var report = await _reportingService.GenerateReportPDF("RecyclingOnlyDelinquency", parameters);
 
                 return File(report, "application/pdf", "recycling_only_delinquency_" + DateTime.Now + ".pdf");
             }
@@ -235,7 +253,8 @@ namespace SW.InternalWeb.Controllers
 
                 var parameters = new Dictionary<string, object>
                 {
-                    {"SelectedYear", revenueYear}
+                    {"SelectedYear", revenueYear},
+                    {"connectionString", _options.ConnectionString}
                 };
 
                 var report = await _reportingService.GenerateReportPDF("Revenue", parameters);
@@ -305,7 +324,9 @@ namespace SW.InternalWeb.Controllers
                     parameters.Add(new KeyValuePair<string, object>("ResolveDateStart", "9999/12/31"));
                     parameters.Add(new KeyValuePair<string, object>("ResolveDateEnd", "1753/01/01"));
                 }
-                
+
+                parameters.Add(new KeyValuePair<string, object>("connectionString", _options.ConnectionString));
+
                 var report = await _reportingService.GenerateReportPDF("WorkOrder", parameters);
 
                 return File(report, "application/pdf", "work_order_" + DateTime.Now + ".pdf");
@@ -330,6 +351,7 @@ namespace SW.InternalWeb.Controllers
             parameters.Add(new KeyValuePair<string, object>("ContainerRouteEnd", int.MaxValue));
             parameters.Add(new KeyValuePair<string, object>("ResolveDateStart", "1753/01/01"));
             parameters.Add(new KeyValuePair<string, object>("ResolveDateEnd", "9999/12/31"));
+            parameters.Add(new KeyValuePair<string, object>("connectionString", _options.ConnectionString));
 
             var report = await _reportingService.GenerateReportPDF("WorkOrder", parameters);
 
@@ -339,11 +361,12 @@ namespace SW.InternalWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> ContractCharge(ReportsViewModel vm)
         {
-            try 
+            try
             {
                 var parameters = new Dictionary<string, object>
                 {
-                    {"contractCharge", vm.ContractChargeValue.ContractChargeZero}
+                    {"contractCharge", vm.ContractChargeValue.ContractChargeZero},
+                    {"connectionString", _options.ConnectionString}
                 };
 
                 if (vm.ContractChargeValue.SpreadSheet)
@@ -352,7 +375,7 @@ namespace SW.InternalWeb.Controllers
 
                     return File(report, "application/xlsx", "contract_charge_" + DateTime.Now + ".xlsx");
                 }
-                else 
+                else
                 {
                     var report = await _reportingService.GenerateReportPDF("ContractCharge", parameters);
 
@@ -368,9 +391,14 @@ namespace SW.InternalWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> PaymentPlanCustomers()
         {
-            try 
+            try
             {
-                var report = await _reportingService.GenerateReportPDF("PaymentPlanCustomers");
+                var parameters = new Dictionary<string, object>
+                {
+                    {"connectionString", _options.ConnectionString}
+                };
+
+                var report = await _reportingService.GenerateReportPDF("PaymentPlanCustomers", parameters);
 
                 return File(report, "application/pdf", "payment_plan_customers_" + DateTime.Now + ".pdf");
             }
@@ -385,7 +413,8 @@ namespace SW.InternalWeb.Controllers
         {
             var parameters = new Dictionary<string, object>
             {
-                {"paymentPlanId", paymentPlanId}
+                {"paymentPlanId", paymentPlanId},
+                {"connectionString", _options.ConnectionString}
             };
 
             var report = await _reportingService.GenerateReportPDF("PaymentPlanAgreement", parameters);
@@ -396,9 +425,14 @@ namespace SW.InternalWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> ActiveCustomerList()
         {
-            try 
+            try
             {
-                var report = await _reportingService.GenerateReportXLS("ActiveCustomerList");
+                var parameters = new Dictionary<string, object>
+                {
+                    {"connectionString", _options.ConnectionString}
+                };
+
+                var report = await _reportingService.GenerateReportXLS("ActiveCustomerList", parameters);
 
                 return File(report, "application/xlsx", "active_customer_list_" + DateTime.Now + ".xlsx");
             }
@@ -413,15 +447,20 @@ namespace SW.InternalWeb.Controllers
         {
             try
             {
+                var parameters = new Dictionary<string, object>
+                {
+                    {"connectionString", _options.ConnectionString}
+                };
+
                 if (RoutesExporttoXls)
                 {
-                    var report = await _reportingService.GenerateReportXLS("Routes");
+                    var report = await _reportingService.GenerateReportXLS("Routes", parameters);
 
                     return File(report, "application/xlsx", "routes_" + DateTime.Now + ".xlsx");
                 }
                 else
                 {
-                    var report = await _reportingService.GenerateReportPDF("Routes");
+                    var report = await _reportingService.GenerateReportPDF("Routes", parameters);
 
                     return File(report, "application/pdf", "routes_" + DateTime.Now + ".pdf");
                 }
@@ -435,7 +474,7 @@ namespace SW.InternalWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> KanPay(ReportsViewModel vm)
         {
-            try 
+            try
             {
                 string[] listPayTypes = new string[2];
                 switch (vm.KanPayActionCode.PayType)
@@ -463,7 +502,8 @@ namespace SW.InternalWeb.Controllers
                     {"payType", listPayTypes},
                     {"startDate", vm.KanPayActionCode.StartDate.ToString()},
                     {"endDate", vm.KanPayActionCode.EndDate.ToString()},
-                    {"customerNumber", vm.KanPayActionCode.CustomerNumber?.ToString()}
+                    {"customerNumber", vm.KanPayActionCode.CustomerNumber?.ToString()},
+                    {"connectionString", _options.ConnectionString}
                 };
 
                 if (!vm.KanPayActionCode.SpreadSheet)
@@ -482,13 +522,13 @@ namespace SW.InternalWeb.Controllers
             catch (Exception ex)
             {
                 return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
-            }            
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Delinquents(ReportsViewModel vm)
         {
-            try 
+            try
             {
                 if (vm.DelinquentAccount.StartDate == null)
                 {
@@ -503,7 +543,8 @@ namespace SW.InternalWeb.Controllers
                 {
                     {"startDate", vm.DelinquentAccount.StartDate.ToString()},
                     {"endDate", vm.DelinquentAccount.EndDate.ToString()},
-                    {"customerNumber", vm.DelinquentAccount.CustomerNumber?.ToString()}
+                    {"customerNumber", vm.DelinquentAccount.CustomerNumber?.ToString()},
+                    {"connectionString", _options.ConnectionString}
                 };
 
                 if (vm.DelinquentAccount.Account == "Collections")
@@ -540,7 +581,7 @@ namespace SW.InternalWeb.Controllers
             catch (Exception ex)
             {
                 return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
-            }      
+            }
         }
 
         //SOWA-56: SW Batch Billing Telerik Report Testing
@@ -552,8 +593,9 @@ namespace SW.InternalWeb.Controllers
                 var parameters = new Dictionary<string, object>
                 {
                     {"beg_datetime", vm.BatchBilling.BegDateTime},
-                    {"end_datetime", vm.BatchBilling.EndDateTime},                    
-                    {"customer_id", vm.BatchBilling.CustomerId}
+                    {"end_datetime", vm.BatchBilling.EndDateTime},
+                    {"customer_id", vm.BatchBilling.CustomerId},
+                    {"connectionString", _options.ConnectionString}
                 };
                 var report = await _reportingService.GenerateReportPDF("SW_Bill", parameters);
 

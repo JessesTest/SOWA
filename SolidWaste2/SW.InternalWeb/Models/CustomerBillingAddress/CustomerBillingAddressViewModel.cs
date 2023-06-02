@@ -4,27 +4,22 @@ namespace SW.InternalWeb.Models.CustomerBillingAddress;
 
 public class CustomerBillingAddressViewModel
 {
-    public string CustomerType { get; set; }
-    public int CustomerID { get; set; }
-    public int? Id { get; set; }
+    public int CustomerId { get; set; }
+    public int Id { get; set; }
 
-    public IList<CustomerBillingAddressViewModel> Addresses;
+    public IEnumerable<ValidAddressDto> Addresses;
     public int SelectIndex { get; set; }
 
     public bool Override { get; set; }
 
     public bool? Undeliverable { get; set; }
 
-    public string Number { get; set; }
-    public string Direction { get; set; }
-    public string StreetName { get; set; }
-    public string Suffix { get; set; }
-    public string Apt { get; set; }
-
     [Required]
     [Display(Name = "Address")]
     [StringLength(64)]
     public string AddressLine1 { get; set; }
+
+    public string AddressLine2 { get; set; }
 
 
     [StringLength(32)]

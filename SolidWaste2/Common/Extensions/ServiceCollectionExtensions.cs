@@ -2,8 +2,8 @@
 using Common.Services.Blob;
 using Common.Services.Email;
 using Common.Services.Sms;
-using Common.Web.Services.Common;
-using Common.Web.Services.GraphApi;
+using Common.Services.Common;
+using Common.Services.GraphApi;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

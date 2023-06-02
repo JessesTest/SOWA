@@ -2,7 +2,7 @@
 using Microsoft.Identity.Client;
 using System.Text.Json;
 
-namespace Common.Web.Services.Common;
+namespace Common.Services.Common;
 
 public class ApiServiceBase
 {

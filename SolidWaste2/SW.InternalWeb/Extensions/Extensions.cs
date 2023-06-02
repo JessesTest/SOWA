@@ -32,6 +32,33 @@ public static class Extensions
         }
         return sb.ToString().Trim();
     }
+    public static string FormatAddressLine1(this Address a)
+    {
+        if (a == null)
+            return "";
+
+        var sb = new StringBuilder();
+        if (a.StreetName == "PO BOX" && a.Number.HasValue)
+        {
+            sb.Append("PO BOX ").Append(a.Number.Value);
+        }
+        else
+        {
+            if (a.Number.HasValue && a.Number.Value > 0)
+                sb.Append(a.Number.Value);
+            if (!string.IsNullOrWhiteSpace(a.Direction))
+                sb.Append(' ').Append(a.Direction);
+            if (!string.IsNullOrWhiteSpace(a.StreetName))
+                sb.Append(' ').Append(a.StreetName);
+            if (!string.IsNullOrWhiteSpace(a.Suffix))
+                sb.Append(' ').Append(a.Suffix);
+        }
+        return sb.ToString().Trim();
+    }
+    public static string FormatAddressLine2(this Address a)
+    {
+        return a?.Apt ?? "";
+    }
 
     public static HtmlString FormatMultiLine(this string str)
     {
@@ -88,6 +115,23 @@ public static class Extensions
             sb.Append(self.Zip);
 
         return sb.ToString().Trim();
+    }
+
+    public static int DaysCount(this Models.NewCustomer.ContainerViewModel model)
+    {
+        var count = 0;
+
+        if (model == null)
+            return count;
+
+        if (model.MonService) count++;
+        if (model.TueService) count++;
+        if (model.WedService) count++;
+        if (model.ThuService) count++;
+        if (model.FriService) count++;
+        if (model.SatService) count++;
+        
+        return count;
     }
 
     public static bool IsAjaxRequest(this HttpRequest request)

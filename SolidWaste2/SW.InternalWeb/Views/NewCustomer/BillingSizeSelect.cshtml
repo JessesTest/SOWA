@@ -1,0 +1,11 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.ContainerViewModel
+@using SW.InternalWeb.Extensions
+@inject SW.InternalWeb.Services.BillingSizeSelectItemsService billingSizeService
+@{
+    var billingSizes = await billingSizeService.Get(
+        Model.ContainerCodeId,
+        Model.ContainerSubtypeId,
+        Model.DaysCount(),
+        Model.EffectiveDate);
+}
+@Html.DropDownListFor(m => m.BillingSize, billingSizes, new { @class = "form-control" })

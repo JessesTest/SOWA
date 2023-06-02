@@ -11,6 +11,8 @@ using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using Microsoft.Identity.Web.UI;
 using NLog;
 using NLog.Web;
+using Notify.BL.Extensions;
+using Notify.DAL.Extensions;
 using PE.BL.Extensions;
 using PE.DAL.Extensions;
 using StackifyLib;
@@ -18,7 +20,7 @@ using SW.BLL.Extensions;
 using SW.DAL.Extensions;
 using SW.InternalWeb.Extensions;
 using SW.InternalWeb.Identity;
-using SW.Reporting.Services;
+using Common.Services.TelerikReporting;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
@@ -29,17 +31,17 @@ try
     var environment = builder.Environment;
     configuration.AddEnvironmentVariables();    // for sendgrid
 
-    //// key vault
-    //var keyVaultEndpoint = new Uri(configuration["AzureKeyVaultEndpoint"]);
-    //TokenCredential tokenCredential =
-    //    builder.Environment.IsEnvironment("Local")
-    //    ? new VisualStudioCredential()
-    //    : new ManagedIdentityCredential();
-    //configuration.AddAzureKeyVault(keyVaultEndpoint, tokenCredential, new AzureKeyVaultConfigurationOptions
-    //{
-    //    // Manager = new PrefixKeyVaultSecretManager(secretPrefix),
-    //    ReloadInterval = TimeSpan.FromMinutes(5)
-    //});
+    // key vault
+    var keyVaultEndpoint = new Uri(configuration["AzureKeyVaultEndpoint"]);
+    TokenCredential tokenCredential =
+        builder.Environment.IsEnvironment("Local")
+        ? new VisualStudioCredential()
+        : new ManagedIdentityCredential();
+    configuration.AddAzureKeyVault(keyVaultEndpoint, tokenCredential, new AzureKeyVaultConfigurationOptions
+    {
+        // Manager = new PrefixKeyVaultSecretManager(secretPrefix),
+        ReloadInterval = TimeSpan.FromMinutes(5)
+    });
 
     // razor pages
     builder.Services
@@ -67,6 +69,8 @@ try
         .AddPersonEntityServices()
         .AddIdentityDbContext(configuration)
         .AddIdentityServices()
+        .AddNotifyDbContext(configuration)
+        .AddNotifyServices(configuration)
         .AddSolidWasteDbContext(configuration)
         .AddSolidWasteServices(configuration)
         .AddInternalWebServices();
@@ -97,9 +101,9 @@ try
         })
         .AddDistributedMemoryCache();
 
-    //// azure ad, also uncomment .AddMicrosoftIdentityUI()
-    //builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    //    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+    // azure ad, also uncomment .AddMicrosoftIdentityUI()
+    builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+        .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
     // manage identity logins
     builder.Services.AddIdentity(configuration.GetConnectionString("Identity"));
@@ -123,16 +127,13 @@ try
         options.MinimumSameSitePolicy = SameSiteMode.None;
     });
 
-
-    //SOWA-56
+    //SOWA - 56
     builder.Services.AddTransient<IReportingService, ReportingService>()
     .AddOptions<ReportingServiceOptions>()
     .Configure(options =>
     {
         options.ConnectionString = configuration.GetConnectionString("SolidWaste");
     });
-
-
 
     var app = builder.Build();
 

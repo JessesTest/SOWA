@@ -1,12 +1,13 @@
-﻿using Common.Web.Services.Common;
+﻿using Common.Services.Common;
 
-namespace Common.Web.Services.GraphApi;
+namespace Common.Services.GraphApi;
 
 public interface IGraphService
 {
     Task<Result<List<Microsoft.Graph.User>>> GetUsersAsync(string principalId = null, string tenant = "AAD");
     Task<Result<List<Microsoft.Graph.User>>> GetUsersByAppAsync(string searchEmail = null, string tenant = "AAD");
     Task<Result<List<Microsoft.Graph.AppRoleAssignment>>> GetAppRoleAssignmentsByUserIdAsync(string principalId, string tenant = "AAD");
+    Task<Result<List<Microsoft.Graph.AppRoleAssignment>>> GetAppRoleAssignmentsByRoleAsync(string appRoleId, string tenant = "AAD");
     Task<Result<List<Microsoft.Graph.AppRole>>> GetAppRolesByResourceIdAsync(string tenant = "AAD");
     Task<Result> GrantAssignmentAsync(string principalId, string tenant = "AAD");
     Task<Result> GrantAssignmentAsync(string principalId, string appRoleId, string tenant = "AAD");

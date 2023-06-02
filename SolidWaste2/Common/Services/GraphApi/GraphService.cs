@@ -1,8 +1,9 @@
-﻿using Common.Web.Services.Common;
+﻿using Common.Services.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
 
-namespace Common.Web.Services.GraphApi;
+namespace Common.Services.GraphApi;
 
 public class GraphService : ApiServiceBase, IGraphService
 {
@@ -16,7 +17,7 @@ public class GraphService : ApiServiceBase, IGraphService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<List<Microsoft.Graph.User>>> GetUsersAsync(string principalId = null, string tenant = "AAD")
+    public async Task<Result<List<User>>> GetUsersAsync(string principalId = null, string tenant = "AAD")
     {
         try
         {
@@ -24,12 +25,12 @@ public class GraphService : ApiServiceBase, IGraphService
                 ? _settings.B2CResourceId
                 : _settings.AADResourceId;
             var obj = new { resourceId, principalId, tenant };
-            return await MakeRequest<List<Microsoft.Graph.User>>(_settings.GetUsers, obj);
+            return await MakeRequest<List<User>>(_settings.GetUsers, obj);
         }
         catch(Exception e)
         {
             _logger.LogError(e, "Error getting graph users");
-            return new Result<List<Microsoft.Graph.User>>
+            return new Result<List<User>>
             {
                 Message = "Error getting graph users: " + e.Message,
                 Successful = false
@@ -37,7 +38,7 @@ public class GraphService : ApiServiceBase, IGraphService
         }
     }
 
-    public async Task<Result<List<Microsoft.Graph.User>>> GetUsersByAppAsync(string searchEmail = null, string tenant = "AAD")
+    public async Task<Result<List<User>>> GetUsersByAppAsync(string searchEmail = null, string tenant = "AAD")
     {
         try
         {
@@ -45,12 +46,12 @@ public class GraphService : ApiServiceBase, IGraphService
                 ? _settings.B2CResourceId
                 : _settings.AADResourceId;
             var obj = new { resourceId, searchEmail, tenant };
-            return await MakeRequest<List<Microsoft.Graph.User>>(_settings.GetUsersByApp, obj);
+            return await MakeRequest<List<User>>(_settings.GetUsersByApp, obj);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error getting graph users of app");
-            return new Result<List<Microsoft.Graph.User>>
+            return new Result<List<User>>
             {
                 Message = "Error getting graph users of app",
                 Successful = false
@@ -58,7 +59,7 @@ public class GraphService : ApiServiceBase, IGraphService
         }
     }
 
-    public async Task<Result<List<Microsoft.Graph.AppRoleAssignment>>> GetAppRoleAssignmentsByUserIdAsync(string principalId, string tenant = "AAD")
+    public async Task<Result<List<AppRoleAssignment>>> GetAppRoleAssignmentsByUserIdAsync(string principalId, string tenant = "AAD")
     {
         try
         {
@@ -66,21 +67,43 @@ public class GraphService : ApiServiceBase, IGraphService
                 ? _settings.B2CResourceId
                 : _settings.AADResourceId;
             var obj = new { resourceId, principalId, tenant };
-            return await MakeRequest<List<Microsoft.Graph.AppRoleAssignment>>(_settings.GetAppRoleAssignmentsByUserId, obj);
+            return await MakeRequest<List<AppRoleAssignment>>(_settings.GetAppRoleAssignmentsByUserId, obj);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error getting graph role assignments");
-            return new Result<List<Microsoft.Graph.AppRoleAssignment>>
+            return new Result<List<AppRoleAssignment>>
             {
                 Message = "Error getting graph role assignments",
                 Successful = false,
-                Value = new List<Microsoft.Graph.AppRoleAssignment> ()
+                Value = new List<AppRoleAssignment> ()
             };
         }
     }
 
-    public async Task<Result<List<Microsoft.Graph.AppRole>>> GetAppRolesByResourceIdAsync(string tenant = "AAD")
+    public async Task<Result<List<AppRoleAssignment>>> GetAppRoleAssignmentsByRoleAsync(string appRoleId, string tenant = "AAD")
+    {
+        try
+        {
+            var resourceId = tenant == "B2C"
+                ? _settings.B2CResourceId
+                : _settings.AADResourceId;
+            var obj = new { resourceId, appRoleId, tenant };
+            return await MakeRequest<List<AppRoleAssignment>>(_settings.GetAppRoleAssignmentsByUserId, obj);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error getting graph assignments");
+            return new Result<List<AppRoleAssignment>>
+            {
+                Message = "Error getting graph assignments",
+                Successful = false,
+                Value = new List<AppRoleAssignment>()
+            };
+        }
+    }
+
+    public async Task<Result<List<AppRole>>> GetAppRolesByResourceIdAsync(string tenant = "AAD")
     {
         try
         {
@@ -88,16 +111,16 @@ public class GraphService : ApiServiceBase, IGraphService
                 ? _settings.B2CResourceId
                 : _settings.AADResourceId;
             var obj = new { resourceId, tenant };
-            return await MakeRequest<List<Microsoft.Graph.AppRole>>(_settings.GetAppRolesByResourceId, obj);
+            return await MakeRequest<List<AppRole>>(_settings.GetAppRolesByResourceId, obj);
         }
         catch(Exception e)
         {
             _logger.LogWarning(e, "Error getting graph roles");
-            return new Result<List<Microsoft.Graph.AppRole>>
+            return new Result<List<AppRole>>
             {
                 Message = "Error getting graph roles",
                 Successful = false,
-                Value = new List<Microsoft.Graph.AppRole>()
+                Value = new List<AppRole>()
             };
         }
     }
@@ -217,7 +240,7 @@ public class GraphService : ApiServiceBase, IGraphService
         }
     }
 
-    public async Task<Result<List<Microsoft.Graph.Group>>> GetGroupsAsync(string id = null, string tenant = "AAD", bool includeMembers = false, bool includeAppRoleAssignments = false)
+    public async Task<Result<List<Group>>> GetGroupsAsync(string id = null, string tenant = "AAD", bool includeMembers = false, bool includeAppRoleAssignments = false)
     {
         try
         {
@@ -225,13 +248,13 @@ public class GraphService : ApiServiceBase, IGraphService
                 ? _settings.B2CResourceId
                 : _settings.AADResourceId;
             var obj = new { resourceId, id, appPrefix = _settings.AppPrefix, includeMembers, includeAppRoleAssignments, tenant };
-            var result = await MakeRequest<List<Microsoft.Graph.Group>>(_settings.GetGroups, obj);
+            var result = await MakeRequest<List<Group>>(_settings.GetGroups, obj);
             return result;
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Error getting groups");
-            return new Result<List<Microsoft.Graph.Group>>
+            return new Result<List<Group>>
             {
                 Successful = false,
                 Message = e.Message
@@ -305,7 +328,7 @@ public class GraphService : ApiServiceBase, IGraphService
         }
     }
 
-    public async Task<Result<Microsoft.Graph.User>> AddUserAsync(Microsoft.Graph.User user, string tenant = "AAD")
+    public async Task<Result<User>> AddUserAsync(User user, string tenant = "AAD")
     {
         try
         {
@@ -313,13 +336,13 @@ public class GraphService : ApiServiceBase, IGraphService
                 ? _settings.B2CResourceId
                 : _settings.AADResourceId;
             var obj = new { resourceId, appPrefix = _settings.AppPrefix, tenant, user };
-            var result = await MakeRequest<Microsoft.Graph.User>(_settings.AddUser, obj);
+            var result = await MakeRequest<User>(_settings.AddUser, obj);
             return result;
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Error adding user");
-            return new Result<Microsoft.Graph.User>
+            return new Result<User>
             {
                 Successful = false,
                 Message = e.Message
@@ -327,7 +350,7 @@ public class GraphService : ApiServiceBase, IGraphService
         }
     }
 
-    public async Task<Result<Microsoft.Graph.User>> UpdateUserAsync(Microsoft.Graph.User user, string tenant = "AAD")
+    public async Task<Result<User>> UpdateUserAsync(User user, string tenant = "AAD")
     {
         try
         {
@@ -335,13 +358,13 @@ public class GraphService : ApiServiceBase, IGraphService
                 ? _settings.B2CResourceId
                 : _settings.AADResourceId;
             var obj = new { resourceId, appPrefix = _settings.AppPrefix, tenant, user };
-            var result = await MakeRequest<Microsoft.Graph.User>(_settings.UpdateUser, obj);
+            var result = await MakeRequest<User>(_settings.UpdateUser, obj);
             return result;
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Update adding user");
-            return new Result<Microsoft.Graph.User>
+            return new Result<User>
             {
                 Successful = false,
                 Message = e.Message

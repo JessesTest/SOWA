@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
+using Notify.BL.Extensions;
+using Notify.DAL.Extensions;
 using PE.BL.Extensions;
 using PE.DAL.Extensions;
 using StackifyLib;
@@ -42,6 +44,8 @@ try
         .AddPersonEntityServices()
         .AddIdentityDbContext(configuration)
         .AddIdentityServices()
+        .AddNotifyDbContext(configuration)
+        .AddNotifyServices(configuration)
         .AddSolidWasteDbContext(configuration)
         .AddSolidWasteServices(configuration);
 
@@ -62,8 +66,12 @@ try
         );
     builder.Services
         //.AddIdentity(configuration.GetConnectionString("Identity"))
-        .AddIdentity<ApplicationUser, IdentityRole>()
-        .AddEntityFrameworkStores<ApplicationDbContext>();
+        .AddIdentity<ApplicationUser, IdentityRole>(options =>
+        {
+            options.SignIn.RequireConfirmedAccount = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
 
     // logging
     if (environment.IsEnvironment("Local"))

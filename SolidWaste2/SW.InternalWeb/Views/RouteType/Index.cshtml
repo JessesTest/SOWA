@@ -1,0 +1,21 @@
+﻿@model List<SW.InternalWeb.Models.RouteType.RouteTypeListViewModel>
+@{
+    ViewBag.ATitle = "Route Type Maintenance";
+}
+
+<partial name="_RouteTypeList" />
+
+<br />
+<br />
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            table = $('#RouteTypeList').dataTable({
+                "order": [[1, "asc"]],
+                stateSave: true
+            });
+        });
+    </script>
+}

@@ -1,14 +1,11 @@
 ﻿using Common.Services.AddressValidation;
-using SW.InternalWeb.Models.Customer;
-using SW.InternalWeb.Models.CustomerBillingAddress;
 
 namespace SW.InternalWeb.Models.CustomerServiceAddress;
 
 public class ServiceAddressMasterViewModel
 {
-
     public ICollection<ValidAddress> ServiceAddressList { get; set; }
-    public int ServiceAddressListIndex { get; set; }
+    public int? ServiceAddressListIndex { get; set; }
 
     public ServiceAddressViewModel ServiceAddress { get; set; } = new();
     public int AddressIndex { get; set; }
@@ -22,11 +19,6 @@ public class ServiceAddressMasterViewModel
     public int NoteIndex { get; set; }
     public int NoteCount { get; set; }
 
-    public CustomerBillingAddressViewModel Bill { get; set; } = new();
-    public int BillIndex { get; set; }
-    public int BillCount { get; set; }
-
-    public CustomerViewModel Customer { get; set; } = new();
-
     public string FullName { get; set; }
+    public DateTime? CustomerCancelDate { get; set; } 
 }

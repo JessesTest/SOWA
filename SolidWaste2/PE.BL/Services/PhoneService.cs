@@ -88,11 +88,11 @@ public class PhoneService : IPhoneService
         var defaultPhone = await GetById(phoneId);
 
         if (defaultPhone == null)
-            throw new Exception(string.Format("Phone Id '{0}' was not found.", phoneId));
+            throw new ArgumentException($"Phone Id '{phoneId}' was not found.", nameof(phoneId));
         if (defaultPhone.PersonEntityID != personId)
-            throw new Exception("Phone PersonEntityId mismatch");
+            throw new ArgumentException("Phone PersonEntityId mismatch", nameof(personId));
         if (defaultPhone.Delete)
-            throw new Exception("Phone was deleted");
+            throw new InvalidOperationException("Phone was deleted");
 
         var defaultPhones = await db.Phones
             .Where(p => p.PersonEntityID == personId && p.IsDefault)

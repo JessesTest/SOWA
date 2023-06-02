@@ -1,0 +1,135 @@
+﻿@model SW.InternalWeb.Models.Support.SupportViewModel
+@{
+    ViewBag.Title = "Support Panel";
+    ViewBag.ATitle = "Support Panel";
+}
+
+@using (Html.BeginForm("Index", "Support", FormMethod.Get, new { role = "form" }))
+{
+    <div class="panel panel-primary">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.CustomerId, new { @class = "control-label font-bold" })
+                    @Html.TextBoxFor(m => m.CustomerId, new { @class = "form-control" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.Label(string.Empty, " ")
+                    <input type="submit" class="btn btn-block btn-primary" value="Lookup" />
+                </div>
+                @if (Model.CustomerId.HasValue)
+                {
+                    <div class="col-xs-4">
+                        @Html.LabelFor(m => m.CustomerName, new { @class = "control-label font-bold" })
+                        <div class="form-control" disabled>
+                            @Model.CustomerName
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        @Html.LabelFor(m => m.Email, new { @class = "control-label font-bold" })
+                        <div class="form-control" disabled>
+                            @Model.Email
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@if (!Model.CustomerId.HasValue)
+{
+    return;
+}
+
+@if (!Model.HasOnline)
+{
+    <div class="alert alert-warning">
+        User has not registered an online bill pay account
+    </div>
+    return;
+}
+
+@using (Html.BeginForm("ResendConfirmationEmail", "Support", FormMethod.Post, new { role = "form" }))
+{
+    @Html.HiddenFor(m => m.PersonEntityId)
+    @Html.HiddenFor(m => m.CustomerId)
+    @Html.HiddenFor(m => m.CustomerName)
+    @Html.HiddenFor(m => m.HasOnline)
+    @Html.HiddenFor(m => m.EmailConfirmationFlag)
+    @Html.HiddenFor(m => m.Email)
+
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h4 class="margin-vertical-0">Confirmation Email</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            @Html.LabelFor(m => m.EmailConfirmationFlag, new { @class = "control-label font-bold" })
+                            <div>
+                                @Model.EmailConfirmationFlag
+                            </div>
+                        </div>
+                        <div class="col-xs-6">
+                            @if (!Model.EmailConfirmationFlag)
+                            {
+                                <input type="submit" class="btn btn-block btn-success" value="Resend Confirmation Email" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            @* Right column *@
+        </div>
+    </div>
+}
+
+@using (Html.BeginForm("ResetPassword", "Support", FormMethod.Post, new { @id = "resetPasswordFormId", role = "form", onsubmit = "return confirm('Reset Password Are you sure you want to change this item?')" }))
+{
+    @Html.HiddenFor(m => m.PersonEntityId)
+    @Html.HiddenFor(m => m.CustomerId)
+    @Html.HiddenFor(m => m.CustomerName)
+    @Html.HiddenFor(m => m.HasOnline)
+    @Html.HiddenFor(m => m.EmailConfirmationFlag)
+    @Html.HiddenFor(m => m.Email)
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h4 class="margin-vertical-0">Reset Password</h4>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row form-group">
+                        <div class="col-xs-12">
+                            @Html.LabelFor(m => m.Password, new { @class = "content-label" })
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", @pattern = "(?=.*\\d)(?=.*[a-z]).{8,}", @title = "Must contain at least one number and lowercase letter, and at least 8 or more characters", @required = "required" })
+                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <button type="submit" class="btn btn-block btn-success">Reset Password</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            @* Right column *@
+        </div>
+    </div>
+}

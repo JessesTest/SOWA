@@ -21,6 +21,14 @@ public static class Helpers
             new SelectListItem { Value = "H", Text = "Home Owners Association" }
         };
 
+    public static IEnumerable<SelectListItem> NewCustomerTypes =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Value = "C", Text = "Commercial" },
+            new SelectListItem { Value = "R", Text = "Residential" },
+            new SelectListItem { Value = "H", Text = "Home Owners Association" }
+        };
+
     public static IEnumerable<SelectListItem> EmailTypes =>
         new SelectListItem[]
         {
@@ -50,6 +58,13 @@ public static class Helpers
             new SelectListItem { Value = "4", Text = "W - Work"},
             new SelectListItem { Value = "5", Text = "C - Cell"},
             new SelectListItem { Value = "6", Text = "F - Fax"}
+        };
+
+    public static IEnumerable<SelectListItem> RouteTypes =>
+        new SelectListItem[]
+        {
+            new SelectListItem { Text = "C - Commercial", Value = "C" },
+            new SelectListItem { Text = "R - Residential", Value = "R" }
         };
 
     public static IEnumerable<SelectListItem> PhoneStatuses =>

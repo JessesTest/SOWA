@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Notify.DAL\Notify.DAL.csproj" />
+    <ProjectReference Include="..\Notify.DM\Notify.DM.csproj" />
+  </ItemGroup>
+
+</Project>

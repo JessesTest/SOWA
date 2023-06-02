@@ -1,0 +1,78 @@
+﻿@model IEnumerable<SW.BLL.DTOs.CustomerDelinquency>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table id="results" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th><!-- View --></th>
+                    <th>
+                        Customer
+                    </th>
+                    <th>
+                        Past Due
+                    </th>
+                    <th>
+                        Past Due 30 Days
+                    </th>
+                    <th>
+                        Past Due 60 Days
+                    </th>
+                    <th>
+                        Past Due 90 Days
+                    </th>
+                    <th>
+                        Collections Balance
+                    </th>
+                    <th>
+                        Counselors Balance
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.ActionLink("View", "Index", "Customer", new { customerID = item.Customer.CustomerId }, new { @class = "btn btn-primary" })
+                        </td>
+                        <td>
+                            @item.PersonEntity.FullName
+                        </td>
+                        <td class="text-right">
+                            @string.Format("{0:c}", item.PastDue)
+                        </td>
+                        <td class="text-right">
+                            @string.Format("{0:c}", item.PastDue30Days)
+                        </td>
+                        <td class="text-right">
+                            @string.Format("{0:c}", item.PastDue60Days)
+                        </td>
+                        <td class="text-right">
+                            @string.Format("{0:c}", item.PastDue90Days)
+                        </td>
+                        <td class="text-right">
+                            @string.Format("{0:c}", item.CollectionsBalance)
+                        </td>
+                        <td class="text-right">
+                            @string.Format("{0:c}", item.CounselorsBalance)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#results").DataTable({ "order": [[1, "asc"]] });
+        })
+    </script>
+}

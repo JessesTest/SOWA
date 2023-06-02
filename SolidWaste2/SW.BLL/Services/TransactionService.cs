@@ -621,4 +621,24 @@ public class TransactionService : ITransactionService
             .AsNoTracking()
             .ToListAsync();
     }
+
+    public async Task<DateTime> GetLastBillTranDateTime(int customerID, DateTime billAddDateTime)
+    {
+        var codes = new[] { "MB", "MBR", "FB" };
+
+        using var db = dbFactory.CreateDbContext();
+        var temp = await db.Transactions
+            .Where(t => t.CustomerId == customerID)
+            .Where(t => !t.DeleteFlag)
+            .Where(t => t.AddDateTime < billAddDateTime)
+            .Where(t => codes.Contains(t.TransactionCode.Code))
+            .OrderByDescending(t => t.AddDateTime)
+            .ThenByDescending(t => t.Sequence)
+            .FirstOrDefaultAsync();
+
+        if (temp != null)
+            return temp.AddDateTime;
+
+        return new DateTime(billAddDateTime.Year, billAddDateTime.Month, 1).AddMonths(-1);
+    }
 }
