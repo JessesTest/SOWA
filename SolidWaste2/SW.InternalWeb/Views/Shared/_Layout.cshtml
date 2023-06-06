@@ -94,8 +94,7 @@
                                                 <i class="fa fa-user-plus icon"> <b class="bg-primary"></b> </i> <span>New Customer</span>
                                             </a>
                                         </li>
-                                        @if ("SNCO\\ITData" == "SNCO\\ITData") @* original role to check for, replace with real check once roles are finalized *@
-                                        @*@if (User.IsInRole(accessIT))*@
+                                        @if (User.IsInRole("role.admin"))
                                         {
                                             <li @if (ViewBag.ActivePage == "Maintenance") { WriteLiteral("class=\"active\""); }>
                                                 <a href="#">
@@ -137,8 +136,7 @@
                                                 <li><a href="~/Transaction/Batch"><i class="fa fa-angle-right"></i><span>Batch Payment</span></a></li>
                                                 <li><a href="~/Transaction/Payment"><i class="fa fa-angle-right"></i><span>Payment</span></a></li>
                                                 <li><a href="~/Transaction/Index"><i class="fa fa-angle-right"></i><span>Service Charge</span></a></li>
-                                                @if ("SNCO\\SOWARAPP_Admin" == "SNCO\\SOWARAPP_Admin") @* original role to check for, replace with real check once roles are finalized *@
-                                                @*@if (User.IsInRole("SNCO\\SOWARAPP_Admin"))*@
+                                                @if (User.IsInRole("role.write-off"))
                                                 {
                                                     <li><a href="~/Writeoff/Index"><i class="fa fa-angle-right"></i><span>Write-off</span></a></li>
                                                 }

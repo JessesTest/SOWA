@@ -176,7 +176,7 @@ public class TransactionApiController : ControllerBase
             if (containerId == 0)
                 throw new ArgumentException("Error: ContainerID not selected");
 
-            var rules = new List<TransactionCodeRule>();
+            List<TransactionCodeRule> rules;
 
             decimal transactionAmount = 0;
 
@@ -268,7 +268,7 @@ public class TransactionApiController : ControllerBase
             {
                 customerName = person.FullName,
                 currentBalance = await _transactionService.GetCurrentBalance(customer.CustomerId),
-                paymentPlan = paymentPlan,
+                paymentPlan,
                 counselorsBalance = await _transactionService.GetCounselorsBalance(customer.CustomerId),
                 collectionsBalance = await _transactionService.GetCollectionsBalance(customer.CustomerId),
                 transactionHoldingSelectList = await GenerateTransactionHoldingSelectList(customer.CustomerId),
@@ -389,9 +389,7 @@ public class TransactionApiController : ControllerBase
 
             var jsonResult = new
             {
-                // SOWA-92  need to replace with new role info once that is setup
-                //security = ConfigurationManager.AppSettings["Access.Admin"],
-                security = @"SNCO\ITData",
+                security = "role.admin",
                 isAssociatedTransactionIdRequired,
                 associatedTransactionSelectList
             };

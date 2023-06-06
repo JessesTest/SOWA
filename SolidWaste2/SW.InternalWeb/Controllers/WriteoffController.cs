@@ -7,6 +7,7 @@ using SW.InternalWeb.Models.Writeoff;
 
 namespace SW.InternalWeb.Controllers;
 
+[Authorize(Roles = "role.write-off")]
 public class WriteoffController : Controller
 {
     private readonly ICustomerService customerService;
@@ -29,7 +30,6 @@ public class WriteoffController : Controller
         return View(model);
     }
 
-    //[Authorize(Roles = "SNCO\\SOWARAPP_Admin")]
     [HttpGet]
     public async Task<IActionResult> Create(int? customerId)
     {
@@ -70,7 +70,6 @@ public class WriteoffController : Controller
             .WithWarningWhen(customer.PaymentPlan, "", "Customer has a payment plan");
     }
 
-    //[Authorize(Roles = "SNCO\\SOWARAPP_Admin")]
     [HttpPost]
     public async Task<IActionResult> Create(WriteoffPaymentViewModel model)
     {

@@ -282,7 +282,7 @@
                                     @Html.ActionLink("Payment Plans", "Index", "PaymentPlan", new { customerId = Model.CustomerID }, new { @class = "btn btn-block btn-success margin-bottom-5" })
                                 </div>
                             </div>
-                            if ((Model.PastDue90Days > 0 || Model.CollectionsBalance > 0 || Model.CounselorsBalance > 0 || Model.UncollectableBalance > 0))
+                            @if (User.IsInRole("role.write-off") && (Model.PastDue90Days > 0 || Model.CollectionsBalance > 0 || Model.CounselorsBalance > 0 || Model.UncollectableBalance > 0))
                             {
                                 <div class="form-group">
                                     <div class="col-md-6 col-md-offset-3">

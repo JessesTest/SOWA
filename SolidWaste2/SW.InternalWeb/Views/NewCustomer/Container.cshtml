@@ -143,8 +143,7 @@
                                 @Html.LabelFor(m => m.AdditionalCharge, new { @class = "control-label font-bold" })
                             </div>
                             <div class="col-md-9">
-                                @* @if (User.IsInRole(System.Configuration.ConfigurationManager.AppSettings["Access.Admin"].ToString())) *@
-                                @if ("SNCO\\ITData" == "SNCO\\ITData")
+                                @if (User.IsInRole("role.admin"))
                                 {
                                     @Html.TextBoxFor(m => m.AdditionalCharge, new { @class = "form-control" })
                                     @Html.ValidationMessageFor(m => m.AdditionalCharge, null, new { @class = "text-danger" })
