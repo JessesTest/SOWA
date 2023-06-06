@@ -1,5 +1,6 @@
 ﻿using Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph;
 using Notify.BL.Services;
 using SW.InternalWeb.Views.NotifyAPI;
 
@@ -51,23 +52,31 @@ public class NotifyApiController : ControllerBase
     }
 
     [Route("GetGroupJson")]
-    public async Task<object> GetGroupJson()
+    public object GetGroupJson()
     {
-        try
+        // not possible without graph api access...
+        //try
+        //{
+        //    var dtos = await notifyService.GetApprovalUsers();  // role.admin
+        //    return new
+        //    {
+        //        Members = dtos.Select(d => new
+        //        {
+        //            d.DisplayName,
+        //            d.EmailAddress
+        //        })
+        //    };
+        //}
+        //catch(Exception e)
+        //{
+        //    return new { e.Message };
+        //}
+
+        return new[]
         {
-            var dtos = await notifyService.GetApprovalUsers();
-            return new
-            {
-                Members = dtos.Select(d => new
-                {
-                    d.DisplayName,
-                    d.EmailAddress
-                })
-            };
-        }
-        catch(Exception e)
-        {
-            return new { e.Message };
-        }
+            new{ DisplayName = "FINLEY, KATHRYN (6061)", EmailAddress = "KATHRYN.FINLEY@SNCO.US" },
+            new{ DisplayName = "ORESTER, ANGIE (6062)", EmailAddress = "ANGIE.ORESTER@SNCO.US" },
+            new{ DisplayName = "STARKEBAUM, DEANNA (6056)", EmailAddress = "DEANNA.STARKEBAUM@SNCO.US" },
+        };
     }
 }

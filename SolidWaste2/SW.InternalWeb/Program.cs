@@ -21,6 +21,9 @@ using SW.DAL.Extensions;
 using SW.InternalWeb.Extensions;
 using SW.InternalWeb.Identity;
 using Common.Services.TelerikReporting;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Extensions.Options;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
@@ -31,17 +34,17 @@ try
     var environment = builder.Environment;
     configuration.AddEnvironmentVariables();    // for sendgrid
 
-    // key vault
-    var keyVaultEndpoint = new Uri(configuration["AzureKeyVaultEndpoint"]);
-    TokenCredential tokenCredential =
-        builder.Environment.IsEnvironment("Local")
-        ? new VisualStudioCredential()
-        : new ManagedIdentityCredential();
-    configuration.AddAzureKeyVault(keyVaultEndpoint, tokenCredential, new AzureKeyVaultConfigurationOptions
-    {
-        // Manager = new PrefixKeyVaultSecretManager(secretPrefix),
-        ReloadInterval = TimeSpan.FromMinutes(5)
-    });
+    //// key vault
+    //var keyVaultEndpoint = new Uri(configuration["AzureKeyVaultEndpoint"]);
+    //TokenCredential tokenCredential =
+    //    environment.IsEnvironment("Local")
+    //    ? new VisualStudioCredential()
+    //    : new ManagedIdentityCredential();
+    //configuration.AddAzureKeyVault(keyVaultEndpoint, tokenCredential, new AzureKeyVaultConfigurationOptions
+    //{
+    //    // Manager = new PrefixKeyVaultSecretManager(secretPrefix),
+    //    ReloadInterval = TimeSpan.FromMinutes(5)
+    //});
 
     // razor pages
     builder.Services
@@ -52,15 +55,20 @@ try
         .AddControllersWithViews(mvcOptions =>
         {
             mvcOptions.EnableEndpointRouting = false;
+
+            var policy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+                .Build();
+            mvcOptions.Filters.Add(new AuthorizeFilter(policy));
         })
         .AddRazorRuntimeCompilation()
         .AddViewOptions(options =>
         {
             // restores legacy mvc behaviour for auto-generated checkbox fields
             options.HtmlHelperOptions.CheckBoxHiddenInputRenderMode = CheckBoxHiddenInputRenderMode.Inline;
-        });
+        })
         //.AddSessionStateTempDataProvider()
-        //.AddMicrosoftIdentityUI()     // azure ad
+        .AddMicrosoftIdentityUI();     // azure ad
 
     // our services
     builder.Services
