@@ -17,7 +17,7 @@ public interface INotifyService
 
 public class NotifySettings
 {
-    public string VerificationRole { get; set; }
+    public string VerificationRole { get; set; } = "role.admin";
 }
 
 
