@@ -20,9 +20,9 @@ Rewrite of the original solidwaste billing systemSW-Email-ConsoleApplication:
   > All jobs use **Telerik** for generating reports and **SendGrid** for email purpose and run as SSIS package where?
 
   #### Monthly bills
-  1. SW_Bill_Generate_Console_Application: Creates table records
-  2. SW_Bill_Generate_Console_Application: Runs manually after step 1, generates a batch Billing pdf for Todd to print and KC Presort to pickup and mail to customers. Recipients: Jon, Deanna, Angie, Todd, and Kyle
-  3. SW_Bill_Save_Console_Application: Runs manually after step 2 on localhost with bacpac from production loaded onto sqlexpress, Generates the bill blob images for online viewing; upon completion, local bacpac is forwarded to Kyle to load the BillBlobs into production
+  1. SW_Billing_Console_Application: Creates monthly billing records for customers.
+  2. SW_Bill_Generate_Console_Application: Runs after step 1, generates a batch monthly billing pdf report file (**SW_Bills.trdp**) for Todd to print which KC Presort picks up and mails out to customers. Recipients: Jon, Deanna, Angie, Todd, and Kyle
+  3. SW_Bill_Save_Console_Application: Currently runs manually after step 2 on localhost with bacpac from production loaded onto sqlexpress, Generates the bill blob images for online viewing; upon completion, local bacpac is forwarded to Kyle to load the BillBlobs into production.
   4. SW_BillEmailer_ConsoleApplication: Final step emails all customers who are flagged as paperless/paper and paperless, informing them about the availability of online bills. As a result, a text file containing customer email addresses and send status is generated for the purpose of identifying paperless customers from billed customers and resolving any issues or questions regarding any particular customer(s) and them receiving their bills.
   
   
