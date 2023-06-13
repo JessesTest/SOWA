@@ -33,11 +33,24 @@ public static class UserExtensions
 
     public static string GetEmail(this ClaimsPrincipal user)
     {
-        var email = user?.FindFirst("emails")?.Value;
+        if (user == null)
+            return null;
+
+        var email = user.FindFirst("emails")?.Value;
         if (!string.IsNullOrWhiteSpace(email))
             return email;
 
-        return user?.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
+        var pun = user?.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
+        if(pun != null && pun.EndsWith("@sncoapps.us"))
+        {
+            // currently no graph api access
+            // what can go wrong with this?
+            var index = pun.IndexOf("@sncoapps.us");
+            var name = pun.Substring(0, index);
+            return $"{name}@snco.us";
+        }
+
+        return pun;
     }
 
     public static string GetNameOrEmail(this ClaimsPrincipal user)
