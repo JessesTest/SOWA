@@ -43,4 +43,20 @@ public class Customer
 
     [NotMapped]
     public PE.DM.PersonEntity PersonEntity { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        return obj is Customer other &&
+            other.CustomerType == CustomerType &&
+            other.CustomerId == CustomerId &&
+            CustomerId > 0;
+    }
+
+    public override int GetHashCode()
+    {
+        HashCode hash = new();
+        hash.Add(CustomerType);
+        hash.Add(CustomerId);
+        return hash.ToHashCode();
+    }
 }
