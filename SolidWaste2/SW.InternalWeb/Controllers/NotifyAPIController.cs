@@ -54,6 +54,8 @@ public class NotifyApiController : ControllerBase
     [Route("GetGroupJson")]
     public object GetGroupJson()
     {
+        string groupName = "role.admin";
+
         // not possible without graph api access...
         //try
         //{
@@ -69,14 +71,17 @@ public class NotifyApiController : ControllerBase
         //}
         //catch(Exception e)
         //{
-        //    return new { e.Message };
+        //    return new { message = e.Message };
         //}
 
-        return new[]
+        return new 
         {
-            new{ DisplayName = "FINLEY, KATHRYN (6061)", EmailAddress = "KATHRYN.FINLEY@SNCO.US" },
-            new{ DisplayName = "ORESTER, ANGIE (6062)", EmailAddress = "ANGIE.ORESTER@SNCO.US" },
-            new{ DisplayName = "STARKEBAUM, DEANNA (6056)", EmailAddress = "DEANNA.STARKEBAUM@SNCO.US" },
+            Members = new[]
+            {
+                new{ DisplayName = "FINLEY, KATHRYN (6061)", EmailAddress = "KATHRYN.FINLEY@SNCO.US" },
+                new{ DisplayName = "ORESTER, ANGIE (6062)", EmailAddress = "ANGIE.ORESTER@SNCO.US" },
+                new{ DisplayName = "STARKEBAUM, DEANNA (6056)", EmailAddress = "DEANNA.STARKEBAUM@SNCO.US" },
+            }
         };
     }
 }

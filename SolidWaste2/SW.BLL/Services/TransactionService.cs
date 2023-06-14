@@ -49,6 +49,214 @@ public class TransactionService : ITransactionService
         await db.SaveChangesAsync();
     }
 
+    public async Task<string> AddTransactionAutoCalc(Transaction transaction)
+    {
+        using var db = dbFactory.CreateDbContext();
+
+        // Make sure there is an add toi
+        if (string.IsNullOrWhiteSpace(transaction.AddToi))
+            return "No user defined";
+
+        // Make sure there is a valid customer id
+        var customer = await db.GetCustomerById(transaction.CustomerId);
+        if (customer == null)
+            return "Invalid customer id";
+
+        // Make sure there is a valid transaction code
+        var transactionCode = await db.GetTransactionCode(transaction.TransactionCodeId.GetValueOrDefault());
+        if (transactionCode == null)
+            return "Invalid transaction code";
+
+        // If an associated transaction is provided, make sure it is valid
+        if (transaction.AssociatedTransactionId.HasValue && !await TransactionExists(transaction.AssociatedTransactionId.Value))
+            return "Invalid associated transaction id";
+
+        // Make sure the transaction amount has the right sign
+        if (transactionCode.TransactionSign == "P" && transaction.TransactionAmt < 0)
+            transaction.TransactionAmt *= -1;
+        if (transactionCode.TransactionSign == "N" && transaction.TransactionAmt > 0)
+            transaction.TransactionAmt *= -1;
+
+        // Is this a counselor payment?
+        if (transactionCode.Code == "DEC")
+        {
+            transaction.CounselorsAmount = transaction.TransactionAmt;
+            transaction.TransactionAmt = 0;
+        }
+
+        // Is this a collection payment?
+        if (transactionCode.Code == "BW" || transactionCode.Code == "DEK")
+        {
+            transaction.CollectionsAmount = transaction.TransactionAmt;
+            transaction.TransactionAmt = 0;
+        }
+
+        // Make sure there is a sequence number
+        if (transaction.Sequence <= 0)
+            transaction.Sequence = 1;
+
+        // Set the initial transaction balance
+        var lastTransaction = await GetLatest(transaction.CustomerId);
+
+        if (transactionCode.Group == "P" && lastTransaction != null && lastTransaction.CounselorsBalance > 0)
+        {
+            var counselorsAmount = 0m;
+            var transactionAmount = -transaction.TransactionAmt;
+
+            if (lastTransaction.CounselorsBalance >= transactionAmount)
+            {
+                counselorsAmount = transactionAmount;
+                transactionAmount = 0;
+            }
+            else
+            {
+                counselorsAmount = lastTransaction.CounselorsBalance;
+                transactionAmount -= counselorsAmount;
+            }
+
+            transaction.TransactionAmt = -transactionAmount;
+
+            if (counselorsAmount > 0)
+            {
+                var result = await MakeDelinquencyPayment(customer.CustomerId, "PCC", counselorsAmount, transaction.Comment);
+                if (result != null)
+                    return result;
+            }
+
+            if (transaction.TransactionAmt == 0)
+                return null;
+
+            lastTransaction = await GetLatest(transaction.CustomerId);
+        }
+
+        if (lastTransaction == null)
+        {
+            transaction.TransactionBalance = 0;
+            transaction.CounselorsBalance = 0;
+            transaction.CollectionsBalance = 0;
+            transaction.UncollectableBalance = 0;
+        }
+        else
+        {
+            transaction.TransactionBalance = lastTransaction.TransactionBalance;
+            transaction.CounselorsBalance = lastTransaction.CounselorsBalance;
+            transaction.CollectionsBalance = lastTransaction.CollectionsBalance;
+            transaction.UncollectableBalance = lastTransaction.UncollectableBalance;
+        }
+
+        // Clear out Counselor's Balance first
+        if (lastTransaction != null && lastTransaction.CounselorsBalance > 0 && transaction.TransactionAmt < 0)
+        {
+            decimal amtNeg = transaction.TransactionAmt;
+
+            if (transactionCode.TransactionSign == "N")
+                amtNeg *= -1;
+
+            if (amtNeg >= transaction.CounselorsBalance)
+            {
+                transaction.TransactionAmt += transaction.CounselorsBalance;
+                transaction.CounselorsAmount = -transaction.CounselorsBalance;
+            }
+            else
+            {
+                transaction.CounselorsAmount = transaction.TransactionAmt;
+                transaction.TransactionAmt = 0;
+            }
+        }
+
+        transaction.UncollectableAmount ??= 0;
+
+        // Add the new transaction amount to the balance
+        transaction.TransactionBalance += transaction.TransactionAmt;
+        transaction.CounselorsBalance += transaction.CounselorsAmount;
+        transaction.CollectionsBalance += transaction.CollectionsAmount;
+        transaction.UncollectableBalance += transaction.UncollectableAmount;
+
+        // "Pay off" payment plans if customer is on one
+        var paymentPlan = (await db.GetPaymentPlanByCustomer(customer.CustomerId, true)).SingleOrDefault(m => m.Status == "Active");
+
+        if (transactionCode.Code == "PP" && paymentPlan != null)
+        {
+            if (transaction.TransactionBalance <= 0)
+            {
+                paymentPlan.Canceled = true;
+                db.PaymentPlans.Update(paymentPlan);
+
+                customer.PaymentPlan = false;
+                db.Customers.Update(customer);
+            }
+            else
+            {
+                var remainingBalance = -transaction.TransactionAmt;
+
+                var firstUnpaidPaymentPlanDetail = paymentPlan.Details.FirstOrDefault(m => !m.Paid.GetValueOrDefault());
+
+                if (firstUnpaidPaymentPlanDetail != null)
+                {
+                    var remainingTotal = firstUnpaidPaymentPlanDetail.PaymentTotal;
+                    var remainingAmount = firstUnpaidPaymentPlanDetail.Amount;
+
+                    if (remainingBalance >= remainingTotal)
+                    {
+                        remainingBalance -= remainingTotal;
+                        remainingTotal = 0;
+                        remainingAmount = 0;
+                    }
+                    else if (remainingBalance >= remainingAmount)
+                    {
+                        remainingTotal = firstUnpaidPaymentPlanDetail.PaymentTotal - remainingBalance;
+                        remainingAmount = 0;
+                        remainingBalance = 0;
+                    }
+                    else
+                    {
+                        remainingTotal = firstUnpaidPaymentPlanDetail.PaymentTotal - remainingBalance;
+                        remainingAmount = firstUnpaidPaymentPlanDetail.Amount - remainingBalance;
+                        remainingBalance = 0;
+                    }
+
+                    remainingBalance -= remainingTotal;
+
+                    firstUnpaidPaymentPlanDetail.PaymentTotal = 0;
+                    firstUnpaidPaymentPlanDetail.Amount = 0;
+                    firstUnpaidPaymentPlanDetail.Paid = true;
+                    db.PaymentPlanDetails.Update(firstUnpaidPaymentPlanDetail);
+                }
+
+                if (remainingBalance != 0)
+                {
+                    var unpaidPaymentPlanDetails = paymentPlan.Details.Where(m => !m.Paid.GetValueOrDefault());
+                    var count = unpaidPaymentPlanDetails.Count();
+
+                    foreach (var item in unpaidPaymentPlanDetails)
+                    {
+                        item.PaymentTotal -= remainingBalance / count;
+                        item.Amount -= remainingBalance / count;
+                        db.PaymentPlanDetails.Update(item);
+                    }
+                }
+            }
+
+            if (!paymentPlan.Details.Any(m => !m.Paid.GetValueOrDefault()))
+            {
+                paymentPlan.Canceled = true;
+                db.PaymentPlans.Update(paymentPlan);
+
+                customer.PaymentPlan = false;
+                db.Customers.Update(customer);
+            }
+        }
+
+        transaction.AddDateTime = DateTime.Now;
+
+        if (lastTransaction != null && transaction.AddDateTime.ToString("G") == lastTransaction.AddDateTime.ToString("G"))
+            transaction.Sequence = lastTransaction.Sequence + 1;
+
+        db.Transactions.Add(transaction);
+        await db.SaveChangesAsync();
+        return null;
+    }
+
     public async Task<ICollection<Transaction>> GetByCustomer(int customerId, bool includeDeleted)
     {
         using var db = dbFactory.CreateDbContext();
@@ -305,19 +513,19 @@ public class TransactionService : ITransactionService
         return bob;
     }
 
-    public async Task MakeDelinquencyPayment(int customerId, string transactionTypeCode, decimal amount, string comment, DateTime? dateTime = null)
+    public async Task<string> MakeDelinquencyPayment(int customerId, string transactionTypeCode, decimal amount, string comment)
     {
         var userName = System.Security.Claims.ClaimsPrincipal.Current.GetNameOrEmail();
 
         using var db = dbFactory.CreateDbContext();
 
         var customer = await db.GetCustomerById(customerId);
-        if (customer == null || customer.DelDateTime != null)
-            throw new ArgumentException("Customer not found", nameof(customerId));
+        if (customer == null || customer.DelDateTime.HasValue)
+            return string.Format("Customer {0} not found", customerId);
 
         var code = await db.GetTransactionCodeByCode(transactionTypeCode);
         if (code == null || code.DeleteFlag)
-            throw new ArgumentException("Transaction code not found", nameof(transactionTypeCode));
+            return string.Format("Transaction code {0} not found", transactionTypeCode);
 
         Func<Transaction, decimal> GetTranAmt;
         if (code.IsCollections)
@@ -327,10 +535,10 @@ public class TransactionService : ITransactionService
         else if (code.IsUncollectable)
             GetTranAmt = t => t.UncollectableAmount.GetValueOrDefault();
         else
-            throw new InvalidOperationException("invalid transaction type");
+            return "invalid transaction type";
 
         var feesToPay = await db.GetDelinquencyFeesToPay(customerId, code);
-        var lastTransaction = await db.GetLatesetTransaction(customerId);
+        var lastTransaction = await GetLatest(customerId);
         var sequence = 0;
         var remainingPayment = amount;
 
@@ -340,7 +548,7 @@ public class TransactionService : ITransactionService
 
             var t = new Transaction
             {
-                AddDateTime = dateTime ?? DateTime.Now,
+                AddDateTime = DateTime.Now,
                 AddToi = userName,
                 Comment = comment,
                 ContainerId = fee.ContainerId,
@@ -358,7 +566,7 @@ public class TransactionService : ITransactionService
                 await db.AddTransaction(t);
                 lastTransaction = t;
 
-                fee.ChgDateTime = dateTime ?? DateTime.Now;
+                fee.ChgDateTime = DateTime.Now;
                 fee.ChgToi = userName;
                 fee.Partial = fee.Partial.GetValueOrDefault() + transactionAmount;
                 if (code.IsCollections)
@@ -367,7 +575,7 @@ public class TransactionService : ITransactionService
                     fee.PaidFull = fee.CounselorsAmount - fee.Partial.Value <= 0;
                 else if (code.IsUncollectable)
                     fee.PaidFull = fee.UncollectableAmount - fee.Partial.Value <= 0;
-                db.UpdateTransaction(fee);
+                db.Transactions.Update(fee);
 
                 remainingPayment -= transactionAmount;
             }
@@ -379,7 +587,7 @@ public class TransactionService : ITransactionService
         {
             var t = new Transaction
             {
-                AddDateTime = dateTime.HasValue ? dateTime.Value : DateTime.Now,
+                AddDateTime = DateTime.Now,
                 AddToi = userName,
                 Comment = "overpay",
                 CustomerId = lastTransaction.CustomerId,
@@ -391,6 +599,7 @@ public class TransactionService : ITransactionService
         }
 
         await db.SaveChangesAsync();
+        return null;
     }
 
     #endregion
@@ -442,9 +651,9 @@ public class TransactionService : ITransactionService
 
         // Set the initial transaction balance
         Transaction lastTransaction = await db.Transactions
-            .Where(e => e.CustomerId == transaction.CustomerId)
-            .OrderByDescending(e => e.AddDateTime)
-            .ThenByDescending(e => e.Sequence)
+            .Where(e => e.CustomerId == transaction.CustomerId && !e.DeleteFlag)
+            .OrderByDescending(e => e.Sequence)
+            .ThenByDescending(e => e.AddDateTime)
             .FirstOrDefaultAsync();
 
         if (lastTransaction == null)

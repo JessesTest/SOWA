@@ -1,0 +1,414 @@
+﻿@model SW.InternalWeb.Models.Transaction.BatchTransactionViewModel
+@using SW.InternalWeb.Extensions
+@{
+    ViewBag.Title = "Batch Payment";
+    ViewBag.ATitle = "Batch Payment";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Batch", "Transaction", FormMethod.Post, new { @role = "form" }))
+        {
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @Html.HiddenFor(m => m.BatchID)
+                    @Html.HiddenFor(m => m.CurrentTransaction.TransactionHoldingID)
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.LabelFor(m => m.CurrentTransaction.CustomerID, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.CurrentTransaction.CustomerID, new { @class = "form-control font-mono text-upper", @tabindex = 1 })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.LabelFor(m => m.CurrentTransaction.CustomerName, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.CurrentTransaction.CustomerName, new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    @Html.LabelFor(m => m.CurrentTransaction.TransactionCodeID, new { @class = "control-label font-bold" })
+                                    <select class="form-control font-mono text-uppercase" tabindex="2" asp-for="CurrentTransaction.TransactionCodeID" asp-items="Model.TransactionCodeSelectList"></select>
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.LabelFor(m => m.CurrentTransaction.TransactionAmt, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.CurrentTransaction.TransactionAmt, new { @class = "form-control font-mono text-upper", @tabindex = 3 })
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.LabelFor(m => m.CurrentTransaction.CheckNumber, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.CurrentTransaction.CheckNumber, new { @class = "form-control font-mono text-upper", @tabindex = 4 })
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-12">
+                                    @Html.LabelFor(m => m.CurrentTransaction.Comment, new { @class = "control-label font-bold" })
+                                    @Html.TextAreaFor(m => m.CurrentTransaction.Comment, new { @class = "form-control font-mono", @tabindex = 5, rows = 3 })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5ths col-5ths-farleft">
+                                    @Html.Label(string.Empty, "Balance Before", new { @class = "control-label font-bold" })
+                                    <input type="text" id="BalanceBefore" class="form-control font-mono" readonly />
+                                </div>
+                                <div class="col-md-5ths">
+                                    @Html.Label(string.Empty, "Balance After", new { @class = "control-label font-bold" })
+                                    <input type="text" id="BalanceAfter" class="form-control font-mono" readonly />
+                                </div>
+                                <div class="col-md-5ths">
+                                    @Html.Label(string.Empty, "Counselors Before", new { @class = "control-label font-bold" })
+                                    <input type="text" id="CounselorsBefore" class="form-control font-mono" readonly />
+                                </div>
+                                <div class="col-md-5ths">
+                                    @Html.Label(string.Empty, "Counselors After", new { @class = "control-label font-bold" })
+                                    <input type="text" id="CounselorsAfter" class="form-control font-mono" readonly />
+                                </div>
+                                <div class="col-md-5ths col-5ths-farright">
+                                    @Html.Label(string.Empty, "Collection Balance", new { @class = "control-label font-bold" })
+                                    <input type="text" id="CollectionsBalance" class="form-control font-mono" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="row">
+                                <div class="col-md-12 text-right margin-bottom-5">
+                                    <h4 class="font-bold text-ul margin-vertical-0">Active Batches</h4>
+                                </div>
+                                @for (int i = 0; i < Model.ActiveBatches.Count(); i++)
+                                {
+                                    var b = Model.ActiveBatches.ElementAt(i);
+                                    if (b.Key == Model.BatchID)
+                                    {
+                                        <div class="col-md-12 text-right">
+                                            Batch #@b.Key : @b.Value
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="col-md-12 text-right">
+                                            <a class="text-ul" href="@Url.Action("Batch", "Transaction", new { batchID = b.Key })">Batch #@b.Key : @b.Value</a>
+                                        </div>
+                                    }
+                                }
+                                <div class="col-md-12">
+                                    <hr />
+                                </div>
+                                <div class="col-md-12 text-right margin-bottom-5">
+                                    <h4 class="font-bold text-ul margin-vertical-0">Payment Plan Details</h4>
+                                </div>
+                                <div class="col-md-12">
+                                    <input type="hidden" id="MinPaymentAmount" />
+                                    <input type="hidden" id="CorrectPaymentAmount" />
+                                    <input type="hidden" id="UnpaidCount" />
+                                    <div id="details" class="text-right">
+
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <hr />
+                                </div>
+                                <div class="col-md-12 text-right margin-bottom-5">
+                                    <h4 class="font-bold text-ul margin-vertical-0">Information</h4>
+                                </div>
+                                <div class="col-md-12">
+                                    <div id="information" class="text-right text-danger">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                        <div class="col-md-3">
+                            @if (!string.IsNullOrWhiteSpace(Model.CurrentTransaction.TransactionHoldingID))
+                            {
+                                <input id="SubmitButton" class="btn btn-block btn-primary" type="submit" value="Save changes" tabindex="6" data-form-action="@Url.Action("Batch", "Transaction")" data-confirm="Confirm save changes?" disabled="disabled" />
+                            }
+                            else
+                            {
+                                <input id="SubmitButton" class="btn btn-block btn-primary" type="submit" value="Add to batch" tabindex="6" data-form-action="@Url.Action("Batch", "Transaction")" data-confirm="Confirm add to batch?" disabled="disabled" />
+                            }
+                        </div>
+                        <div class="col-md-6 text-center font-bold asims-not-as-big-money">
+                            Batch #
+                            @if (Model.BatchID == 0)
+                            {
+                                <span>New</span>
+                            }
+                            else
+                            {
+                                <span>@Model.BatchID Total $ @Model.Transactions.Sum(t => decimal.Parse(t.TransactionAmt))</span>
+                            }
+                        </div>
+                        <div class="col-md-3">
+                            @if (Model.BatchID != 0)
+                            {
+                                <a class="btn btn-block btn-primary" data-confirm="Confirm submit batch?" href="@Url.Action("BatchSubmit", "Transaction", new { batchID = Model.BatchID })">Submit Batch</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-striped table-condensed" id="Transactions">
+                            <thead>
+                                <tr>
+                                    <td>Action</td>
+                                    <td>@Html.DisplayNameFor(m => m.Transactions.FirstOrDefault().CustomerID)</td>
+                                    <td>@Html.DisplayNameFor(m => m.Transactions.FirstOrDefault().TransactionCodeID)</td>
+                                    <td>@Html.DisplayNameFor(m => m.Transactions.FirstOrDefault().TransactionAmt)</td>
+                                    <td>@Html.DisplayNameFor(m => m.Transactions.FirstOrDefault().CheckNumber)</td>
+                                    @*<td>@Html.DisplayNameFor(m => m.Transactions.FirstOrDefault().WorkOrder)</td>*@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Transactions.Count(); i++)
+                                {
+                                    var t = Model.Transactions.ElementAt(i);
+                                    <tr>
+                                        <td>
+                                            <a href="@Url.Action("Batch", "Transaction", new { batchID = Model.BatchID, transactionHoldingID = t.TransactionHoldingID })">Edit</a> |
+                                            <a href="@Url.Action("BatchDeleteTransaction", "Transaction", new { transactionHoldingID = t.TransactionHoldingID, batchID = Model.BatchID })" data-confirm="Confirm delete?">Delete</a>
+                                        </td>
+                                        <td>@t.CustomerID</td>
+                                        <td>@t.TransactionCodeID.GetTransactionCodeDisplayName(Model.TransactionCodeSelectList)</td>
+                                        <td>@t.TransactionAmt</td>
+                                        <td>@t.CheckNumber</td>
+                                        @*<td>@t.WorkOrder</td>*@
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function changeCustomerID($event) {
+            var data = {
+                customerId: ($('#CurrentTransaction_CustomerID').val()) ? $('#CurrentTransaction_CustomerID').val() : 0,
+            }
+
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: getPath('~/api/TransactionApi/BatchAjaxCustomerId'),
+                data: data,
+                success: updateCustomerID,
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function updateCustomerID(data) {
+            if (data.message != null) {
+                $('#CurrentTransaction_CustomerName').val('');
+                $('#BalanceBefore').val('0.00');
+                $('#BalanceAfter').val('0.00');
+                $('#CounselorsBefore').val('0.00');
+                $('#CounselorsAfter').val('0.00');
+                $('#CollectionsBalance').val('0.00');
+            } else {
+                $('#CurrentTransaction_CustomerName').val(data.customerName);
+                $('#BalanceBefore').val(data.currentBalance.toFixed(2));
+                $('#BalanceAfter').val(data.currentBalance.toFixed(2));
+                $('#CounselorsBefore').val(data.counselorsBalance.toFixed(2));
+                $('#CounselorsAfter').val(data.counselorsBalance.toFixed(2));
+                $('#CollectionsBalance').val(data.collectionsBalance.toFixed(2));
+            }
+
+            var list = $('select#CurrentTransaction_TransactionCodeID');
+            var selected = list.val();
+            list.empty();
+            list.append('<option value="0">SELECT A TRANSACTION CODE</option>');
+            $(data.transactionCodeSelectList).each(function(index, item) {
+                list.append('<option value="' + item.value + '">' + item.text + '</option>');
+            });
+            list.val(selected);
+
+            var detailsColumn = $('div#details');
+            $('#MinPaymentAmount').val('');
+            $('#CorrectPaymentAmount').val('');
+            $('#UnpaidCount').val('');
+            detailsColumn.empty();
+
+            if (data.paymentPlan != null) {
+                var firstUnpaid = false;
+                var unpaidCount = data.paymentPlan.details.length - 1;
+
+                $('#MinPaymentAmount').val(parseFloat($('#BalanceBefore').val() * 0.10).toFixed(2));
+                $('#CorrectPaymentAmount').val(parseFloat(data.paymentPlan.details[unpaidCount].paymentTotal).toFixed(2));
+
+                for (var i = 0; i < data.paymentPlan.details.length; i++) {
+                    var detailsRowText = '$' +
+                        data.paymentPlan.details[i].paymentTotal.toFixed(2) +
+                        ' | Due: ' +
+                        data.paymentPlan.details[i].dueDate;
+
+                    var detailsRow = $(document.createElement('div'));
+                    detailsRow.text(detailsRowText);
+                    detailsRow.attr('data-amount', data.paymentPlan.details[i].amount);
+                    detailsRow.attr('data-paymentTotal', data.paymentPlan.details[i].paymentTotal);
+                    if (data.paymentPlan.details[i].paid == true) {
+                        detailsRow.attr('style', 'text-decoration: line-through;');
+                        unpaidCount--;
+                    } else if (firstUnpaid == false) {
+                        detailsRow.attr('id', 'FirstUnpaidPaymentPlanDetail');
+                        firstUnpaid = true;
+                    }
+                    detailsRow.appendTo(detailsColumn);
+                }
+                $('#UnpaidCount').val(unpaidCount);
+            }
+
+            activateButton();
+        }
+
+        function changeTransactionCodeID($event) {
+            activateButton();
+        }
+
+        function changeTransactionAmt($event) {
+            var transactionAmount = parseFloat($('#CurrentTransaction_TransactionAmt').val());
+
+            var counselorsBefore = parseFloat($('#CounselorsBefore').val());
+            var counselorsAfter = parseFloat($('#CounselorsAfter').val());
+
+            if (counselorsBefore > 0) {
+                counselorsAfter = counselorsBefore - transactionAmount;
+                transactionAmount = 0;
+            }
+
+            if (counselorsAfter < 0) {
+                transactionAmount = 0 - counselorsAfter;
+                counselorsAfter = 0;
+            }
+
+            var balanceBefore = parseFloat($('#BalanceBefore').val());
+            var balanceAfter = balanceBefore - transactionAmount;
+
+            $('#BalanceAfter').val(balanceAfter.toFixed(2));
+            $('#CounselorsAfter').val(counselorsAfter.toFixed(2));
+
+            activateButton();
+        }
+
+        function activateButton($event) {
+            var customerID = $('#CurrentTransaction_CustomerID').val();
+            var transactionCodeID = $('#CurrentTransaction_TransactionCodeID').val();
+            var transactionAmount = parseFloat($('#CurrentTransaction_TransactionAmt').val());
+            var minPaymentAmount = parseFloat($('#MinPaymentAmount').val());
+            var correctPaymentAmount = parseFloat($('#CorrectPaymentAmount').val());
+            var counselorsBalance = parseFloat($('#CounselorsBefore').val());
+
+            $('#information').empty();
+
+            if (customerID == null || customerID == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (!isNaN(counselorsBalance) && counselorsBalance > 0) {
+                $('#information')
+                    .append('<div>This customer has a counselors balance. Any amount entered here will be applied towards the counselors balance first. Any remaining amount will then be applied towards the account balance.');
+            }
+
+            if (transactionCodeID == null || transactionCodeID == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (transactionAmount == null || transactionAmount == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            // adjust payment transaction amounts to a positive number to allow for accurate comparison to payment plans
+            if (transactionAmount < 0) {
+                transactionAmount = transactionAmount * -1;
+            }
+
+            if (!isNaN(minPaymentAmount) && transactionCodeID == 24 && transactionAmount < minPaymentAmount) {
+                $('#information')
+                    .append('<div>Minimum payment is ' +
+                        minPaymentAmount.toFixed(2) +
+                        '</div><div>(10% of current balance)</div>');
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (!isNaN(correctPaymentAmount) && transactionCodeID == 24 && !isNaN(transactionAmount) && transactionAmount != correctPaymentAmount) {
+                if ($('#BalanceAfter').val() <= 0) {
+                    $('#information')
+                        .text('A payment this large will terminate the payment plan.');
+                    return;
+                }
+
+                var remainingBalance = transactionAmount;
+                var firstUnpaidPaymentTotal = parseFloat($('#FirstUnpaidPaymentPlanDetail').data('paymenttotal'));
+                var firstUnpaidAmount = parseFloat($('#FirstUnpaidPaymentPlanDetail').data('amount'));
+                var unpaidCount = parseInt($('#UnpaidCount').val());
+                var remainingTotal = firstUnpaidPaymentTotal;
+                var remainingAmount = firstUnpaidAmount;
+
+                if (remainingBalance >= remainingTotal) {
+                    remainingBalance -= remainingTotal;
+                    remainingTotal = 0;
+                    remainingAmount = 0;
+                } else if (remainingBalance >= remainingAmount) {
+                    remainingTotal = firstUnpaidPaymentTotal - remainingBalance;
+                    remainingAmount = 0;
+                    remainingBalance = 0;
+                } else {
+                    remainingTotal = firstUnpaidPaymentTotal - remainingBalance;
+                    remainingAmount = firstUnpaidAmount - remainingBalance;
+                    remainingBalance = 0;
+                }
+
+                remainingBalance -= remainingTotal;
+
+                if (remainingBalance != 0) {
+                    var newPaymentTotal = (firstUnpaidPaymentTotal - (remainingBalance / unpaidCount)).toFixed(2);
+                    $('#information')
+                        .append('<div>This amount will alter the payment plan amounts for the following months to:</div>\n<br /><div>' +
+                            newPaymentTotal +
+                            ' per month for ' +
+                            unpaidCount +
+                            ' months.</div>');
+                }
+            }
+
+            $('#SubmitButton').prop('disabled', false);
+            return;
+        }
+
+        function processSubmit() {
+            $('[disabled]').prop('disabled', false);
+            $('#SubmitButton').prop('disabled', true);
+        }
+
+        $(function () {
+            $('#Transactions').DataTable({
+                'ordering': false
+            });
+            $('#CurrentTransaction_CustomerID').on('change', changeCustomerID);
+            $('#CurrentTransaction_TransactionCodeID').on('change', changeTransactionCodeID);
+            $('#CurrentTransaction_TransactionAmt').on('change', changeTransactionAmt);
+            $(this).on('submit', processSubmit);
+
+            $('#CurrentTransaction_CustomerID').trigger('change');
+        });
+    </script>
+}

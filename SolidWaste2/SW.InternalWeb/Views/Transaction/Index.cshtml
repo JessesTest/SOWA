@@ -1,0 +1,482 @@
+﻿@model SW.InternalWeb.Models.Transaction.TransactionViewModel
+@{
+    ViewBag.Title = "Transaction";
+    ViewBag.ATitle = "Transaction";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Index", "Transaction", FormMethod.Post, new { @role = "form" }))
+        {
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div hidden="hidden">
+                        <div id="CustomerID_Lock">@Model.CustomerID</div>
+                        <div id="TransactionCodeID_Lock">@Model.TransactionCodeID</div>
+                        <div id="ServiceAddressID_Lock">@Model.ServiceAddressID</div>
+                        <div id="ContainerID_Lock">@Model.ContainerID</div>
+                        @Html.HiddenFor(m => m.Locks)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.LabelFor(m => m.CustomerID, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.CustomerID, new { @class = "form-control font-mono text-uppercase", @tabindex = 1 })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.LabelFor(m => m.CustomerName, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.CustomerName, new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-12">
+                                    @Html.LabelFor(m => m.TransactionCodeID, new { @class = "control-label font-bold" })
+                                    <select class="form-control font-mono text-uppercase" tabindex="2" asp-for="TransactionCodeID"></select>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-12">
+                                    @Html.LabelFor(m => m.ServiceAddressID, new { @class = "control-label font-bold" })
+                                    <select class="form-control font-mono text-uppercase" tabindex="3" asp-for="ServiceAddressID"></select>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-12">
+                                    @Html.LabelFor(m => m.ContainerID, new { @class = "control-label font-bold" })
+                                    <select class="form-control font-mono text-uppercase" tabindex="4" asp-for="ContainerID"></select>
+                                </div>
+                            </div>
+                            <div class="row" hidden="hidden" id="FormulaBase">
+                                <div class="col-md-2">
+                                    <label class="control-label font-bold" for="FormulaBase">Base</label>
+                                    <input class="form-control font-mono text-uppercase valid" parameter="{b}" id="Formula_Base_Value" name="Formula.Base.Value" type="text" aria-invalid="false" />
+                                </div>
+                            </div>
+                            <div class="row form-group" hidden="hidden" id="FormulaComment">
+                                @Html.HiddenFor(m => m.Formula.CommentString)
+                                <div class="col-md-12">
+                                    @Html.LabelFor(m => m.Comment, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.Comment, new { @class = "form-control font-mono text-uppercase" })
+                                </div>
+                            </div>
+                            <div class="row" hidden="hidden" id="FormulaString">
+                                @Html.HiddenFor(m => m.Formula.FormulaString)
+                            </div>
+                            <div class="row" hidden="hidden" id="FormulaConstants"></div>
+                            <div class="row" hidden="hidden" id="FormulaVariables"></div>
+                        </div>
+                        <div class="col-md-4">
+                            @* *** INFORMATION BOX GOES HERE *** *@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                        <div class="col-md-2">
+                            <input id="SubmitButton" class="btn btn-block btn-primary" type="submit" value="Submit" data-form-action="@Url.Action("Index", "Transaction")" data-confirm="Confirm submit?" disabled="disabled" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function ajaxCustomer($event) {
+            $('select#TransactionCodeID').find('option').remove();
+            $('select#ServiceAddressID').find('option').remove();
+            $('select#ContainerID').find('option').remove();
+            $('#FormulaVariables').prop('hidden', true);
+            $('#CustomerName').val('');
+
+            var data = {
+                CustomerId: ($('#CustomerID').val()) ? $('#CustomerID').val() : 0
+            }
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: getPath('~/api/TransactionApi/CheckId'),
+                data: data,
+                success: updateCustomer,
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+            $event.preventDefault();
+        }
+        function updateCustomer(data) {
+            if (data.message != null) {
+                alert(data.message);
+            } else {
+                $('#CustomerName').val(data.customerName);
+
+                var list = $('select#TransactionCodeID');
+                list.append('<option value="0">SELECT A TRANSACTION CODE</option>');
+                $(data.transactionCodeSelectList)
+                    .each(function(index, item) {
+                        list.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+            }
+
+            $('#TransactionAmount').val('');
+            activateButton();
+        }
+
+        function ajaxTransaction($event) {
+            $('select#ServiceAddressID').find('option').remove();
+            $('select#ContainerID').find('option').remove();
+            $('#FormulaVariables').prop('hidden', true);
+
+            var data = {
+                CustomerId: ($('#CustomerID').val()) ? $('#CustomerID').val() : 0,
+                TransactionCodeId: $('#TransactionCodeID').val(),
+            }
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: getPath('~/api/TransactionApi/CheckCode'),
+                data: data,
+                success: updateTransaction,
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+            $event.preventDefault();
+        }
+        function updateTransaction(data) {
+            if (data.message != null) {
+                alert(data.message);
+            } else {
+                var list = $('select#ServiceAddressID');
+                list.append('<option value="0">SELECT A SERVICE ADDRESS</option>');
+                $(data.serviceAddressSelectList)
+                    .each(function(index, item) {
+                        list.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+            }
+
+            $('#FormulaComment').prop('hidden', true);
+            $('#TransactionAmount').val('');
+            activateButton();
+        }
+
+        function ajaxServiceAddress($event) {
+            $('select#ContainerID').find('option').remove();
+            $('#FormulaVariables').prop('hidden', true);
+
+            var data = {
+                TransactionCodeId: $('#TransactionCodeID').val(),
+                ServiceAddressId: $('#ServiceAddressID').val(),
+            }
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: getPath('~/api/TransactionApi/CheckServiceAddress'),
+                data: data,
+                success: updateServiceAddress,
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+            $event.preventDefault();
+        }
+        function updateServiceAddress(data) {
+            var code = $('select#TransactionCodeID').val();
+            var list = $('select#ContainerID');
+
+            if (data.message != null) {
+                alert(data.message);
+            } else if (code == 1) {
+                list.append('<option value="-1">BULK</option>');
+                updateContainer(data);
+            } else if (code == 48) {
+                list.append('<option value="-1">CONTAINER RESET</option>');
+                ajaxContainer();
+            } else {
+                list.append('<option value="0">SELECT A CONTAINER</option>');
+                $(data.containerSelectList)
+                    .each(function(index, item) {
+                        list.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+                $('#FormulaComment').prop('hidden', true);
+            }
+
+            $('#TransactionAmount').val('');
+            activateButton();
+        }
+
+        function ajaxContainer($event) {
+            $('#FormulaVariables').prop('hidden', true);
+
+            var data = {
+                TransactionCodeId: $('#TransactionCodeID').val(),
+                ContainerId: $('#ContainerID').val(),
+            }
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: getPath('~/api/TransactionApi/CheckContainer'),
+                data: data,
+                success: updateContainer,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+            if ($event) {   // prevent error being thrown when updateServiceAddress shortcuts into this function for container reset
+                $event.preventDefault();
+            }
+        }
+        function updateContainer(data) {
+            $('#Formula_Base_Value').val(data.transAmt);
+            $('#TransactionAmount').val(data.transAmt);
+            $('#SubmitButton').removeAttr('tabindex');
+
+            if (data.message != null) {
+                alert(data.message);
+            } else {
+                var formulaCmt = $('#FormulaComment');
+                var formulaCon = $('#FormulaConstants');
+                var formulaVar = $('#FormulaVariables');
+
+                formulaCmt.prop('hidden', true);
+                formulaCon.prop('hidden', true);
+                formulaVar.prop('hidden', true);
+
+                formulaCon.empty();
+                formulaVar.empty();
+                $('#Formula_CommentString').val('');
+                $('#Comment').val('');
+                $('#Formula_FormulaString').val('');
+
+                if (data.formula != null) {
+                    if (data.formula.commentString != null && data.formula.commentString != '') {
+                        $('#Formula_CommentString').val(data.formula.commentString);
+                    }
+                    $('#Formula_FormulaString').val(data.formula.formulaString);
+
+                    // Build the formula constants and variables divs
+                    for (i = 0; i < data.formula.parameters.length; i++) {
+                        var parameter = data.formula.parameters[i];
+
+                        // Build the formula constants div
+                        if (parameter.constant == true) {
+                            var input = $(document.createElement('input'));
+                            input.attr('parameter', parameter.parameterId);
+                            input.prop('id', 'Formula_Parameters_' + i + '__Value');
+                            input.prop('name', 'Formula.Parameters[' + i + '].Value');
+                            input.prop('type', 'hidden');
+                            input.val(parameter.value);
+
+                            formulaCon.append(input);
+                        }
+
+                        // Build the formula variables div
+                        if (parameter.constant == false) {
+                            var column = $(document.createElement('div'));
+                            column.attr('class', 'col-md-3');
+
+                            var label = $(document.createElement('label'));
+                            label.attr('class', 'control-label font-bold');
+                            label.prop('for', 'Formula_Parameters_' + i + '__Value');
+                            label.text(parameter.name);
+                            column.append(label);
+
+                            var input = $(document.createElement('input'));
+                            input.attr('class', 'form-control font-mono text-uppercase');
+                            input.attr('tabindex', $('[tabindex]').length + 1);
+                            input.attr('parameter', parameter.parameterId);
+                            input.attr('data-val-regex', 'The field ' + parameter.name + ' must match the regular expression \'^[0-9$,\.\-]+$\'.');
+                            input.attr('data-val-regex-pattern', '^[0-9$,\.\-]+$');
+                            input.attr('data-val-required', 'The ' + parameter.name + ' Amount field is required.');
+                            input.prop('id', 'Formula_Parameters_' + i + '__Value');
+                            input.prop('name', 'Formula.Parameters[' + i + '].Value');
+                            input.prop('type', 'text');
+                            input.val(parameter.value);
+                            input.on('change', evaluateFormula);
+
+                            column.append(input);
+
+                            formulaVar.append(column);
+                        }
+                    }
+                }
+
+                // Build the Amount div
+                var column = $(document.createElement('div'));
+                column.attr('class', 'col-md-3');
+
+                var label = $(document.createElement('label'));
+                label.attr('class', 'control-label font-bold');
+                label.prop('for', 'TransactionAmount');
+                label.text('Amount');
+                column.append(label);
+
+                var input = $(document.createElement('input'));
+                input.attr('class', 'form-control font-mono text-uppercase');
+                input.attr('tabindex', $('[tabindex]').length + 1);
+                input.attr('data-val-regex', 'The field Amount must match the regular expression \'^[0-9$,\.\-]+$\'.');
+                input.attr('data-val-regex-pattern', '^[0-9$,\.\-]+$');
+                input.attr('data-val-required', 'The Amount field is required.');
+                input.prop('disabled', true);
+                input.prop('id', 'TransactionAmount');
+                input.prop('name', 'TransactionAmount');
+                input.prop('type', 'text');
+                input.val('');
+                column.append(input);
+
+                formulaVar.append(column);
+
+                // Build the Order Purchase div
+                var column = $(document.createElement('div'));
+                column.attr('class', 'col-md-3');
+
+                var label = $(document.createElement('label'));
+                label.attr('class', 'control-label font-bold');
+                label.prop('for', 'WorkOrder');
+                label.text('Purchase Order');
+                column.append(label);
+
+                var input = $(document.createElement('input'));
+                input.attr('class', 'form-control font-mono text-uppercase');
+                input.attr('tabindex', $('[tabindex]').length + 1);
+                input.attr('data-val-required', 'The Work Order field is required.');
+                input.prop('id', 'WorkOrder');
+                input.prop('name', 'WorkOrder');
+                input.prop('type', 'text');
+                input.val('');
+                column.append(input);
+
+                formulaVar.append(column);
+
+                formulaVar.prop('hidden', false);
+            }
+
+            var transaction_code_id = $('select#TransactionCodeID').val();
+            if (transaction_code_id == 1 || transaction_code_id == 48) {
+                formulaCmt.prop('hidden', false);
+            }
+
+            $('#TransactionAmount').on('change', activateButton);
+            $('#SubmitButton').attr('tabindex', $('[tabindex]').length + 1);
+            evaluateFormula();
+            activateButton();
+        }
+
+        function evaluateFormula($event) {
+            var formulaString = $('#Formula_FormulaString').val();
+            var commentString = $('#Formula_CommentString').val();
+            var parList = $('[parameter]');
+
+            for (i = 0; i < parList.length; i++) {
+                var parStr = $(parList[i]).attr('parameter');
+                var parVal = $(parList[i]).val();
+
+                formulaString = formulaString.replace(parStr, parVal);
+
+                if (commentString != undefined) {
+                    commentString = commentString.replace(parStr, parVal);
+                } else {
+                    commentString = $('#Comment').val();
+                }
+            }
+            formulaString = eval(formulaString).toFixed(2);
+            $('#TransactionAmount').val(formulaString);
+            $('#TransactionAmount').change();
+            $('#Comment').val(commentString);
+        }
+
+        function activateButton($event) {
+            var customerID = $('#CustomerID').val();
+            var transactionCodeID = $('#TransactionCodeID').val();
+            var serviceAddressID = $('#ServiceAddressID').val();
+            var containerID = $('#ContainerID').val();
+            var transactionAmount = $('#TransactionAmount').val();
+
+            //alert('CustomerID: ' + customerID + '\nTransactionCodeID: ' + transactionCodeID + '\nServiceAddressID: ' + serviceAddressID + '\nContainerID: ' + containerID + '\nTransactionAmount: ' + transactionAmount);
+
+            if (customerID == null || customerID == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (transactionCodeID == null || transactionCodeID == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (serviceAddressID == null || serviceAddressID == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (containerID == null || containerID == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (transactionAmount == null || isNaN(transactionAmount) || transactionAmount < 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            $('#SubmitButton').prop('disabled', false);
+            return;
+        }
+
+        function processLocks() {
+            var customerID = $('#CustomerID_Lock').text();
+            var transactionCodeID = $('#TransactionCodeID_Lock').text();
+            var serviceAddressID = $('#ServiceAddressID_Lock').text();
+            var containerID = $('#ContainerID_Lock').text();
+
+            if (customerID != 0) {
+                $('#CustomerID').val(customerID);
+                $('#CustomerID').change();
+                var focusIndex = +($(':focus').attr('tabindex'));
+                $('[tabindex="' + (focusIndex + 1) + '"]').focus();
+                $('#CustomerID').prop('disabled', true);
+                if (transactionCodeID != 0) {
+                    $('#TransactionCodeID').val(transactionCodeID);
+                    $('#TransactionCodeID').change();
+                    var focusIndex = +($(':focus').attr('tabindex'));
+                    $('[tabindex="' + (focusIndex + 1) + '"]').focus();
+                    $('#TransactionCodeID').prop('disabled', true);
+                    if (serviceAddressID != 0) {
+                        $('#ServiceAddressID').val(serviceAddressID);
+                        $('#ServiceAddressID').change();
+                        var focusIndex = +($(':focus').attr('tabindex'));
+                        $('[tabindex="' + (focusIndex + 1) + '"]').focus();
+                        $('#ServiceAddressID').prop('disabled', true);
+                        if (containerID != 0) {
+                            $('#ContainerID').val(containerID);
+                            $('#ContainerID').change();
+                            var focusIndex = +($(':focus').attr('tabindex'));
+                            $('[tabindex="' + (focusIndex + 1) + '"]').focus();
+                            $('#ContainerID').prop('disabled', true);
+                        }
+                    }
+                }
+            }
+        }
+
+        function processSubmit() {
+            $('[disabled]').prop('disabled', false);
+            $('#SubmitButton').prop('disabled', true);
+        }
+
+        $(function() {
+            $('#CustomerID').on('change', ajaxCustomer);
+            $('#TransactionCodeID').on('change', ajaxTransaction);
+            $('#ServiceAddressID').on('change', ajaxServiceAddress);
+            $('#ContainerID').on('change', ajaxContainer);
+            $(this).on('submit', processSubmit);
+
+            processLocks();
+        });
+    </script>
+}

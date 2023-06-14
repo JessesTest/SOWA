@@ -36,7 +36,7 @@ public class PendingWorkController : Controller
         if(holding == null)
         {
             return RedirectToAction(nameof(Personal))
-                .WithWarning("Transaction holding not found", "Record does not exist or you are not authorized");
+                .WithDanger("Transaction holding not found", "Record does not exist or you are not authorized");
         }
 
         var temp = new[] { holding };
@@ -54,87 +54,66 @@ public class PendingWorkController : Controller
 
     public async Task<IActionResult> ForceResolve(int transactionHoldingID)
     {
+        var holding = await transactionHoldingService.GetById(transactionHoldingID);
+        if (holding == null)
+            return RedirectToAction(nameof(Personal)).WithDanger("Transaction holding not found", "");
+
         var email = User.GetEmail(); // ?? "Deanna.Starkebaum@snco.us"
-        var holding = await transactionHoldingService.GetAuthorizedById(email, transactionHoldingID);
-        if(holding == null)
-        {
-            return RedirectToAction(nameof(Personal))
-                .WithWarning("Transaction holding not found", "Record does not exist or you are not authorized");
-        }
+        var displayName = User.GetNameOrEmail(); // ?? "Starkebaum, Deanna"
 
-        var displayName = User.GetDisplayName() ?? "Starkebaum, Deanna";
-        //var accountName = User.GetNameOrEmail()
-
-        string result = await transactionHoldingService.Resolve(transactionHoldingID, email, displayName);
+        string result = await transactionHoldingService.Resolve(holding, email, displayName);
         if(result != null)
-        {
-            return RedirectToAction(nameof(Personal))
-                .WithWarning("", result);
-        }
+            return RedirectToAction(nameof(Personal)).WithDanger(result, "");
 
         return RedirectToAction("Index", "CustomerTransactionHistory", new { customerId = holding.CustomerId })
-            .WithSuccess("Success", "Transaction resolved");
+            .WithSuccess("Transaction resolved", "");
     }
 
     public async Task<IActionResult> ApproveTransaction(int transactionHoldingID)
     {
-        var email = User.GetEmail(); // ?? "Deanna.Starkebaum@snco.us"
-        var holding = await transactionHoldingService.GetAuthorizedById(email, transactionHoldingID);
+        var holding = await transactionHoldingService.GetById(transactionHoldingID);
         if (holding == null)
-        {
-            return RedirectToAction(nameof(Personal))
-                .WithWarning("Transaction holding not found", "Record does not exist or you are not authorized");
-        }
+            return RedirectToAction(nameof(Personal)).WithDanger("Transaction holding not found", "");
 
-        var displayName = User.GetDisplayName() ?? "Starkebaum, Deanna";
-        //var accountName = User.GetNameOrEmail()
+        var email = User.GetEmail(); // ?? "Deanna.Starkebaum@snco.us"
+        var displayName = User.GetNameOrEmail(); // ?? "Starkebaum, Deanna"
 
-        string result = await transactionHoldingService.Approve(transactionHoldingID, email, displayName);
+        string result = await transactionHoldingService.Approve(holding, email, displayName);
         if (result != null)
-        {
-            return RedirectToAction(nameof(Personal))
-                .WithWarning("", result);
-        }
+            return RedirectToAction(nameof(Personal)).WithDanger(result, "");
 
         return RedirectToAction("Index", "CustomerTransactionHistory", new { customerId = holding.CustomerId })
-            .WithSuccess("Success", "Transaction resolved");
+            .WithSuccess("Transaction approved", "");
     }
 
     public async Task<IActionResult> RejectTransaction(RejectTransactionViewModel model)
     {
         if (!ModelState.IsValid)
-            return View(nameof(Personal))
-                .WithWarning("", "There are errors on the form");
+            return View(nameof(Personal)).WithDanger("There are errors on the form", "");
 
         var email = User.GetEmail(); // ?? "Deanna.Starkebaum@snco.us"
         var holding = await transactionHoldingService.GetAuthorizedById(email, model.TransactionHoldingID.Value);
         if (holding == null)
-        {
             return RedirectToAction(nameof(Personal))
-                .WithWarning("Transaction holding not found", "Record does not exist or you are not authorized");
-        }
+                .WithDanger("Transaction holding not found", "Record does not exist or you are not authorized");
 
-        var displayName = User.GetDisplayName() ?? "Starkebaum, Deanna";
-        //var accountName = User.GetNameOrEmail()
+        var displayName = User.GetNameOrEmail(); // ?? "Starkebaum, Deanna"
 
-        string result = await transactionHoldingService.Reject(model.TransactionHoldingID.Value, model.Comment, email, displayName);
+        string result = await transactionHoldingService.Reject(holding, email, displayName);
         if (!string.IsNullOrWhiteSpace(result))
-        {
-            return RedirectToAction(nameof(Personal))
-                .WithWarning("", result);
-        }
+            return RedirectToAction(nameof(Personal)).WithDanger(result, "");
 
         var notifyBody = $@"
-<p>Transaction Rejected<br />
-Details:<br />
-&nbsp;&nbsp;TransactionHoldingID: {holding.TransactionCodeId}<br />
-&nbsp;&nbsp;CustomerID: {holding.CustomerId}<br />
-&nbsp;&nbsp;SubmitDate: {holding.AddDateTime}<br />
-&nbsp;&nbsp;SubmittedBy: {holding.Sender}<br />
-&nbsp;&nbsp;TransactionCode: {holding.TransactionCode.Code} - {holding.TransactionCode.Description}<br />
-&nbsp;&nbsp;TransactionAmt: {holding.TransactionAmt}<br />
-Reason:<br />
-&nbsp;&nbsp;{model.Comment}</p>";
+            <p>Transaction Rejected<br />
+            Details:<br />
+            &nbsp;&nbsp;TransactionHoldingID: {holding.TransactionCodeId}<br />
+            &nbsp;&nbsp;CustomerID: {holding.CustomerId}<br />
+            &nbsp;&nbsp;SubmitDate: {holding.AddDateTime}<br />
+            &nbsp;&nbsp;SubmittedBy: {holding.Sender}<br />
+            &nbsp;&nbsp;TransactionCode: {holding.TransactionCode.Code} - {holding.TransactionCode.Description}<br />
+            &nbsp;&nbsp;TransactionAmt: {holding.TransactionAmt}<br />
+            Reason:<br />
+            &nbsp;&nbsp;{model.Comment}</p>";
 
         // add notification
         Notification notification = new()
@@ -149,6 +128,6 @@ Reason:<br />
         await notifyService.Add(notification);
 
         return RedirectToAction(nameof(Personal))
-            .WithSuccess("Success", "Transaction rejected");
+            .WithSuccess("Transaction rejected", "");
     }
 }

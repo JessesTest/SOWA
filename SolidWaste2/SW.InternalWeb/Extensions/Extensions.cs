@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using PE.DM;
+using SW.DM;
 using System.Text;
 
 namespace SW.InternalWeb.Extensions;
@@ -185,5 +187,15 @@ public static class Extensions
             //"A" => ,                  //SOWA-93  No logic for displaying "A" group code existed in the original
             _ => string.Empty,
         };
+    }
+
+    public static string GetTransactionCodeDisplayName(this string code, IEnumerable<SelectListItem> codes)
+    {
+        foreach (var item in codes)
+        {
+            if (code == item.Value)
+                return item.Text;
+        }
+        return string.Empty;
     }
 }

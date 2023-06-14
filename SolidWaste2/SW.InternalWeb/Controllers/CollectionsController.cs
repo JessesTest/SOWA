@@ -65,7 +65,10 @@ public class CollectionsController : Controller
         {
             if (ModelState.IsValid)
             {
-                await transactionService.MakeDelinquencyPayment(model.CustomerId.Value, model.TransactionCode, model.Amount, model.Comment);
+                var result = await transactionService.MakeDelinquencyPayment(model.CustomerId.Value, model.TransactionCode, model.Amount, model.Comment);
+                if (result != null)
+                    throw new ArgumentException(result);
+
                 return RedirectToAction("Index", "Customer", new { customerID = model.CustomerId });
             }
             ModelState.AddModelError("exception", "There are errors on the form");

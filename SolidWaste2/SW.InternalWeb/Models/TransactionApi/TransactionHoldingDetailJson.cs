@@ -1,4 +1,4 @@
-﻿namespace SW.InternalWeb.Models.Transaction;
+﻿namespace SW.InternalWeb.Models.TransactionApi;
 
 public class TransactionHoldingDetailJson
 {

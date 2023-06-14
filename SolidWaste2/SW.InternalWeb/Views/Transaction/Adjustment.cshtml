@@ -1,0 +1,337 @@
+﻿@model SW.InternalWeb.Models.Transaction.TransactionAdjustmentViewModel
+@{
+    ViewBag.Title = "Adjustment";
+    ViewBag.ATitle = "Adjustment";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Adjustment", "Transaction", FormMethod.Post, new { @role = "form" }))
+        {
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div hidden="hidden">
+                        <div id="CustomerID_Lock">@Model.CustomerID</div>
+                        <div id="TransactionCodeID_Lock">@Model.TransactionCodeID</div>
+                        @Html.HiddenFor(m => m.Locks)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.LabelFor(m => m.CustomerID, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.CustomerID, new { @class = "form-control font-mono text-uppercase", @tabindex = 1 })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.LabelFor(m => m.CustomerName, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.CustomerName, new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-9">
+                                    @Html.LabelFor(m => m.TransactionCodeID, new { @class = "control-label font-bold" })
+                                    <select class="form-control font-mono text-uppercase" tabindex="2" asp-for="TransactionCodeID"></select>
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.LabelFor(m => m.TransactionAmount, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.TransactionAmount, new { @class = "form-control font-mono text-uppercase", @tabindex = 3 })
+                                </div>
+                            </div>
+                            <div id="AssociatedTransactionPanel" class="row form-group" hidden="hidden">
+                                <input type="hidden" id="IsAssociatedTransactionIdRequired" value="false" />
+                                <div class="col-md-12">
+                                    @Html.LabelFor(m => m.AssociatedTransactionId, new { @class = "control-label font-bold" })
+                                    <select class="form-control font-mono text-uppercase" tabindex="5" asp-for="AssociatedTransactionId"></select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @Html.LabelFor(m => m.Comment, new { @class = "control-label font-bold" })
+                                    @Html.TextBoxFor(m => m.Comment, new { @class = "form-control font-mono text-uppercase", @required = "required", @tabindex = 4 })
+                                </div>
+                            </div>
+                            @*<div class="row">
+                                <div class="col-md-3">
+                                    @Html.Label(string.Empty, "Balance Before", new { @class = "control-label font-bold" })
+                                    <input type="text" id="BalanceBefore" class="form-control font-mono" readonly />
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.Label(string.Empty, "Balance After", new { @class = "control-label font-bold" })
+                                    <input type="text" id="BalanceAfter" class="form-control font-mono" readonly />
+                                </div>
+                            </div>*@
+                            <div id="SecurityPanel" class="row" hidden>
+                                <div class="col-md-12">
+                                    <hr />
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="EmailAddress" class="control-label font-bold">Request Verification From</label>
+                                    <select class="form-control font-mono text-uppercase" tabindex="6" asp-for="EmailAddress"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            @* *** INFORMATION BOX GOES HERE *** *@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                        <div class="col-md-3">
+                            <input id="SubmitButton" class="btn btn-block btn-primary" type="submit" value="Submit" tabindex="6" data-form-action="@Url.Action("Adjustment", "Transaction")" data-confirm="Confirm submit?" disabled="disabled" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function ajaxCustomer($event) {
+            $('select#TransactionCodeID').find('option').remove();
+            $('select#EmailAddress').find('option').remove();
+            $('select#AssociatedTransactionId').find('option').remove();
+
+            $('#SecurityPanel').prop('hidden', true);
+            $('#AssociatedTransactionPanel').prop('hidden', true);
+
+            $('#CustomerName').val('');
+            var data = {
+                CustomerId: ($('#CustomerID').val()) ? $('#CustomerID').val() : 0
+            }
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: getPath('~/api/TransactionApi/CheckIdAdjustment'),
+                data: data,
+                success: updateCustomer,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+            $event.preventDefault();
+        }
+        function updateCustomer(data) {
+            if (data.message != null) {
+                alert(data.message);
+            }
+            else {
+                $('#CustomerName').val(data.customerName);
+                //$('#BalanceBefore').val(data.currentBalance.toFixed(2));
+                //$('#BalanceAfter').val(data.currentBalance.toFixed(2));
+
+                var list = $('select#TransactionCodeID');
+                list.append('<option value="0">SELECT A TRANSACTION CODE</option>');
+                $(data.transactionCodeSelectList).each(function (index, item) {
+                    list.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            }
+
+            $('#TransactionAmount').val('').trigger('change');
+
+            activateButton();
+        }
+
+        function ajaxTransactionCode($event) {
+            $('select#EmailAddress').find('option').remove();
+            $('select#AssociatedTransactionId').find('option').remove();
+
+            $('#SecurityPanel').prop('hidden', true);
+            $('#AssociatedTransactionPanel').prop('hidden', true);
+            $('#TransactionAmount').prop('readonly', false);
+
+            var data = {
+                TransactionCodeId: $('#TransactionCodeID').val(),
+                CustomerId: ($('#CustomerID').val()) ? $('#CustomerID').val() : 0
+            }
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: getPath('~/api/TransactionApi/CheckTransactionCodeAdjustment'),
+                data: data,
+                success: updateTransactionCode,
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function updateTransactionCode(data) {
+            if (data.message != null) {
+                alert(data.message);
+            }
+            else {
+                $('input#IsAssociatedTransactionIdRequired').val(data.isAssociatedTransactionIdRequired);
+
+                if (data.isAssociatedTransactionIdRequired == true) {
+                    var list = $('select#AssociatedTransactionId');
+                    list.append('<option value="0">SELECT AN ASSOCIATED TRANSACTION</option>');
+                    $(data.associatedTransactionSelectList).each(function (index, item) {
+                        list.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+                    $('#AssociatedTransactionPanel').prop('hidden', false);
+                    $('#TransactionAmount').prop('readonly', true);
+                }
+
+                ajaxSecurityPanel();
+            }
+
+            $('#TransactionAmount').val('').trigger('change');
+            activateButton();
+        }
+
+        function ajaxSecurityPanel($event) {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: '@Url.Action("GetGroupJson", "NotifyAPI")',
+                success: updateSecurityPanel,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function updateSecurityPanel(data) {
+            if (data.message != null) {
+                alert(data.message);
+            }
+            else {
+                var list = $('select#EmailAddress');
+                list.append('<option value="0">SELECT A USER TO REQUEST VERIFICATION FROM</option>');
+                $(data.members).each(function (index, item) {
+                    /*list.append('<option value="' + item.emailAddress + '">' + item.displayName + ' (' + item.voiceTelephoneNumber + ')' + '</option>');*/
+                    list.append('<option value="' + item.emailAddress + '">' + item.displayName + '</option>');
+                });
+
+                $('#SecurityPanel').prop('hidden', false);
+            }
+            activateButton();
+        }
+
+        function updateTransactionAmount() {
+            //var transactionCodeId = ($('#TransactionCodeID').val()) ? $('#TransactionCodeID').val() : 0;
+            //if (transactionCodeId != 0) {
+            //    ajaxBalances();
+            //}
+            activateButton();
+        }
+        //function ajaxBalances() {
+        //    var data = {
+        //        TransactionCodeId: $('#TransactionCodeID').val(),
+        //    }
+        //    $.ajax({
+        //        type: 'GET',
+        //        dataType: 'json',
+        //        url: getPath('~/api/TransactionApi/GetTransactionCodeSign'),
+        //        data: data,
+        //        success: ajaxBalancesSuccess,
+        //        error: function (jqXHR, textStatus, errorThrown) {
+        //            console.log(textStatus, errorThrown);
+        //        }
+        //    });
+        //}
+        //function ajaxBalancesSuccess(data) {
+        //    console.log(data);
+        //    if (data.message != null) {
+        //        alert(data.message);
+        //        return;
+        //    }
+
+        //    var transactionAmount = parseFloat($('#TransactionAmount').val());
+        //    var balanceBefore = parseFloat($('#BalanceBefore').val());
+        //    var balanceAfter = balanceBefore;
+
+        //    if (data.sign == "B" || data.sign == "P") {
+        //        balanceAfter = balanceBefore + transactionAmount;
+        //    }
+        //    else if (data.sign == "N") {
+        //        balanceAfter = balanceBefore - transactionAmount;
+        //    }
+
+        //    $('#BalanceAfter').val(balanceAfter.toFixed(2));
+        //}
+
+        function updateAssociatedTransaction() {
+            var associatedTransactionText = $('#AssociatedTransactionPanel option:selected').text();
+            var associatedTransactionSplits = associatedTransactionText.split('|');
+            if (associatedTransactionSplits.length == 3) {
+                var associatedTransactionAmount = associatedTransactionSplits[2];
+                $('#TransactionAmount').val(((-1) * parseFloat(associatedTransactionAmount)).toFixed(2));
+            } else {
+                $('#TransactionAmount').val('');
+            }
+
+            activateButton();
+        }
+
+        function activateButton() {
+            var customerID = $('#CustomerID').val();
+            var transactionCodeID = $('#TransactionCodeID').val();
+            var transactionAmount = $('#TransactionAmount').val();
+            var isAssociatedTransactionIdRequired = $('#IsAssociatedTransactionIdRequired').val();
+            var associatedTransactionId = $('#AssociatedTransactionId').val();
+
+            if (customerID == null || customerID == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (transactionCodeID == null || transactionCodeID == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (transactionAmount == null || transactionAmount == "") {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            if (isAssociatedTransactionIdRequired === 'true' && associatedTransactionId == 0) {
+                $('#SubmitButton').prop('disabled', true);
+                return;
+            }
+
+            $('#SubmitButton').prop('disabled', false);
+            return;
+        }
+
+        function processLocks() {
+            var customerID = $('#CustomerID_Lock').text();
+            var transactionCodeID = $('#TransactionCodeID_Lock').text();
+
+            if (customerID != 0) {
+                $('#CustomerID').val(customerID);
+                $('#CustomerID').change();
+                var focusIndex = +($(':focus').attr('tabindex'));
+                $('[tabindex="' + (focusIndex + 1) + '"]').focus();
+                $('#CustomerID').prop('disabled', true);
+                if (transactionCodeID != 0) {
+                    $('#TransactionCodeID').val(transactionCodeID);
+                    $('#TransactionCodeID').change();
+                    var focusIndex = +($(':focus').attr('tabindex'));
+                    $('[tabindex="' + (focusIndex + 1) + '"]').focus();
+                    $('#TransactionCodeID').prop('disabled', true);
+                }
+            }
+        }
+
+        function processSubmit() {
+            $('[disabled]').prop('disabled', false);
+            $('#SubmitButton').prop('disabled', true);
+        }
+
+        $(function () {
+            $('#CustomerID').on('change', ajaxCustomer);
+            $('#TransactionCodeID').on('change', ajaxTransactionCode);
+            $('#TransactionAmount').on('change', updateTransactionAmount);
+            $('#AssociatedTransactionId').on('change', updateAssociatedTransaction);
+            $(this).on('submit', processSubmit);
+
+            processLocks();
+        });
+    </script>
+}

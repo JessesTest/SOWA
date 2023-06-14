@@ -33,6 +33,15 @@ public class TransactionCodeService : ITransactionCodeService
             .ToListAsync();
     }
 
+    public async Task<ICollection<TransactionCode>> GetAllByGroup(string group)
+    {
+        using var db = dbFactory.CreateDbContext();
+        return await db.TransactionCodes
+            .Where(c => !c.DeleteFlag && c.Group == group)
+            .OrderBy(c => c.Code)
+            .ToListAsync();
+    }
+
     public async Task<TransactionCode> GetById(int id)
     {
         using var db = dbFactory.CreateDbContext();

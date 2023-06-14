@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SW.BLL.Extensions;
 using SW.DAL.Contexts;
 using SW.DM;
 
@@ -17,7 +18,9 @@ public class TransactionCodeRuleService : ITransactionCodeRuleService
     {
         using var db = dbFactory.CreateDbContext();
         return await db.TransactionCodeRules
-            .Where(e => e.TransactionCodeId == transactionCodeId && !e.DeleteFlag)
+            .Where(e => !e.DeleteFlag
+                && e.TransactionCodeId.HasValue
+                && e.TransactionCodeId.Value == transactionCodeId)
             .Include(e => e.Formula).ThenInclude(f => f.Parameters)
             .Include(e => e.TransactionCode)
             .Include(e => e.ContainerCode)
@@ -27,22 +30,26 @@ public class TransactionCodeRuleService : ITransactionCodeRuleService
             .ToListAsync();
     }
     
-    public async Task<ICollection<TransactionCodeRule>> GetByContainerAndTransactionCode(Container container, int transactionCodeId)
+    public async Task<ICollection<TransactionCodeRule>> GetByContainerAndTransactionCode(int transactionCodeId, Container container = null)
     {
         using var db = dbFactory.CreateDbContext();
 
-        return await db.TransactionCodeRules
-            .Where(e => !e.DeleteFlag 
-                && e.TransactionCodeId == transactionCodeId 
-                && e.ContainerCodeId == container.ContainerCodeId
-                && e.ContainerSubtypeId == container.ContainerSubtypeId
-                && e.ContainerNumDaysService == container.NumDaysService
-                && e.ContainerBillingSize == container.BillingSize)
+        var query = db.TransactionCodeRules
+            .Where(e => !e.DeleteFlag
+                && (e.TransactionCodeId == null || e.TransactionCodeId.Value == transactionCodeId))
             .Include(e => e.Formula).ThenInclude(f => f.Parameters)
             .Include(e => e.TransactionCode)
             .Include(e => e.ContainerCode)
             .Include(e => e.ContainerSubtype)
-            .AsSplitQuery()
+            .AsSplitQuery();
+
+        if (container != null)
+            query = query.Where(e => (e.ContainerCodeId == null || e.ContainerCodeId.Value == container.ContainerCodeId)
+                && (e.ContainerSubtypeId == null || e.ContainerSubtypeId.Value == container.ContainerSubtypeId)
+                && (e.ContainerNumDaysService == null || e.ContainerNumDaysService.Value == container.NumDaysService)
+                && (e.ContainerBillingSize == null || e.ContainerBillingSize.Value == container.BillingSize));
+
+        return await query
             .AsNoTracking()
             .ToListAsync();
     }

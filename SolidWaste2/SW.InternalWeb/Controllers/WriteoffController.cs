@@ -1,4 +1,5 @@
-﻿using Common.Web.Extensions.Alerts;
+﻿using Common.Services.Common;
+using Common.Web.Extensions.Alerts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PE.BL.Services;
@@ -74,15 +75,11 @@ public class WriteoffController : Controller
     public async Task<IActionResult> Create(WriteoffPaymentViewModel model)
     {
         if (!ModelState.IsValid)
-            return View(model)
-                .WithWarning("", "There are errors on the form");
+            return View(model).WithDanger("There are errors on the form", "");
          
-        await transactionService.MakeDelinquencyPayment(
-            model.CustomerId.Value,
-            model.TransactionCode,
-            model.Amount,
-            model.Comment,
-            DateTime.Now);
+        var result = await transactionService.MakeDelinquencyPayment(model.CustomerId.Value, model.TransactionCode, model.Amount, model.Comment);
+        if (result != null)
+            return View(model).WithDanger(result, "");
 
         return RedirectToAction("Index", "Customer", new { model.CustomerId });
     }

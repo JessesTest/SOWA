@@ -8,7 +8,7 @@ public interface IContainerRateService
     Task Delete(ContainerRate containerRate);
     Task<ICollection<ContainerRate>> GetAll();
     Task<ContainerRate> GetById(int id);
-    Task<ICollection<ContainerRate>> GetContainerRateByCodeDaysSize(int containerSubtypeId, int dayCount, decimal billingSize, DateTime effective_date);
+    Task<ICollection<ContainerRate>> GetByCodeDaysSize(int containerSubtypeId, int dayCount, decimal billingSize, DateTime effective_date);
     Task<ICollection<ContainerRate>> GetByCodeDaysSizeEffDate(int containerCodeId, int containerSubtypeId, int dayCount, decimal billingSize, DateTime effectiveDate);
     Task<ICollection<ContainerRate>> GetContainerRateByCodeDays(int containerCodeId, int dayCount);
     Task<ICollection<int>> GetDaysOfServiceByContainerSubtype(int containerSubtypeId);
