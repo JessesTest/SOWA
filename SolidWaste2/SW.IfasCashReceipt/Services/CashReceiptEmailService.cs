@@ -21,7 +21,7 @@ public sealed class CashReceiptEmailService
 
     public async Task SendEmail(CashReceiptContext context)
     {
-        var hasError = context.ErrRptFile.Exists;
+        var hasError = context.ErrRptFile.Exists && context.ErrRptFile.Length > 0;
 
         string subject = hasError ?
             "Error in SOWA Cash Receipts Job" :
