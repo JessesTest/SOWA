@@ -3,14 +3,14 @@ using Common.Services.Email;
 using Microsoft.Extensions.Options;
 using System.Text;
 
-namespace SW.IfasCashReceipt.Services;
+namespace SW.IfasKanPayCashReceipt.Services;
 
-public sealed class CashReceiptEmailService
+public sealed class ReceiptEmailService
 {
     private readonly SendEmailSettings settings;
     private readonly ISendGridService emailService;
 
-    public CashReceiptEmailService(
+    public ReceiptEmailService(
         IOptions<SendEmailSettings> options,
         ISendGridService emailService)
     {
@@ -20,15 +20,15 @@ public sealed class CashReceiptEmailService
 
     internal record AttachmentTemp(FileInfo File, string FileName);
 
-    public async Task SendEmail(CashReceiptContext context)
+    public async Task SendEmail(ReceiptContext context)
     {
         context.CloseFiles();
 
         var hasError = context.ExceptionFile.Exists && context.ExceptionFile.Length > 0;
 
         string subject = hasError ?
-            "Error in SOWA Cash Receipts Job" :
-            "SOWA Cash Receipts Job Details";
+            "Error in SOWA KanPay Cash Receipts Job" :
+            "SOWA KanPay Cash Receipts Job Details";
 
         StringBuilder text = new(1024);
 
@@ -41,7 +41,7 @@ public sealed class CashReceiptEmailService
             .AppendLine($"Payments Found:    {context.TotalPaymentsFound}");
 
         string[] tos = hasError ? settings.Error : settings.Good;
-        
+
         var attachments = await CreateAttachments(context);
 
         SendEmailDto email = new()
@@ -59,16 +59,16 @@ public sealed class CashReceiptEmailService
         await emailService.SendSingleEmail(email);
     }
 
-    private static async Task<ICollection<AttachmentDto>> CreateAttachments(CashReceiptContext context)
+    private static async Task<ICollection<AttachmentDto>> CreateAttachments(ReceiptContext context)
     {
         List<AttachmentDto> value = new();
 
-        AttachmentTemp[] files = new[]
+        var files = new[]
         {
-            new AttachmentTemp(context.ExceptionFile, "SW_Cash_Receipt_Err_Rpt.txt"),
-            new AttachmentTemp(context.ReportFile, "SW_Cash_Receipt_Rpt.txt"),
-            new AttachmentTemp(context.ErrorFile, "Error.txt"),
-            new AttachmentTemp(context.GoodFile, "Good.txt")
+            new AttachmentTemp(context.ExceptionFile, "SW_KanPay_Cash_Receipt_Err_Rpt.txt"),
+            new AttachmentTemp(context.ReportFile, "SW_KanPay_Cash_Receipt_Rpt.txt"),
+            new AttachmentTemp(context.ErrorFile, "KPError.txt"),
+            new AttachmentTemp(context.GoodFile, "KPGood.txt")
         };
         foreach (var file in files)
         {
