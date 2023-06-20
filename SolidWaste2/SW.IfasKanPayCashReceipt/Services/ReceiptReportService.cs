@@ -1,30 +1,24 @@
-﻿namespace SW.IfasCashReceipt.Services;
+﻿using SW.DAL.Contexts;
 
-public sealed class CashReceiptReportService
+namespace SW.IfasKanPayCashReceipt.Services;
+
+public sealed class ReceiptReportService
 {
-    private const string payment_code = "CA";
+    private readonly string payment_code = "CA";
 
-    private readonly TransactionRepository transactionRepository;
-    private readonly BillContainerDetailRepository billContainerDetailRepository;
+    private readonly SwDbContext db;
+    
+    private ReceiptContext context;
 
-    private CashReceiptContext Context;
-
-    public CashReceiptReportService(
-        TransactionRepository transactionRepository,
-        BillContainerDetailRepository billContainerDetailRepository)
+    public ReceiptReportService(SwDbContext db)
     {
-        this.transactionRepository = transactionRepository;
-        this.billContainerDetailRepository = billContainerDetailRepository;
+        this.db = db;
     }
 
-    public Task Handle(CashReceiptContext context)
+    public async Task Handle(ReceiptContext context)
     {
-        Context = context;
-        return DoReport();
-    }
+        this.context = context;
 
-    public async Task DoReport()
-    {
         decimal Commercial_Accum = 0.00m;
         decimal Residential_Accum = 0.00m;
         decimal RollOff_Accum = 0.00m;
@@ -32,9 +26,9 @@ public sealed class CashReceiptReportService
         decimal Late_Accum = 0.00m;
         decimal Collection_Accum = 0.00m;
 
-        var updated_charge_transactions = await transactionRepository
+        var updated_charge_transactions = await db
             .GetUpdatedChargeTransactionsByAddDateTimeRangeForCashReceipt(
-            Context.CashReceiptBeginDatetime,
+            context.CashReceiptBeginDatetime,
             DateTime.Now);
 
         foreach (var charge_tran in updated_charge_transactions)
@@ -66,10 +60,10 @@ public sealed class CashReceiptReportService
         }
 
 
-        var updated_container_detail = await billContainerDetailRepository
+        var updated_container_detail = await db
             .GetUpdatedContainerDetailByAddDateTimeRangeForCashReceipt(
-                Context.CashReceiptBeginDatetime,
-                DateTime.Now);
+            context.CashReceiptBeginDatetime,
+            DateTime.Now);
 
         foreach (var container_detail in updated_container_detail)
         {
@@ -116,15 +110,15 @@ public sealed class CashReceiptReportService
 
     private sealed record ReportLine(string Code, decimal Total);
 
-    private void Generate_IFAS_File(ReportLine line)
+    private void Generate_IFAS_File(ReportLine reportLine)
     {
-        string obj_code = line.Code;
-        decimal obj_total = line.Total;
+        var obj_code = reportLine.Code;
+        var obj_total = reportLine.Total;
+        var cash_receipt_for_date = context.CashReceiptForDate;
 
         if (obj_total <= 0)
             return;
 
-        var cash_receipt_for_date = Context.CashReceiptForDate;
 
         string cash_rcpt = String.Concat(
         "CR",
@@ -159,8 +153,8 @@ public sealed class CashReceiptReportService
         string.Empty.PadRight(2, ' '),
         "NB",
         "N");
-
-        Context.ReportWriter.WriteLineAsync(cash_rcpt);
+        
+        context.ReportWriter.WriteLine(cash_rcpt);
     }
 
 }

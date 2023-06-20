@@ -4,12 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NLog;
 using SW.DAL.Extensions;
-using SW.IfasCashReceipt.Services;
+using SW.IfasKanPayCashReceipt.Services;
 
 var cash_receipt_begin_datetime = DateTime.Now;
 var cash_receipt_for_date = DateTime.Today.AddDays(-1);
 
-CashReceiptContext context = new()
+ReceiptContext context = new()
 {
     CashReceiptBeginDatetime = cash_receipt_begin_datetime,
     CashReceiptForDate = cash_receipt_for_date,
@@ -19,7 +19,7 @@ var logger = LogManager.Setup().LoadConfigurationFromFile("Nlog.config", false).
 //LogManager.Setup().LoadConfigurationFromSection(configuration, "NLog")
 //LogManager.Setup().LoadConfigurationFromSection(configuration.GetSection("NLog"))
 
-CashReceiptEmailService emailer = null;
+ReceiptEmailService emailer = null;
 try
 {
     var hostBuilder = Host.CreateDefaultBuilder(args);
@@ -54,22 +54,19 @@ try
             .AddSendGridService()
             .AddSolidWasteDbContext(configuration, "SolidWaste")
             .Configure<SendEmailSettings>(configuration.GetSection("Email"))
-            .AddTransient<BillContainerDetailRepository>()
-            .AddTransient<ContainerRateRepository>()
-            .AddTransient<TransactionRepository>()
-            .AddTransient<CashReceiptEmailService>()
-            .AddTransient<CashReceiptReportService>()
-            .AddTransient<CashReceiptUpdateService>();
+            .AddTransient<ReceiptEmailService>()
+            .AddTransient<ReceiptReportService>()
+            .AddTransient<ReceiptUpdateService>();
     });
 
     var app = hostBuilder.Build();
 
-    emailer = app.Services.GetRequiredService<CashReceiptEmailService>();
+    emailer = app.Services.GetRequiredService<ReceiptEmailService>();
 
-    var updater = app.Services.GetRequiredService<CashReceiptUpdateService>();
+    var updater = app.Services.GetRequiredService<ReceiptUpdateService>();
     await updater.Handle(context);
 
-    var reporter = app.Services.GetRequiredService<CashReceiptReportService>();
+    var reporter = app.Services.GetRequiredService<ReceiptReportService>();
     await reporter.Handle(context);
 
     await emailer.SendEmail(context);
