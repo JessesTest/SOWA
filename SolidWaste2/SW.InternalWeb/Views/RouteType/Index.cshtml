@@ -1,18 +1,45 @@
 ﻿@model List<SW.InternalWeb.Models.RouteType.RouteTypeListViewModel>
 @{
+    ViewBag.Title = "Route Type Maintenance";
     ViewBag.ATitle = "Route Type Maintenance";
 }
 
-<partial name="_RouteTypeList" />
-
-<br />
-<br />
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table id="RouteTypeList" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().RouteNumber)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Type)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    @Html.HiddenFor(model => model[i].RouteTypeID)
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Edit", "RouteType", new { id = Model[i].RouteTypeID })" title="Edit"><i class="fa fa-pencil-square fa-2x"></i></a>
+                            &nbsp;
+                            <a href="@Url.Action("Delete", "RouteType", new { id = Model[i].RouteTypeID })" title="Remove"><i class="fa fa-minus-square fa-2x"></i></a>
+                        </td>
+                        <td>@Html.DisplayFor(model => model[i].RouteNumber)</td>
+                        <td>@Html.DisplayFor(model => model[i].Type)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @Html.ActionLink("Add New Route Type", "Add", null, null, new { @class = "btn btn-success" })
+    </div>
+</div>
 
 @section scripts
 {
     <script type="text/javascript">
         $(document).ready(function () {
             table = $('#RouteTypeList').dataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
                 "order": [[1, "asc"]],
                 stateSave: true
             });

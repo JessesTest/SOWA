@@ -1,109 +1,104 @@
 ﻿function updateNotificationsList(data) {
-    var list = $('#notify-list');
+    let list = $('#notify-list');
     list.empty();
-    var notificationsLength = data.notifications.length;
+    let notificationsLength = data.notifications.length;
+    
+    for (let i = 0; i < notificationsLength; i++) {
+        let timeIndex = data.notifications[i].addDateTime.indexOf('T');
+        
+        let anchor = $(document.createElement('a'));
+        anchor.attr('href', getPath('~/Notify/Detail?notificationID=' + data.notifications[i].notificationID));
 
-    for (var i = 0; i < notificationsLength; i++) {
-        var timeIndex = data.notifications[i].AddDateTime.indexOf('T');
-
-        var anchor = $(document.createElement('a'));
-        /*anchor.attr('href', '@(envUrl)' + 'Notify/Detail?notificationID=' + data.notifications[i].NotificationID);*/
-        anchor.attr('href', getPath('~/Notify/Detail?notificationID=' + data.notifications[i].NotificationID));
-
-        var rowDiv = $(document.createElement('div'));
+        let rowDiv = $(document.createElement('div'));
         rowDiv.attr('class', 'row notify-element');
 
-        if (data.notifications[i].Read) {
+        if (data.notifications[i].read) {
             rowDiv.addClass('notify-element-read');
         }
         else {
             rowDiv.addClass('notify-element-unread');
         }
 
-        var colDiv = $(document.createElement('div'));
+        let colDiv = $(document.createElement('div'));
         colDiv.attr('class', 'col-md-8');
 
-        var fromDiv = $(document.createElement('div'));
+        let fromDiv = $(document.createElement('div'));
         fromDiv.attr('class', 'font-bold text-sm text-ellipsis');
-        fromDiv.text(data.notifications[i].From)
+        fromDiv.text(data.notifications[i].from)
 
         colDiv.append(fromDiv);
         rowDiv.append(colDiv);
 
-        var colDiv = $(document.createElement('div'));
-        colDiv.attr('class', 'col-md-4');
+        let colDiv2 = $(document.createElement('div'));
+        colDiv2.attr('class', 'col-md-4');
 
-        var timeDiv = $(document.createElement('div'));
+        let timeDiv = $(document.createElement('div'));
         timeDiv.attr('class', 'text-right text-sm');
-        timeDiv.text(data.notifications[i].AddDateTime.substring(0, timeIndex));
+        timeDiv.text(data.notifications[i].addDateTime.substring(0, timeIndex));
 
-        colDiv.append(timeDiv);
-        rowDiv.append(colDiv);
+        colDiv2.append(timeDiv);
+        rowDiv.append(colDiv2);
 
-        var colDiv = $(document.createElement('div'));
-        colDiv.attr('class', 'col-md-12');
+        let colDiv3 = $(document.createElement('div'));
+        colDiv3.attr('class', 'col-md-12');
 
-        var subjectDiv = $(document.createElement('div'));
+        let subjectDiv = $(document.createElement('div'));
         subjectDiv.attr('class', 'text-sm text-ellipsis');
-        subjectDiv.text(data.notifications[i].Subject);
+        subjectDiv.text(data.notifications[i].subject);
 
-        colDiv.append(subjectDiv);
-        rowDiv.append(colDiv);
+        colDiv3.append(subjectDiv);
+        rowDiv.append(colDiv3);
 
         anchor.append(rowDiv);
 
         list.append(anchor);
     }
 
-    var anchor = $(document.createElement('a'));
-    /*anchor.attr('href', '@(envUrl)' + 'Notify/List');*/
-    anchor.attr('href', getPath('~/Notify/List'));
+    let footerAnchor = $(document.createElement('a'));
+    footerAnchor.attr('href', getPath('~/Notify/List'));
 
-    var rowDiv = $(document.createElement('div'));
-    rowDiv.attr('class', 'row notify-element');
-    rowDiv.attr('id', 'notify-footer');
+    let footerRowDiv = $(document.createElement('div'));
+    footerRowDiv.attr('class', 'row notify-element');
+    footerRowDiv.attr('id', 'notify-footer');
 
-    var colDiv = $(document.createElement('div'));
-    colDiv.attr('class', 'col-md-12');
+    let footerColDiv = $(document.createElement('div'));
+    footerColDiv.attr('class', 'col-md-12');
 
-    var footerDiv = $(document.createElement('div'));
+    let footerDiv = $(document.createElement('div'));
     footerDiv.attr('class', 'font-bold text-sm text-center');
     footerDiv.text('View All Notifications');
 
-    colDiv.append(footerDiv);
-    rowDiv.append(colDiv);
-    anchor.append(rowDiv);
+    footerColDiv.append(footerDiv);
+    footerRowDiv.append(footerColDiv);
+    footerAnchor.append(footerRowDiv);
 
-    list.append(anchor);
+    list.append(footerAnchor);
 }
 
 function updateNotificationsCount(data) {
-    var icon = $('#notify-icon');
-    var iconTxt = $('#notify-icon-txt');
+    let icon = $('#notify-icon');
+    let iconTxt = $('#notify-icon-txt');
 
     if (data.count == 0) {
         icon.removeClass('fa-color-gold');
         icon.addClass('fa-color-grey');
-        iconTxt.removeClass();
-        iconTxt.attr('hidden', true);
+        iconTxt.css('display', 'none');
         iconTxt.text('');
     }
     else {
         icon.removeClass('fa-color-grey');
         icon.addClass('fa-color-gold');
-        iconTxt.addClass('notify-icon-txt');
-        iconTxt.attr('hidden', false);
+        iconTxt.css('display', 'block');
         iconTxt.text(data.count);
     }
 }
 
 function ajaxNotificationsList($event) {
-    var data;
+    let data;
     $.ajax({
         type: 'POST',
         dataType: 'json',
         contentType: 'application/json',
-        /*url: '@(envUrl + "api/NotifyAPI/NotificationsListJson")',*/
         url: getPath('~/api/NotifyAPI/NotificationsListJson'),
         data: JSON.stringify(data),
         cache: false,
@@ -115,12 +110,11 @@ function ajaxNotificationsList($event) {
 }
 
 function ajaxNotificationsCount($event) {
-    var data;
+    let data;
     $.ajax({
         type: 'POST',
         dataType: 'json',
         contentType: 'application/json',
-        /*url: '@(envUrl + "api/NotifyAPI/NotificationsCountJson")',*/
         url: getPath('~/api/NotifyAPI/NotificationsCountJson'),
         data: JSON.stringify(data),
         cache: false,

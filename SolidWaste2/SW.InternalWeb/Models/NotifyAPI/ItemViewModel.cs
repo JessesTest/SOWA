@@ -1,4 +1,4 @@
-﻿namespace SW.InternalWeb.Views.NotifyAPI;
+﻿namespace SW.InternalWeb.Models.NotifyAPI;
 
 public class ItemViewModel
 {

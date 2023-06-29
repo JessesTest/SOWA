@@ -9,12 +9,10 @@
 
 @using (Html.BeginForm())
 {
-    @Html.HiddenFor(m => m.CustomerId)
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
                 <div class="col-md-8">
-
                     <div class="row form-group">
                         <div class="col-md-3">
                             @Html.LabelFor(m => m.CustomerId, new { @class = "control-label font-bold" })
@@ -56,7 +54,7 @@
                     <div class="row form-group">
                         <div class="col-md-12">
                             @Html.LabelFor(m => m.Comment, new { @class = "control-label font-bold" })
-                            @Html.TextAreaFor(m => m.Comment, new { @class = "form-control font-mono text-uppercase", rows = 2 })
+                            @Html.TextAreaFor(m => m.Comment, new { @class = "form-control font-mono text-uppercase", rows = 3 })
                         </div>
                     </div>
                     <div class="row form-group">
@@ -90,59 +88,58 @@
 @section scripts
 {
     <script type="text/javascript">
+        function updateTransactionCode() {
+            $("#Save").attr("disabled", true);
+            
+            var $beforeTxt = $("#BalanceBefore");
+            var $afterTxt = $("#BalanceAfter");
+            var transactionCode = $("#TransactionCode").val();
+            var amountStr = $("#Amount").val();
+            var beforeStr;
+
+            if (transactionCode == "VWO") {
+                beforeStr = $("#Collections").val();
+            } else if (transactionCode == "CWO") {
+                beforeStr = $("#Counselors").val();
+            } else if (transactionCode == "BWO") {
+                beforeStr = $("#PastDue90Days").val();
+            } else if (transactionCode == "UWO") {
+                beforeStr = $("#Uncollectable").val();
+            } else {
+                beforeStr = "";
+            }
+
+            $beforeTxt.val(beforeStr);
+
+            if (isNaN(amountStr)) {
+                $afterTxt.val("");
+                return;
+            }
+
+            var amount = parseFloat(amountStr);
+            var before = parseFloat(beforeStr);
+            var after = before - amount;
+            $afterTxt.val(after.toFixed(2));
+
+            if (after < 0) {
+                alert("Invalid amount");
+                return;
+            }
+            
+            $("#Save").attr("disabled", false);
+        }
+
         $(document).ready(function () {
-            $("#TransactionCodeId").change(function () {
-                $("#Save").attr("disabled", true);
-
-                var $beforeTxt = $("#BalanceBefore");
-                var $afterTxt = $("#BalanceAfter");
-                var transactionCodeId = $("#TransactionCodeId").val();
-                var amountStr = $("#Amount").val();
-                var beforeStr;
-
-                if (transactionCodeId == 40) {
-                    beforeStr = $("#Collections").val();
-                } else if (transactionCodeId == 41) {
-                    beforeStr = $("#Counselors").val();
-                } else if (transactionCodeId == 42) {
-                    beforeStr = $("#PastDue90Days").val();
-                } else if (transactionCodeId == 39) {
-                    beforeStr = $("#Uncollectable").val();
-                } else {
-                    beforeStr = "";
-                }
-
-                $beforeTxt.val(beforeStr);
-
-                if (isNaN(amountStr)) {
-                    $afterTxt.val("");
-                    return;
-                }
-
-                var amount = parseFloat(amountStr);
-                var before = parseFloat(beforeStr);
-                var after = before - amount;
-                $afterTxt.val(after.toFixed(2));
-
-                if (after < 0)
-                {
-                    alert("Invalid amount");
-                    return;
-                }
-
-                $("#Save").attr("disabled", false);
-            });
-            $("#Amount").change(function () {
-                $("#TransactionCodeId").change();
-            });
-
-            $("#TransactionCodeId").change();
-
             if (!$.isNumeric($("#CustomerId").val())) {
-                $("#TransactionCodeId").attr("disabled", true);
+                $("#TransactionCode").attr("disabled", true);
                 $("#Amount").attr("readonly", true);
                 $("#Comment").attr("readonly", true);
             }
+
+            $('#Amount').on('change', updateTransactionCode);
+            $('#TransactionCode').on('change', updateTransactionCode);
+
+            $('#TransactionCode').trigger('change');
         });
     </script>
 }

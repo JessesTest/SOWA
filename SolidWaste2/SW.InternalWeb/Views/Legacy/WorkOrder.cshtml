@@ -1,5 +1,4 @@
 ﻿@model SW.InternalWeb.Models.Legacy.LegacyRViewModel
-
 @{
     ViewBag.Title = "Legacy Work Order";
     ViewBag.ATitle = "Legacy Work Order";
@@ -11,10 +10,11 @@
     <div class="panel panel-default">
         <div class="panel-body">
             @Html.HiddenFor(m => m.WorkOrderLegacyId)
+            @Html.HiddenFor(m => m.AlreadyResolvedFlag)
 
             <fieldset class="form-group">
                 <legend>Work Order</legend>
-                <div class="row form-group">
+                <div class="row">
                     <div class="col-xs-2">
                         @Html.LabelFor(m => m.Route, new { @class = "font-bold" })
                         @Html.TextBoxFor(m => m.Route, new { @class = "form-control", @readonly = "readonly" })
@@ -41,20 +41,18 @@
                     </div>
                 </div>
             </fieldset>
-
             <fieldset class="form-group">
                 <legend>Work Order Details</legend>
-                <div class="row form-group">
+                <div class="row">
                     <div class="col-xs-12">
                         @Html.LabelFor(m => m.ProblemDescription, new { @class = "font-bold" })
                         @Html.TextAreaFor(m => m.ProblemDescription, 2, 120, new { @class = "form-control" })
                     </div>
                 </div>
             </fieldset>
-
             <fieldset class="form-group">
                 <legend>Record Details</legend>
-                <div class="row form-group">
+                <div class="row">
                     <div class="col-xs-2">
                         @Html.LabelFor(m => m.AddDate, new { @class = "font-bold" })
                         @Html.TextBoxFor(m => m.AddDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
@@ -73,12 +71,9 @@
                     </div>
                 </div>
             </fieldset>
-
-            @Html.HiddenFor(m => m.AlreadyResolvedFlag)
-
             @if (!Model.AlreadyResolvedFlag)
             {
-                <div class="row form-group">
+                <div class="row">
                     <div class="col-xs-2">
                         <button type="submit" class="btn btn-block btn-primary">Update</button>
                     </div>

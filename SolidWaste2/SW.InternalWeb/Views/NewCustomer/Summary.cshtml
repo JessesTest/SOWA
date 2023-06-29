@@ -3,6 +3,7 @@
 @inject SW.InternalWeb.Services.ContainerCodeSelectItemsService typeService;
 @inject SW.InternalWeb.Services.ContainerSubtypeSelectItemsService subtypeService;
 @{
+    ViewBag.Title = "New Customer";
     ViewBag.faTitleClass = "user-plus";
     ViewBag.ATitle = "New Customer : Summary";
 
@@ -26,10 +27,8 @@
                         <div class="col-md-12">
                             <h4 class="margin-vertical-0 font-bold">Customer Information</h4>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-12">
-                            <hr class="margin-vertical-15" />
+                            <hr />
                         </div>
                     </div>
                     <div class="row">
@@ -90,10 +89,8 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <hr class="margin-vertical-15" />
+                            <hr />
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-5">
                             <label class="control-label font-bold">Billing Address</label>
                         </div>
@@ -108,10 +105,8 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <hr class="margin-vertical-15" />
+                            <hr />
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-5">
                             <label class="control-label font-bold">Contact Phone</label>
                         </div>
@@ -121,10 +116,8 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <hr class="margin-vertical-15" />
+                            <hr />
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-5">
                             <label class="control-label font-bold">Contact Email</label>
                         </div>
@@ -134,10 +127,8 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <hr class="margin-vertical-15" />
+                            <hr />
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-5">
                             <label class="control-label font-bold">Billing Amount</label>
                         </div>
@@ -151,10 +142,8 @@
                         <div class="col-md-12">
                             <h4 class="margin-vertical-0 font-bold">Service Information</h4>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-12">
-                            <hr class="margin-vertical-15" />
+                            <hr />
                         </div>
                     </div>
                     @for (int i = 0; i < Model.ServiceAddresses.Count(); i++)
@@ -304,8 +293,6 @@
                 <div class="col-md-12">
                     <hr />
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-12">
                     @Html.ActionLink("Previous", "ServiceAddress", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
                     @Html.ActionLink("Submit", "Done", "NewCustomer", null, new { @class = "btn btn-danger btn-s-xs" })
@@ -314,6 +301,3 @@
         </div>
     </div>
 </div>
-
-<br />
-<br />

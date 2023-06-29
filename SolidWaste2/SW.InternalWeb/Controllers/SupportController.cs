@@ -41,17 +41,12 @@ public class SupportController : Controller
 
         var customer = await customerService.GetById(customerId.Value);
         if(customer == null)
-        {
             return View(new SupportViewModel())
-                .WithWarning("", $"Customer id {customerId} is invalid");
-        }
+                .WithDanger($"Customer id {customerId} is invalid", "");
 
         var person = await personService.GetById(customer.Pe);
         if(person == null)
-        {
-            return View(new SupportViewModel())
-                .WithWarning("", $"Person id {customer.Pe} is invalid");
-        }
+            return View(new SupportViewModel()).WithDanger($"Person id {customer.Pe} is invalid", "");
 
         var user = await userManager.Users.SingleOrDefaultAsync(u => u.UserId == person.Id);
 
@@ -74,26 +69,21 @@ public class SupportController : Controller
     public async Task<IActionResult> ResendConfirmationEmail(SupportViewModel vm)
     {
         if (vm == null)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "Form invalid");
+            return RedirectToAction(nameof(Index)).WithDanger("Form invalid", "");
 
         if (vm.PersonEntityId == null)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "PersonEntityId invalid");
+            return RedirectToAction(nameof(Index)).WithDanger("PersonEntityId invalid", "");
 
         var person = await personService.GetById(vm.PersonEntityId.Value);
         if(person == null)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "PersonEntityId invalid");
+            return RedirectToAction(nameof(Index)).WithDanger("PersonEntity invalid", "");
 
         var user = await userManager.Users.SingleOrDefaultAsync(u => u.UserId == person.Id);
         if (user == null)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "UserId is invalid");
+            return RedirectToAction(nameof(Index)).WithDanger("UserId is invalid", "");
 
         if (user.EmailConfirmed)
-            return RedirectToAction(nameof(Index), new { vm.CustomerId })
-                .WithInfo("", "Email is already confirmed");
+            return RedirectToAction(nameof(Index), new { vm.CustomerId }).WithInfo("Email is already confirmed", "");
 
         var externalUri = new Uri(configuration["ExternalWebsite"]);
         var callbackUri = new Uri(externalUri, "/Account/ConfirmEmail");
@@ -101,29 +91,25 @@ public class SupportController : Controller
         await notificationService.SendConfirmationEmailByUserId(user.UserId, callbackUri.ToString());
 
         return RedirectToAction(nameof(Index), new { vm.CustomerId })
-            .WithSuccess("success", "Confirmation email sent to " + user.Email);
+            .WithSuccess("Confirmation email sent to " + user.Email, "");
     }
 
     [HttpPost]
     public async Task<IActionResult> ResetPassword(SupportViewModel vm)
     {
         if (!ModelState.IsValid)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "Form invalid");
+            return RedirectToAction(nameof(Index)).WithDanger("Form invalid", "");
 
         if (vm.PersonEntityId == null)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "PersonEntityId invalid");
+            return RedirectToAction(nameof(Index)).WithDanger("PersonEntityId invalid", "");
 
         var person = await personService.GetById(vm.PersonEntityId.Value);
         if (person == null)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "PersonEntityId invalid");
+            return RedirectToAction(nameof(Index)).WithDanger("PersonEntityId invalid", "");
 
         var user = await userManager.Users.SingleOrDefaultAsync(u => u.UserId == person.Id);
         if (user == null)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "UserId is invalid");
+            return RedirectToAction(nameof(Index)).WithDanger("UserId is invalid", "");
 
         foreach(var validator in userManager.PasswordValidators)
         {
@@ -131,21 +117,16 @@ public class SupportController : Controller
             if (!validateResult.Succeeded)
             {
                 var errorMessage = validateResult.Errors.First().Description;
-                ModelState.AddModelError(nameof(vm.Password), errorMessage);
-                return View(nameof(Index), vm)
-                    .WithWarning("Invalid Password", errorMessage);
+                return View(nameof(Index), vm).WithWarning("Invalid Password", errorMessage);
             }
         }
 
         var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
         var resetResult = await userManager.ResetPasswordAsync(user, resetToken, vm.Password);
         if (!resetResult.Succeeded)
-        {
-            return View(nameof(Index), vm)
-                .WithWarning("", resetResult.Errors.First().Description);
-        }
+            return View(nameof(Index), vm).WithDanger("Password Reset Failed", resetResult.Errors.First().Description);
 
         return View(nameof(Index), vm)
-            .WithSuccess("", "Password reset");
+            .WithSuccess("Password reset", "");
     }
 }

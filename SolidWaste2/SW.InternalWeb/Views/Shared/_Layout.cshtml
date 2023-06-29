@@ -41,13 +41,11 @@
     @* Bootstrap 3 *@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     @* DataTables *@
-    @*<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.10/css/jquery.dataTables.min.css" integrity="sha512-xo0HhuSoZO2TxkQsrgWtMLLzdXDY+3K9fxENWwNBA1jx51EWtk4oVgKohboPb7HMXxMmulnVhoGR6yBDJL8LzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />*@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.10/css/dataTables.bootstrap.min.css" integrity="sha512-hs1f667XhSY60xOFaCeT+8zwrnG/QnsWLiO8e+56a+/vZWWKwBZ/tfXPDPiBl+3/lpuz7KCWmqbAM/cJWF6hAA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     @* Addons *@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.1/css/datepicker.min.css" integrity="sha512-DXCdWA+kptZRnpCPCPM6k3+sF//B3EpGLQJZ7Euj0MWf8Z+ImdJO1wcg4nIeFLSH3ChNQrChUNEuR8TUPYrVHA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.1/css/datepicker3.min.css" integrity="sha512-e/VbwhU6ngdCrXrWO4/tPs3rX+tRBGwRpYQR9pcrlYV5tyUAvI+LjZcKMbcgouLtDs+UAV+NxX9GpCFIWSdTtQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.13/daterangepicker.min.css" integrity="sha512-wgBMaQ1LmNkklphLR4+Jy77dyfOKmRBGcOXXwKJW3WiSc9n76BLDwsS/q5XPhVNwdPDzUWiG4XsC7ETVpuoQBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    @*<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.css" integrity="sha512-x1sYGOeCnohzDAuU02Ecjrjcyiy3iYTGGQjuiFenhGpoQsEtK2V+/ELYnOGFjFY7LDx609Ndm6O01CzRBkZsxA==" crossorigin="anonymous" referrerpolicy="no-referrer" />*@
     @* Fonts and Icons *@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" integrity="sha512-i8+QythOYyQke6XbStjt9T4yQHhhM+9Y9yTY1fOxoDQwsQpKMEpIoSQZ8mVomtnVCf9PBvoQDnKl06gGOOD19Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/css/font.css" />
@@ -185,16 +183,14 @@
                 <section id="content">
                     <section class="vbox">
                         <header class="header bg-white b-b b-light hidden-print">
-                            <text>
-                                <ul class="nav navbar-nav clear">
-                                    <li class="navbar-text">
-                                        <i class="fa fa-@ViewBag.faTitleClass">&nbsp;</i><span class="font-semibold">@ViewBag.ATitle</span>
-                                    </li>
-                                </ul>
-                            </text>
+                            <ul class="nav navbar-nav clear">
+                                <li class="navbar-text">
+                                    <i class="fa fa-@ViewBag.faTitleClass">&nbsp;</i><span class="font-semibold">@ViewBag.ATitle</span>
+                                </li>
+                            </ul>
                             <p class="font-thin right"><partial name="_LoginPartial" /></p>
                         </header>
-                        <section class="scrollable padder">
+                        <section class="scrollable padder padder-v w-f">
                             <div class="container container-left">
                                 <div id="alertContainer">
                                     <partial name="_StatusMessages" />
@@ -233,8 +229,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-slimScroll/1.3.0/jquery.slimscroll.min.js" integrity="sha512-5dkhw5GqkRmpzbc0JaxoqcR3yeAza1uU2DiAsSHD33GIwS/rDnyvRyL2ayZrtSNbR//c7vG9wB1SFjeK1DHykA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js" integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.0/jquery.maskedinput.min.js" integrity="sha512-1zmQwacqGvIrUi5txs7SgG2FYyZrZtx5l275m0p/pfShg1829kaaaY4J37BhkfQIlAZpGCvggjKmLam2Z62Jlw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.js" integrity="sha512-FQKKXM+/7s6LVHU07eH2zShZHunHqkBCIcDqodXfdV/NNXW165npscG8qOHdxVsOM4mJx38Ep1oMBcNXGB3BCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.pieRenderer.min.js" integrity="sha512-aTgJc5LAZwVJGYScGUq8unQx1qYLrqtrTBAVFaLQoJ00sFc3rPrgFbeQzO5POMW19QE+qqjF78tuPF7H/FtRTA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>*@
     @* Local Files *@
     <script src="~/js/app.js"></script>
     <script src="~/js/app.plugin.js"></script>

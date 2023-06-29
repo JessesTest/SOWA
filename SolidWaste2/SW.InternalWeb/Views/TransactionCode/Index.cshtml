@@ -5,67 +5,66 @@
     ViewBag.ATitle = "Transaction Code Maintenance";
 }
 
-<table id="TransactionCodeList" class="table table-striped table-bordered" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Action</th>
-            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Code)</th>
-            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Description)</th>
-            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().TransactionSign)</th>
-            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().CollectionsBalanceSign)</th>
-            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().CounselorsBalanceSign)</th>
-            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().AccountType)</th>
-            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Group)</th>
-        </tr>
-    </thead>
-    <tbody>
-        @for (int i = 0; i < Model.Count; i++)
-        {
-            @Html.HiddenFor(model => model[i].TransactionCodeID)
-            <tr>
-                <td>
-                    <a href="@Url.Action("Edit", "TransactionCode", new { id = Model[i].TransactionCodeID })" title="Edit"><i class="fa fa-pencil-square fa-2x"></i></a>
-                    &nbsp;
-                    <a href="@Url.Action("Delete", "TransactionCode", new { id = Model[i].TransactionCodeID })" title="Remove"><i class="fa fa-minus-square fa-2x"></i></a>
-                </td>
-                <td>
-                    @Html.DisplayFor(model => model[i].Code)
-                </td>
-                <td>
-                    @Html.DisplayFor(model => model[i].Description)
-                </td>
-                <td>
-                    @Model[i].TransactionSign.GetTransactionCodeSignDisplayName()
-                </td>
-                <td>
-                    @Model[i].CollectionsBalanceSign.GetTransactionCodeSignDisplayName()
-                </td>
-                <td>
-                    @Model[i].CounselorsBalanceSign.GetTransactionCodeSignDisplayName()
-                </td>
-                <td>
-                    @Model[i].AccountType.GetTransactionCodeAccountTypeDisplayName()
-                </td>
-                <td>
-                    @Model[i].Group.GetTransactionCodeGroupTypeDisplayName()
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@Html.ActionLink("Add New Transaction Code", "Add", null, null, new { @class = "btn btn-success" })
-
-<br />
-<br />
-<br />
-<br />
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table id="TransactionCodeList" class="table table-striped table-bordered" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Code)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Description)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().TransactionSign)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().CollectionsBalanceSign)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().CounselorsBalanceSign)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().AccountType)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Group)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    @Html.HiddenFor(model => model[i].TransactionCodeID)
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Edit", "TransactionCode", new { id = Model[i].TransactionCodeID })" title="Edit"><i class="fa fa-pencil-square fa-2x"></i></a>
+                            &nbsp;
+                            <a href="@Url.Action("Delete", "TransactionCode", new { id = Model[i].TransactionCodeID })" title="Remove"><i class="fa fa-minus-square fa-2x"></i></a>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model[i].Code)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model[i].Description)
+                        </td>
+                        <td>
+                            @Model[i].TransactionSign.GetTransactionCodeSignDisplayName()
+                        </td>
+                        <td>
+                            @Model[i].CollectionsBalanceSign.GetTransactionCodeSignDisplayName()
+                        </td>
+                        <td>
+                            @Model[i].CounselorsBalanceSign.GetTransactionCodeSignDisplayName()
+                        </td>
+                        <td>
+                            @Model[i].AccountType.GetTransactionCodeAccountTypeDisplayName()
+                        </td>
+                        <td>
+                            @Model[i].Group.GetTransactionCodeGroupTypeDisplayName()
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @Html.ActionLink("Add New Transaction Code", "Add", null, null, new { @class = "btn btn-success" })
+    </div>
+</div>
 
 @section scripts
 {
     <script type="text/javascript">
         $(document).ready(function () {
             table = $('#TransactionCodeList').dataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
                 "order": [[1, "asc"]],
                 stateSave: true
             });

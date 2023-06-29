@@ -11,28 +11,13 @@
                 <table id="Results" class="table table-condensed table-bordered">
                     <thead>
                         <tr class="bg-dark">
-                            <th class="col-xs-1">
-                                Action
-                            </th>
-                            @*<th class="col-xs-1">
-                                Origin
-                            </th>*@
-                            <th class="col-xs-4">
-                                @Html.DisplayNameFor(m => m.CustomerName) / @Html.DisplayNameFor(m => m.CustomerAddress)
-                            </th>
-                            <th class="col-xs-1">
-                                @Html.DisplayNameFor(m => m.ContainerRoute)
-                            </th>
-                            <th class="col-xs-2">
-                                @Html.DisplayNameFor(m => m.TransDate)
-                            </th>
-                            <th class="col-xs-2">
-                                @Html.DisplayNameFor(m => m.DriverInitials)
-                            </th>
-                            <th class="col-xs-1">
-                                @Html.DisplayNameFor(m => m.WorkOrderId)
-                            </th>
-
+                            <th>Action</th>
+                            @*<th>Origin</th>*@
+                            <th>@Html.DisplayNameFor(m => m.CustomerName) / @Html.DisplayNameFor(m => m.CustomerAddress)</th>
+                            <th>@Html.DisplayNameFor(m => m.ContainerRoute)</th>
+                            <th>@Html.DisplayNameFor(m => m.TransDate)</th>
+                            <th>@Html.DisplayNameFor(m => m.DriverInitials)</th>
+                            <th>@Html.DisplayNameFor(m => m.WorkOrderId)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,36 +41,30 @@
                                 @*<td class="v-middle text-center">
                                     @if (item.ResolveDate != null)
                                     {
-                                        <p class="margin-bottom-5">WorkOrder Closed</p>
+                                        <p>WorkOrder Closed</p>
                                     }
                                     else
                                     {
-                                        <p class="margin-bottom-5">WorkOrder</p>
+                                        <p>WorkOrder</p>
                                     }
                                 </td>*@
                                 <td>
-                                    <p class="margin-bottom-5"><strong>@Html.DisplayFor(m => item.CustomerName)</strong></p>
-                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.CustomerAddress)</p>
+                                    <strong class="margin-bottom-5" style="display:block;">@Html.DisplayFor(m => item.CustomerName)</strong>
+                                    @Html.DisplayFor(m => item.CustomerAddress)
                                 </td>
-                                <td>
-                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.ContainerRoute)</p>
-                                </td>
+                                <td>@Html.DisplayFor(m => item.ContainerRoute)</td>
                                 <td>
                                     @if (item.TransDate != null)
                                     {
-                                        <p class="margin-bottom-5">@item.TransDate.Value.ToShortDateString()</p>
+                                        @item.TransDate.Value.ToShortDateString()
                                     }
                                     else
                                     {
-                                        <p class="margin-bottom-5">@Html.DisplayFor(m => item.TransDate)</p>
+                                        @Html.DisplayFor(m => item.TransDate)
                                     }
                                 </td>
-                                <td>
-                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.DriverInitials)</p>
-                                </td>
-                                <td>
-                                    <p class="margin-bottom-5">@Html.DisplayFor(m => item.WorkOrderId)</p>
-                                </td>
+                                <td>@Html.DisplayFor(m => item.DriverInitials)</td>
+                                <td>@Html.DisplayFor(m => item.WorkOrderId)</td>
                             </tr>
                         }
                     </tbody>
@@ -100,6 +79,7 @@
     <script type="text/javascript">
         $(function () {
             $('#Results').dataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
                 'order' : [[1, 'asc']]
             });
         });

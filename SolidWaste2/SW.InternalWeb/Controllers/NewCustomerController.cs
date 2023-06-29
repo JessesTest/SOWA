@@ -66,7 +66,7 @@ public class NewCustomerController : Controller
 
     public IActionResult Index()
     {
-        return CustomerInformation();
+        return RedirectToAction(nameof(CustomerInformation));
     }
 
     #region Customer
@@ -75,14 +75,14 @@ public class NewCustomerController : Controller
     public IActionResult CustomerInformation()
     {
         var model = GetCustomer();
-        return View(nameof(CustomerInformation), model);
+        return View(model);
     }
 
     [HttpPost]
     public IActionResult CustomerInformation(CustomerViewModel model)
     {
         if (!ModelState.IsValid)
-            return View(model);
+            return View(model).WithDanger("Invalid customer code", "");
 
         while (model.FullName.Contains("  ")) model.FullName = model.FullName.Replace("  ", " ");
 
@@ -135,16 +135,21 @@ public class NewCustomerController : Controller
     public async Task<IActionResult> CustomerBillingAddress(BillingAddressViewModel model)
     {
         if (!ModelState.IsValid)
-            return View(model);
+            return View(model).WithDanger("Invalid Customer Billing Address 1", "");
 
         var old = GetBillingAddress();
         model.ApprovedAddress = old?.ApprovedAddress;
 
         RemoveValidBillingAddresses();
 
-        string errormsg = await Process(model);
-        if(!string.IsNullOrWhiteSpace(errormsg))
-            return View(model).WithWarning("", errormsg);
+        try
+        {
+            await Process(model);
+        }
+        catch(Exception ex)
+        {
+            return View(model).WithDanger(ex.Message, "");
+        }
 
         if (model.Addresses != null)
             return View(model).WithInfo("", "Select an adddress from the list");
@@ -170,13 +175,12 @@ public class NewCustomerController : Controller
             SetBillingAddress(model);
             return RedirectToAction(nameof(CustomerInformation));
         }
-        return View(nameof(CustomerBillingAddress), model);
+        return View(nameof(CustomerBillingAddress), model).WithDanger("Invalid Customer Billing Address 2", "");
     }
 
     // address verification
-    public async Task<string> Process(BillingAddressViewModel model)
+    public async Task Process(BillingAddressViewModel model)
     {
-        ModelState.Clear();
         model.AddressLine1 = model.AddressLine1?.ToUpper();
         model.AddressLine2 = model.AddressLine2?.ToUpper();
         model.City = model.City?.ToUpper();
@@ -187,34 +191,32 @@ public class NewCustomerController : Controller
         {
             if (string.IsNullOrWhiteSpace(model.City))
             {
-                ModelState.AddModelError(nameof(model.City), "City is required.");
+                throw new ArgumentException("There are errors on the form");
             }
             if (string.IsNullOrWhiteSpace(model.State))
             {
-                ModelState.AddModelError(nameof(model.State), "State is required.");
+                throw new ArgumentException("There are errors on the form");
             }
             if (string.IsNullOrWhiteSpace(model.Zip))
             {
-                ModelState.AddModelError(nameof(model.Zip), "Zip is required.");
+                throw new ArgumentException("There are errors on the form");
             }
 
-            return ModelState.ErrorCount == 0 ? null : "There are errors on the form";
+            return;
         }
 
         if (string.IsNullOrWhiteSpace(model.City))
         {
-            ModelState.AddModelError(nameof(model.City), "City is required.");
-            return "City is required.";
+            throw new ArgumentException("City is required.");
         }
         if (string.IsNullOrWhiteSpace(model.State))
         {
-            ModelState.AddModelError(nameof(model.State), "State is required.");
-            return "State is required.";
+            throw new ArgumentException("State is required.");
         }
 
         var temp = await addressValidationService.GetCandidates(model.AddressLine1, model.City, model.Zip, 8);
         if (!temp.Any())
-            return "Address not found";
+            throw new ArgumentException("Address not found");
 
         if (temp.Count == 1)
         {
@@ -226,7 +228,7 @@ public class NewCustomerController : Controller
             model.Zip = a.Zip?.ToUpper();
 
             model.Addresses = null;
-            return null;
+            return;
         }
 
         model.Addresses = temp.Select(a => new ValidAddressDto
@@ -238,8 +240,6 @@ public class NewCustomerController : Controller
             Zip = a.Zip?.ToUpper()
         }).ToList();
         SetValidBillAddresses(model.Addresses);
-
-        return null;
     }
 
     private static bool SkipAddressValidation(BillingAddressViewModel model)
@@ -324,13 +324,16 @@ public class NewCustomerController : Controller
             SetPhone(model);
             return RedirectToAction(nameof(CustomerEmail));
         }
-        return View(model);
+        return View(model).WithDanger("The Phone Number is invalid", "");
     }
 
     [HttpPost]
     public IActionResult CustomerPhoneNumber_Prev(PhoneNumberViewModel model)
     {
-        return RedirectToAction(nameof(CustomerBillingAddress));
+        if (ModelState.IsValid)
+            return RedirectToAction(nameof(CustomerBillingAddress));
+
+        return View("CustomerPhoneNumber", model).WithDanger("The Phone Number is invalid", "");
     }
 
     private PhoneNumberViewModel GetPhone()
@@ -370,13 +373,16 @@ public class NewCustomerController : Controller
             SetEmail(model);
             return RedirectToAction(nameof(ServiceAddress));
         }
-        return View(model);
+        return View(model).WithDanger("The Email Address is invalid", "");
     }
 
     [HttpPost]
     public IActionResult CustomerEmail_Prev(EmailViewModel model)
     {
-        return RedirectToAction(nameof(CustomerPhoneNumber));
+        if (ModelState.IsValid)
+            return RedirectToAction(nameof(CustomerPhoneNumber));
+
+        return View("CustomerEmail", model).WithDanger("The Email Address is invalid", "");
     }
 
     private EmailViewModel GetEmail()
@@ -437,7 +443,7 @@ public class NewCustomerController : Controller
         var address = list.FirstOrDefault(m => m.Id == id);
         if (address == null)
             return RedirectToAction(nameof(ServiceAddress))
-                .WithDanger("", "Address not found");
+                .WithDanger("Address not found", "");
 
         return View("ServiceAddress", address);
     }
@@ -454,17 +460,24 @@ public class NewCustomerController : Controller
         }
 
         return RedirectToAction(nameof(ServiceAddress))
-            .WithSuccess("", "Address removed");
+            .WithSuccess("Address removed", "");
     }
 
     public IActionResult SelectAddress(ServiceAddressViewModel model)
     {
         if (!ModelState.IsValid)
             return RedirectToAction(nameof(ServiceAddress))
-                .WithWarning("", "Invalid address");
+                .WithDanger("Invalid Customer Service Address 1", "");
 
         var serviceAddressList = GetServiceAddressList();
         var validAddressList = GetValidServiceAddresses();
+
+        var customer = GetCustomer();
+        if (customer.EffectiveDate > model.EffectiveDate)
+        {
+            model.Addresses = validAddressList;
+            return View("ServiceAddress", model).WithDanger("Service address effective date before customer effective date", "");
+        }
 
         var serviceAddress = serviceAddressList.FirstOrDefault(a => a.Id == model.Id);
         if (serviceAddress == null)
@@ -495,7 +508,7 @@ public class NewCustomerController : Controller
         return (serviceAddress.Containers.Any() ?
             RedirectToAction(nameof(serviceAddress)) :
             RedirectToAction(nameof(AddContainer), new { id = serviceAddress.Id }))
-            .WithSuccess("", "Service address added");
+            .WithSuccess("Service address added", "");
     }
 
     public async Task<IActionResult> SaveAddress(ServiceAddressViewModel model)
@@ -503,16 +516,12 @@ public class NewCustomerController : Controller
         RemoveValidServiceAddresses();
 
         if (!ModelState.IsValid)
-        {
-            return View("ServiceAddress", model);
-        }
+            return View("ServiceAddress", model)
+                .WithDanger("Invalid Customer Service Address 2", "");
 
         var customer = GetCustomer();
         if (customer.EffectiveDate > model.EffectiveDate)
-        {
-            ModelState.AddModelError(nameof(model.EffectiveDate), "Service address effective date before customer effective date");
-            return View("ServiceAddress", model);
-        }
+            return View("ServiceAddress", model).WithDanger("Service address effective date before customer effective date", "");
 
         var serviceAddressList = GetServiceAddressList();
         var serviceAddress = serviceAddressList.FirstOrDefault(a => a.Id == model.Id);
@@ -544,15 +553,12 @@ public class NewCustomerController : Controller
             return (serviceAddress.Containers.Any() ?
                 RedirectToAction(nameof(ServiceAddress)) :
                 RedirectToAction(nameof(AddContainer), new { id = serviceAddress.Id }))
-                .WithSuccess("", "Service address saved");
+                .WithSuccess("Service address saved", "");
         }
 
         var validAddresses = await addressValidationService.GetCandidates(model.AddressLine1, model.City, model.Zip, 8);
         if (validAddresses.Count == 0)
-        {
-            ModelState.AddModelError(nameof(model.AddressLine1), "Address not found");
-            return View("ServiceAddress", model);
-        }
+            return View("ServiceAddress", model).WithDanger("Address not found", "");
         if(validAddresses.Count == 1)
         {
             var validAddress = validAddresses[0];
@@ -567,7 +573,7 @@ public class NewCustomerController : Controller
             return (serviceAddress.Containers.Any() ?
                 RedirectToAction(nameof(ServiceAddress)) :
                 RedirectToAction(nameof(AddContainer), new { id = serviceAddress.Id }))
-                .WithSuccess("", "Service address saved");
+                .WithSuccess("Service address saved", "");
         }
 
         var validServiceAddresses = validAddresses.Select(a => new ValidAddressDto
@@ -584,8 +590,9 @@ public class NewCustomerController : Controller
 
         model.Addresses = validServiceAddresses;
         return View("ServiceAddress", model)
-            .WithInfo("", "Select an address from the list");
+            .WithInfo("Select an address from the list", "");
     }
+
     private static bool SkipAddressValidation(ServiceAddressViewModel model)
     {
         return model == null
@@ -667,7 +674,7 @@ public class NewCustomerController : Controller
         var serviceAddress = serviceAddresses.FirstOrDefault(a => a.Id == id);
         if (serviceAddress == null)
             return RedirectToAction(nameof(serviceAddress))
-                .WithWarning("", "Service address not found");
+                .WithDanger("Service address not found", "");
 
         ContainerViewModel model = new()
         {
@@ -683,10 +690,9 @@ public class NewCustomerController : Controller
         var list = GetServiceAddressList();
         var container = GetContainer(list, id);
         if(container == null)
-        {
             return RedirectToAction(nameof(ServiceAddress))
-                .WithWarning("", "Contaier not found");
-        }
+                .WithDanger("Container not found", "");
+
         return View("Container", container);
     }
 
@@ -694,10 +700,8 @@ public class NewCustomerController : Controller
     {
         var list = GetServiceAddressList();
         if(list == null || list.Count == 0)
-        {
             return RedirectToAction(nameof(ServiceAddress))
-                .WithWarning("", "Contaier not found");
-        }
+                .WithDanger("Service addresses not found", "");
 
         ContainerViewModel container = null;
         foreach (var sa in list)
@@ -712,18 +716,18 @@ public class NewCustomerController : Controller
 
         if(container == null)
             return RedirectToAction(nameof(ServiceAddress))
-                .WithWarning("", "Contaier not found");
+                .WithDanger("Container not found", "");
 
         SetServiceAddressList(list);
         return RedirectToAction(nameof(ServiceAddress))
-            .WithSuccess("", "Container removed");
+            .WithSuccess("Container removed", "");
     }
 
     public async Task<IActionResult> SaveContainer(ContainerViewModel model)
     {
         if (!ModelState.IsValid)
             return View("Container", model)
-                .WithWarning("", "There are errors on the form");
+                .WithDanger("There are errors on the form", "");
 
         var rates = await rateService.GetByCodeDaysSizeEffDate(
             model.ContainerCodeId,
@@ -733,7 +737,7 @@ public class NewCustomerController : Controller
             model.EffectiveDate);
         if (!rates.Any())
             return View("Container", model)
-                .WithWarning("", "Container rate not found");
+                .WithDanger("Container rate not found", "");
 
         var serviceAddressList = GetServiceAddressList();
 
@@ -741,12 +745,11 @@ public class NewCustomerController : Controller
         if (serviceAddress == null)
         {
             return RedirectToAction(nameof(ServiceAddress))
-                .WithWarning("", "Service address not found");
+                .WithDanger("Service address not found", "");
         }
         if (model.EffectiveDate < serviceAddress.EffectiveDate)
         {
-            return View("Container", model)
-                .WithWarning("", "Container effective date before service address effective date");
+            return View("Container", model).WithDanger("Container effective date before service address effective date", "");
         }
 
         var container = serviceAddress.Containers.FirstOrDefault(c => c.Id == model.Id);
@@ -778,7 +781,7 @@ public class NewCustomerController : Controller
         SetServiceAddressList(serviceAddressList);
 
         return RedirectToAction(nameof(serviceAddress))
-            .WithSuccess("", "Container saved");
+            .WithSuccess("Container saved", "");
     }
 
     [HttpPost]
@@ -928,20 +931,18 @@ public class NewCustomerController : Controller
         address.Notes.Remove(note);
         SetServiceAddressList(addresses);
         return RedirectToAction(nameof(ServiceAddress))
-            .WithSuccess("", "Note removed");
+            .WithSuccess("Note removed", "");
     }
 
     public IActionResult SaveNote(NoteViewModel model)
     {
         if (!ModelState.IsValid)
-            return View("Note", model)
-                .WithWarning("", "Invalid Customer Note");
+            return View("Note", model).WithDanger("Invalid Customer Note", "");
 
         var addresses = GetServiceAddressList();
         var address = addresses.FirstOrDefault(a => a.Id == model.ServiceAddressId);
         if (address == null)
-            return RedirectToAction(nameof(ServiceAddress))
-                .WithWarning("", "Address not found");
+            return RedirectToAction(nameof(ServiceAddress)).WithDanger("Address not found", "");
 
         var note = address.Notes.FirstOrDefault(n => n.Id == model.Id);
         if (note == null)
@@ -961,7 +962,7 @@ public class NewCustomerController : Controller
         SetServiceAddressList(addresses);
 
         return RedirectToAction(nameof(EditAddress), new { id = model.ServiceAddressId })
-            .WithSuccess("", "Note saved");
+            .WithSuccess("Note saved", "");
     }
 
     #endregion
@@ -1297,45 +1298,35 @@ public class NewCustomerController : Controller
         var serviceAddresses = GetServiceAddressList();
 
         if (customerModel == null)
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Customer information not found");
+            return RedirectToAction(nameof(Summary)).WithDanger("Customer information not found", "");
 
         if (billingAddressModel == null)
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Billing address not found");
+            return RedirectToAction(nameof(Summary)).WithDanger("Billing address not found", "");
 
         if (phoneModel == null)
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Phone number not found");
+            return RedirectToAction(nameof(Summary)).WithDanger("Phone number not found", "");
 
         if (emailModel == null)
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Email not found");
+            return RedirectToAction(nameof(Summary)).WithDanger("Email not found", "");
 
         if (serviceAddresses == null || !serviceAddresses.IsValid)
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Service address not found");
+            return RedirectToAction(nameof(Summary)).WithDanger("Service address not found", "");
 
 
         if (!TryValidateModel(customerModel))
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Customer information is invalid");
+            return RedirectToAction(nameof(Summary)).WithDanger("Customer information is invalid", "");
 
         if (!TryValidateModel(billingAddressModel))
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Billing address is invalid");
+            return RedirectToAction(nameof(Summary)).WithDanger("Billing address is invalid", "");
         
         if (!TryValidateModel(phoneModel))
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Phone is invalid");
+            return RedirectToAction(nameof(Summary)).WithDanger("Phone is invalid", "");
         
         if (!TryValidateModel(emailModel))
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Email is invalid");
+            return RedirectToAction(nameof(Summary)).WithDanger("Email is invalid", "");
         
         if (!TryValidateModel(serviceAddresses))
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", "Service address is invalid");
+            return RedirectToAction(nameof(Summary)).WithDanger("Service address is invalid", "");
 
         try
         {
@@ -1359,8 +1350,7 @@ public class NewCustomerController : Controller
         }
         catch (Exception ex)
         {
-            return RedirectToAction(nameof(Summary))
-                .WithWarning("", ex.Message);
+            return RedirectToAction(nameof(Summary)).WithDanger(ex.Message, "");
         }
     }
 

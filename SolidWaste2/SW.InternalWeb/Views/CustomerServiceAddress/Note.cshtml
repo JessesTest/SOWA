@@ -23,11 +23,8 @@
             <span class="glyphicon glyphicon-arrow-right"></span>
         </button>
     </div>
-</div>
-
-<div class="row">
     <div class="col-md-12">
-        <hr class="margin-vertical-15" />
+        <hr />
     </div>
 </div>
 
@@ -60,38 +57,32 @@
 
 <div class="row">
     <div class="col-md-12">
-        <hr class="margin-vertical-15" />
+        <hr />
     </div>
-</div>
-
-<div class="row">
     <div class="col-md-12">
         @if (Model.Note.Id > 0)
         {
             <button type="submit" class="btn btn-info btn-s-xs ajax-button" data-form-action="@Url.Action("ClearNote", "CustomerServiceAddress")">New Note</button>
-
-
             @*if (Model.ServiceAddress.CancelDate == null || Model.ServiceAddress.CancelDate > DateTime.Today.Date)
-        {
+            {
 
-        }
-        else
-        {
-        <button type="submit" class="btn btn-info btn-s-xs ajax-button disabled" data-form-action="@Url.Action("ClearNote", "CustomerServiceAddress")">New Note</button>
-        }*@
+            }
+            else
+            {
+                <button type="submit" class="btn btn-info btn-s-xs ajax-button disabled" data-form-action="@Url.Action("ClearNote", "CustomerServiceAddress")">New Note</button>
+            }*@
         }
         else
         {
             <button type="submit" class="btn btn-danger btn-s-xs ajax-button" data-form-action="@Url.Action("AddNote", "CustomerServiceAddress")" data-form-group="note-group">Add Note</button>
-
             @*if (Model.ServiceAddress.CancelDate == null || Model.ServiceAddress.CancelDate > DateTime.Today.Date)
-        {
+            {
 
-        }
-        else
-        {
-        <button type="submit" class="btn btn-danger btn-s-xs ajax-button disabled" data-form-action="@Url.Action("AddNote", "CustomerServiceAddress")" data-form-group="note-group">Add Note</button>
-        }*@
+            }
+            else
+            {
+                <button type="submit" class="btn btn-danger btn-s-xs ajax-button disabled" data-form-action="@Url.Action("AddNote", "CustomerServiceAddress")" data-form-group="note-group">Add Note</button>
+            }*@
         }
     </div>
 </div>

@@ -2,6 +2,7 @@
 @using SW.InternalWeb.Extensions
 @inject SW.InternalWeb.Services.ContainerCodeSelectItemsService codeService
 @{
+    ViewBag.Title = "New Customer";
     ViewBag.ATitle = "New Customer : Service Address : Container";
 
     var containerCodes = await codeService.Get();
@@ -34,7 +35,6 @@
                                 @Html.ValidationMessageFor(m => m.RouteNumber, null, new { @class = "text-danger" })
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="col-md-3">
                                 @Html.LabelFor(m => m.ContainerCodeId, new { @class = "control-label font-bold" })
@@ -44,7 +44,6 @@
                                 @Html.ValidationMessageFor(m => m.ContainerCodeId, null, new { @class = "text-danger" })
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="col-md-3">
                                 @Html.LabelFor(m => m.Delivered, new { @class = "control-label font-bold" })
@@ -54,7 +53,6 @@
                                 @Html.ValidationMessageFor(m => m.Delivered, null, new { @class = "text-danger" })
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="col-md-3">
                                 <label class="control-label font-bold">Days Serviced</label>
@@ -107,7 +105,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="col-md-3">
                                 @Html.LabelFor(m => m.ContainerSubtypeId, new { @class = "control-label font-bold" }) *
@@ -117,7 +114,6 @@
                                 @Html.ValidationMessageFor(m => m.ContainerSubtypeId, null, new { @class = "text-danger" })
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="col-md-3">
                                 @Html.LabelFor(m => m.BillingSize, new { @class = "control-label font-bold" }) *
@@ -127,7 +123,6 @@
                                 @Html.ValidationMessageFor(m => m.BillingSize, null, new { @class = "text-danger" })
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="col-md-3">
                                 @Html.LabelFor(m => m.ActualSize, new { @class = "control-label font-bold" })
@@ -137,7 +132,6 @@
                                 @Html.ValidationMessageFor(m => m.ActualSize, null, new { @class = "text-danger" })
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="col-md-3">
                                 @Html.LabelFor(m => m.AdditionalCharge, new { @class = "control-label font-bold" })
@@ -154,7 +148,7 @@
                                 }
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="form-group">
                             <div class="col-md-3">
                                 @Html.LabelFor(m => m.EffectiveDate, new { @class = "control-label font-bold" }) *
                             </div>
@@ -163,21 +157,13 @@
                                 @Html.ValidationMessageFor(m => m.EffectiveDate, null, new { @class = "text-danger" })
                             </div>
                         </div>
-
-                        <br />
                         <div class="row">
                             <div class="col-md-12">
                                 (* Denotes Required Field)
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-12">
                                 <hr />
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-7">
                                 @Html.ActionLink("Cancel", "ServiceAddress", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
                                 <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>
@@ -194,7 +180,6 @@
 @section scripts
 {
     <script type="text/javascript">
-
         function getFormData() {
             let form = $("form.form-horizontal")[0];
             return {
@@ -340,6 +325,5 @@
                 $("#ServiceAddressSummary2Target").html(result);
             }
         });
-
     </script>
 }

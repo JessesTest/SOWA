@@ -32,7 +32,6 @@
                     @Html.TextBoxFor(m => m.LocationAddress, new { @class = "form-control" })
                 </div>
             </div>
-
             <div class="row form-group">
                 <div class="col-md-12">
                     @Html.CheckBoxFor(m => m.Include, new { @class = "checkbox-inline" })
@@ -40,22 +39,17 @@
                     (Include Inactive Customers)
                 </div>
             </div>
-
             <div class="row form-group">
                 <div class="col-md-12">
                     (At Least One Field is Required to Search)
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-md-12">
                     <button type="submit" name="Command" value="search" class="btn btn-primary">Search</button>
                     <button type="submit" name="Command" value="clear" class="btn btn-info">Clear</button>
                 </div>
             </div>
-
         </div>
     </div>
-    <br />
-    <br />
 }

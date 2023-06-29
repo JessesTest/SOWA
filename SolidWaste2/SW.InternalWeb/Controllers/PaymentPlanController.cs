@@ -51,12 +51,12 @@ public class PaymentPlanController : Controller
         var customer = await customerService.GetById(customerId);
         if (customer == null || customer.DelDateTime != null)
             return RedirectToAction("Index", "Home")
-                .WithWarning("Errorr", "Customer not found");
+                .WithDanger("Customer not found", "");
 
         var paymentPlan = await paymentPlanService.GetActiveByCustomer(customer.CustomerId, true);
         if (paymentPlan != null)
             return RedirectToAction(nameof(Index), new { customerId })
-                .WithWarning("Error", "Account already has a payment plan");
+                .WithDanger("Account already has a payment plan", "");
 
         var summary = await billingSummaryService.GetBillingSummaryForPaymentPlan(customerId);
         var pe = await personEntityService.GetById(customer.Pe);
@@ -75,7 +75,7 @@ public class PaymentPlanController : Controller
         model.MonthlyPayment = model.TotalDue / model.Months + model.MonthlyTotal;
 
         return View(model)
-            .WithWarningWhen(remainingBalance <= 0, "", "Account has not past due charges");
+            .WithDangerWhen(remainingBalance <= 0, "Account has no past due charges", "");
     }
 
     [HttpPost]
@@ -83,24 +83,21 @@ public class PaymentPlanController : Controller
     {
         var customer = await customerService.GetById(model.CustomerId);
         if (customer == null || customer.DelDateTime != null)
-            return RedirectToAction("Index", "Home")
-                .WithWarning("Errorr", "Customer not found");
+            return RedirectToAction("Index", "Home").WithDanger("Customer not found", "");
 
         var paymentPlan = await paymentPlanService.GetActiveByCustomer(customer.CustomerId, true);
         if(paymentPlan != null)
         {
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "Account already has a payment plan");
+            return RedirectToAction(nameof(Index)).WithDanger("Account already has a payment plan", "");
         }
         if (model.TotalDue <= 0)
         {
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "Account has no past due charges");
+            return RedirectToAction(nameof(Index)).WithDanger("Account has no past due charges", "");
         }
 
         if (!ModelState.IsValid)
         {
-            return View(model).WithWarning("", "There were errors on the form");
+            return View(model).WithDanger("There were errors on the form", "");
         }
 
         var p = new PaymentPlan
@@ -114,7 +111,6 @@ public class PaymentPlanController : Controller
         };
 
         var dueDate = model.FirstPaymentDate;
-
 
         for (var i = 0; i < model.Months; i++)
         {
@@ -190,14 +186,14 @@ public class PaymentPlanController : Controller
     {
         var pp = await paymentPlanService.GetById(id);
         if (pp == null || pp.DelFlag)
-            return RedirectToAction("Index", "Home").WithWarning("", "Payment plan not found");
+            return RedirectToAction("Index", "Home").WithDanger("Payment plan not found", "");
 
         var customer = await customerService.GetById(pp.CustomerId);
         if(customer == null)
-            return RedirectToAction("Index", "Home").WithWarning("", "Customer not found");
+            return RedirectToAction("Index", "Home").WithDanger("Customer not found", "");
 
         if (pp.Canceled)
-            return RedirectToAction(nameof(Index)).WithWarning("", "Payment plan was cacneled");
+            return RedirectToAction(nameof(Index), new { customerId = customer.CustomerId }).WithDanger("Payment plan was canceled", "");
 
         var pe = await personEntityService.GetById(customer.Pe);
 
@@ -226,15 +222,15 @@ public class PaymentPlanController : Controller
     public async Task<IActionResult> Edit(PaymentPlanViewModel model)
     {
         if (!ModelState.IsValid)
-            return View(model);
+            return View(model).WithDanger("There were errors on the form", "");
 
         var pp = await paymentPlanService.GetById(model.Id);
         if (pp == null || pp.DelFlag)
-            return RedirectToAction("Index", "Home").WithWarning("", "Payment plan not found");
+            return RedirectToAction("Index", "Home").WithDanger("Payment plan not found", "");
 
         var customer = await customerService.GetById(pp.CustomerId);
         if (customer == null)
-            return RedirectToAction("Index", "Home").WithWarning("", "Customer not found");
+            return RedirectToAction("Index", "Home").WithDanger("Customer not found", "");
 
         if (model.Canceled && customer.PaymentPlan)
         {
@@ -258,7 +254,7 @@ public class PaymentPlanController : Controller
         }
         await paymentPlanService.Update(pp);
 
-        return View(model).WithSuccess("", "Payment plan updated");
+        return View(model).WithSuccess("Payment plan updated", "");
     }
 
     #endregion

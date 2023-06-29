@@ -1,5 +1,6 @@
 ﻿@model SW.InternalWeb.Models.NewCustomer.NoteViewModel
 @{
+    ViewBag.Title = "New Customer";
     ViewBag.ATitle = "New Customer : Service Address : Note";
 }
 <div id="crumbs">
@@ -31,9 +32,6 @@
                             <div class="col-md-12">
                                 <hr />
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-12">
                                 @Html.ActionLink("Cancel", "ServiceAddress", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
                                 <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>
