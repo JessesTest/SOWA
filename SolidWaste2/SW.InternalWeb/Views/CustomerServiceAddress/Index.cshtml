@@ -1,7 +1,7 @@
 ﻿@model SW.InternalWeb.Models.CustomerServiceAddress.ServiceAddressMasterViewModel
 @using SW.InternalWeb.Extensions
 @{
-    //ViewBag.ATitle = "Customer Service Address";
+    ViewBag.Title = "Customer Service Address";
     ViewBag.faTitleClass = "wrench";
     ViewBag.ATitle = "Customer Maintenance : " + Model.FullName + "   Account#" + Model.ServiceAddress.CustomerId;
 }
@@ -24,9 +24,6 @@
         }
     </div>
 </div>
-
-<br />
-<br />
 
 @section scripts
 {

@@ -25,15 +25,13 @@ public class NotifyController : Controller
         var notification = await notifyService.GetById(notificationId);
         if (notification == null)
             return RedirectToAction(nameof(List))
-                .WithWarning("", "Invalid notification id");
+                .WithDanger("Invalid notification id", "");
         if (notification.Deleted)
-            return RedirectToAction(nameof(List))
-                .WithWarning("", "Notification id previously deleted");
+            return RedirectToAction(nameof(List)).WithDanger("Notification id previously deleted", "");
 
         var email = User.GetEmail(); // ?? "DEANNA.STARKEBAUM@SNCO.US"
         if (email != notification.To)
-            return RedirectToAction(nameof(List))
-                .WithWarning("", "Notification does not belong to current user");
+            return RedirectToAction(nameof(List)).WithDanger("Notification does not belong to current user", "");
 
         await notifyService.ToggleReadById(notification.NotificationID);
 

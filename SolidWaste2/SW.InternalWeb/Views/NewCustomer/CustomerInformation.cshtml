@@ -1,6 +1,7 @@
 ﻿@model SW.InternalWeb.Models.NewCustomer.CustomerViewModel
 @using SW.InternalWeb.Extensions
 @{
+    ViewBag.Title = "New Customer";
     ViewBag.faTitleClass = "user-plus";
     ViewBag.ATitle = "New Customer : General";
 }
@@ -75,14 +76,10 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-12">
                         <hr />
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-12">
                         <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>
                         <input type="submit" value="Clear" class="btn btn-info btn-s-xs" name="Clear" data-form-action="@Url.Action("CustomerInformation_Clear", "NewCustomer")" />

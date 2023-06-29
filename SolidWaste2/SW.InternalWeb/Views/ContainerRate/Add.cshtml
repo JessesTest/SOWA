@@ -2,6 +2,7 @@
 @inject SW.BLL.Services.IContainerCodeService containerTypeService
 @inject SW.BLL.Services.IContainerSubtypeService containerSubtypeService
 @{
+    ViewBag.Title = "Add Container Rate";
     ViewBag.ATitle = "Add Container Rate";
 
     var containerTypes = (await containerTypeService.GetAll())
@@ -129,10 +130,7 @@
 
 @section scripts
     {
-    @* @Scripts.Render("~/bundles/jqueryval") *@
-    @* @Scripts.Render("~/bundles/mask") *@
     <script type="text/javascript">
-        
         function changeSubtypes($event) {
             $.post(
                 "@Url.Action("ContainerTypeChanged", "ContainerRate")",
@@ -157,6 +155,5 @@
 
             $("[data-provide='datepicker']").mask("99/99/9999", { placeholder: "mm/dd/yyyy" });
         });
-
     </script>
 }

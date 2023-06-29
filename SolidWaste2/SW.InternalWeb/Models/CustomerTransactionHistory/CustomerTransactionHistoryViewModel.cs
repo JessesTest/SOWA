@@ -8,7 +8,7 @@ public class CustomerTransactionHistoryViewModel
 
     public int CustomerID { get; set; }
     [Display(Name = "Start Date")]
-    public DateTime startDate { get; set; }
+    public DateTime StartDate { get; set; }
     [Display(Name = "End Date")]
-    public DateTime endDate { get; set; }
+    public DateTime EndDate { get; set; }
 }

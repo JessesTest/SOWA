@@ -1,5 +1,6 @@
 ﻿@model SW.InternalWeb.Models.NewCustomer.BillingAddressViewModel
 @{
+    ViewBag.Title = "New Customer";
     ViewBag.faTitleClass = "user-plus";
     ViewBag.ATitle = "New Customer : Billing Address";
 }
@@ -42,9 +43,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
                         <div class="col-md-12">
                             <hr />
                         </div>
@@ -82,7 +80,7 @@
                         @Html.ValidationMessageFor(m => m.State, null, new { @class = "text-danger" })
                         @Html.ValidationMessageFor(m => m.Zip, null, new { @class = "text-danger" })
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-12">
                                 @Html.CheckBoxFor(m => m.Override, new { @class = "checkbox-inline" })
                                 @Html.LabelFor(m => m.Override, new { @class = "font-bold" })
                                 (Bypass address validation)
@@ -90,12 +88,11 @@
                         </div>
                         <br />
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-12">
                                 (* Denotes Required Field)
                             </div>
                         </div>
                     </div>
-                    @*<div class="col-md-4" style="width: 30%; background-color: ;">*@
                     <div class="col-md-4">
                         <div class="alert alert-info" role="alert">
                             <h6>If you are using the address validator you</h6>
@@ -115,9 +112,6 @@
                     <div class="col-md-12">
                         <hr />
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-12">
                         <input type="submit" value="Previous" class="btn btn-primary btn-s-xs" name="Previous" data-form-action="@Url.Action("CustomerBillingAddress_Prev", "NewCustomer")" />
                         <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>

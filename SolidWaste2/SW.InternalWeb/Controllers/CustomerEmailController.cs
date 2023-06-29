@@ -34,7 +34,7 @@ public class CustomerEmailController : Controller
         var person = await personEntityService.GetById(customer.Pe);
         if (person == null || person.Delete)
             return RedirectToAction("Index", "Customer", new { customerId })
-                .WithDanger("Invalid customer", "customer has no person record");
+                .WithDanger("Invalid", "customer has no person record");
 
         var emails = person.Emails
             .Where(e => e.IsDefault)
@@ -73,26 +73,25 @@ public class CustomerEmailController : Controller
         };
 
         return View(vm)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "");
     }
 
     [HttpPost]
     public async Task<IActionResult> Update(CustomerEmailViewModel vm)
     {
         if (!ModelState.IsValid)
-        {
-            return View(vm).WithWarning("", "There are errors on the form");
-        }
+            return View(vm).WithDanger("There were field validation errors", "");
 
         var email = await emailService.GetById(vm.Id.Value);
         if (email == null)
             return RedirectToAction("Index", "Customer")
-                .WithWarning("Error", "Email not found");
+                .WithDanger("Email not found", "");
 
         var customer = await customerService.GetById(vm.CustomerID);
         if (customer == null)
             return RedirectToAction("Index", "Customer")
-                .WithWarning("Error", "Customer not found");
+                .WithDanger("Customer not found", "");
 
         var person = await personEntityService.GetById(customer.Pe);
 
@@ -122,8 +121,7 @@ public class CustomerEmailController : Controller
         }
 
         return RedirectToAction(nameof(Index), new { vm.CustomerID, vm.Id })
-            .WithSuccess("Success", "Email updated")
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithSuccess("Email updated", "");
     }
 
     [HttpPost]
@@ -134,8 +132,8 @@ public class CustomerEmailController : Controller
         vm.Email1 = string.Empty;
 
         var customer = await customerService.GetById(vm.CustomerID);
-        return View(vm)
-            .WithInfoWhen(customer?.PaymentPlan ?? false, "", "Customer has a payment plan.");
+        return View("Index", vm)
+            .WithInfoWhen(customer?.PaymentPlan ?? false, "Customer has a payment plan.", "");
     }
 
     [HttpPost]
@@ -144,12 +142,11 @@ public class CustomerEmailController : Controller
         var customer = await customerService.GetById(vm.CustomerID);
         if (customer == null)
             return RedirectToAction("Index", "Customer")
-                .WithWarning("Error", "Customer not found");
+                .WithDanger("Customer not found", "");
 
         if (!ModelState.IsValid)
             return View("Index", vm)
-                .WithWarning("", "There were field validation errors")
-                .WithInfoWhen(customer?.PaymentPlan ?? false, "", "Customer has a payment plan.");
+                .WithDanger("There were field validation errors", "");
 
         Email email = new()
         {
@@ -165,23 +162,23 @@ public class CustomerEmailController : Controller
         if (TryValidateModel(email))
         {
             await emailService.Add(email);
-            return RedirectToAction("Index", new { customerID = vm.CustomerID, id = email.Id })
-                .WithSuccess("Success", "Email added");
+            return RedirectToAction(nameof(Index), new { customerID = vm.CustomerID, id = email.Id })
+                .WithSuccess("Email added", "");
         }
 
         return View("Index", vm)
-            .WithWarning("", "There were field validation errors")
-            .WithInfoWhen(customer?.PaymentPlan ?? false, "", "Customer has a payment plan.");
+            .WithInfoWhen(customer?.PaymentPlan ?? false, "", "Customer has a payment plan.")
+            .WithDanger("There were field validation errors", "");
     }
 
     public IActionResult Next(CustomerEmailViewModel vm)
     {
-        return RedirectToAction("Index", new { vm.CustomerID, vm.Id });
+        return RedirectToAction(nameof(Index), new { vm.CustomerID, vm.Id });
     }
 
     public IActionResult Previous(CustomerEmailViewModel vm)
     {
-        return RedirectToAction("Index", new { vm.CustomerID, vm.Id });
+        return RedirectToAction(nameof(Index), new { vm.CustomerID, vm.Id });
     }
 
 }

@@ -1,5 +1,4 @@
 ﻿@model SW.InternalWeb.Models.Legacy.LegacyBViewModel
-
 @{
     ViewBag.Title = "Legacy Breakdown";
     ViewBag.ATitle = "Legacy Breakdown";
@@ -7,7 +6,6 @@
 
 <div class="panel panel-default">
     <div class="panel-body">
-
         <fieldset class="form-group">
             <legend>Breakdown Order</legend>
             <div class="row form-group">
@@ -43,14 +41,13 @@
                     @Html.TextBoxFor(m => m.Mileage, new { @class = "form-control", @readonly = "readonly" })
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row">
                 <div class="col-xs-2">
                     @Html.LabelFor(m => m.TransDate, new { @class = "font-bold" })
                     @Html.TextBoxFor(m => m.TransDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
                 </div>
             </div>
         </fieldset>
-
         <fieldset class="form-group">
             <legend>Breakdown Details</legend>
             <div class="row form-group">
@@ -67,17 +64,16 @@
                     @Html.TextBoxFor(m => m.BreakdownLocation, new { @class = "form-control", @readonly = "readonly" })
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row">
                 <div class="col-xs-12">
                     @Html.LabelFor(m => m.BreakdownDescription, new { @class = "font-bold" })
                     @Html.TextAreaFor(m => m.BreakdownDescription, 2, 80, new { @class = "form-control", @readonly = "readonly" })
                 </div>
             </div>
         </fieldset>
-
-        <fieldset class="form-group">
+        <fieldset>
             <legend>Record Details</legend>
-            <div class="row form-group">
+            <div class="row">
                 <div class="col-xs-2">
                     @Html.LabelFor(m => m.AddDate, new { @class = "font-bold" })
                     @Html.TextBoxFor(m => m.AddDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
@@ -96,6 +92,5 @@
                 </div>
             </div>
         </fieldset>
-
     </div>
 </div>

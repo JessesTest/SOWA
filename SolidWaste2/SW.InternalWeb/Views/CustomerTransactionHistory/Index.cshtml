@@ -1,7 +1,7 @@
 ﻿@model SW.InternalWeb.Models.CustomerTransactionHistory.CustomerTransactionHistoryViewModel
 @using System.Configuration;
-
 @{
+    ViewBag.ATitle = "Customer Transaction History";
     ViewBag.faTitleClass = "wrench";
     ViewBag.ATitle = "Customer Maintenance : " + TempData["FullName"] + "   Account#" + Model.CustomerID;
 }
@@ -19,12 +19,52 @@
 </div>
 <div class="panel panel-default">
     <div class="panel-body">
-        <partial name="_CustomerTransactionHistory" />
+        <div class="row">
+            <div class="col-md-12">
+                <table id="transactions" class="table table-striped table-bordered" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Add Date Time</th>
+                            <th>Transaction Code | Description</th>
+                            <th>Check Number</th>
+                            <th>Amount</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <a class="btn btn block btn-success" href="@Url.Action("Index", "Transaction", new { customerID = Model.CustomerID })">Additional Service Charge</a>
+            </div>
+            <div class="col-xs-12">
+                <hr />
+            </div>
+            <div class="col-xs-12">
+                @using (Html.BeginForm("TransactionsbyDateRange", "Reports"))
+                {
+                    @Html.HiddenFor(m => m.CustomerID)
+                    <div class="row">
+                        <div class="col-xs-3">
+                            @Html.LabelFor(m => m.StartDate)
+                            @Html.TextBoxFor(m => m.StartDate, "{0:d}", new { @class = "form-control datepicker-input" })
+                        </div>
+                        <div class="col-xs-3">
+                            @Html.LabelFor(m => m.EndDate)
+                            @Html.TextBoxFor(m => m.EndDate, "{0:d}", new { @class = "form-control datepicker-input" })
+                        </div>
+                        <div class="col-xs-2">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-success">Print Transactions</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>
-
-<br />
-<br />
 
 @section scripts
 {

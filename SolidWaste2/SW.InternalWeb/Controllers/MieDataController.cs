@@ -30,13 +30,11 @@ namespace SW.InternalWeb.Controllers
         public async Task<IActionResult> Edit(MieDataListViewModel vm, IFormFile[] image)
         {
             if (!ModelState.IsValid)
-            {
                 return RedirectToAction("Index", "Customer", new { vm.CustomerId })
-                    .WithWarning("Error", "Upload Image Failed, Model State Error");
-            }
+                    .WithDanger("Upload Image Failed", "Model State Error");
             if (image == null || !image.Any())
                 return RedirectToAction("Index", "Customer", new { vm.CustomerId })
-                    .WithWarning("File Upload Failed", "No file selected");
+                    .WithDanger("File Upload Failed", "No file selected");
 
             await mieDataService.Deactivate(vm.CustomerId.Value, User.GetNameOrEmail());
 
@@ -68,7 +66,7 @@ namespace SW.InternalWeb.Controllers
             }
 
             return RedirectToAction("Index", "Customer", new { vm.CustomerId })
-                .WithSuccess("Success", "File uploaded");
+                .WithSuccess("File uploaded", "");
         }
 
         public IActionResult Return(MieDataListViewModel vm, IFormFile[] image)
@@ -80,7 +78,8 @@ namespace SW.InternalWeb.Controllers
         {
             var image = await mieDataService.GetById(id);
             if (image == null || image.DelDateTime != null)
-                return RedirectToAction("Index", "Customer", new { customerID });
+                return RedirectToAction("Index", "Customer", new { customerID })
+                    .WithDanger("No file found", "");
 
             return File(image.MieDataImage, image.MieDataImageType, image.MieDataImageFileName);
         }
@@ -88,7 +87,8 @@ namespace SW.InternalWeb.Controllers
         public async Task<IActionResult> ImageDelete(int id, int customerID)
         {
             await mieDataService.Delete(id);
-            return RedirectToAction("Index", "Customer", new { customerID });
+            return RedirectToAction("Index", "Customer", new { customerID })
+                .WithSuccess("Delete Successful", "");
         }
 
         public async Task<IActionResult> ImageInactive(int id)

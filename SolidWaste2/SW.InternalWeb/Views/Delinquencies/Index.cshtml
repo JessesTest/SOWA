@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<SW.BLL.DTOs.CustomerDelinquency>
-
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Delinquencies";
+    ViewBag.ATitle = "Delinquencies";
 }
 
 <div class="panel panel-default">
@@ -10,27 +10,13 @@
             <thead>
                 <tr>
                     <th><!-- View --></th>
-                    <th>
-                        Customer
-                    </th>
-                    <th>
-                        Past Due
-                    </th>
-                    <th>
-                        Past Due 30 Days
-                    </th>
-                    <th>
-                        Past Due 60 Days
-                    </th>
-                    <th>
-                        Past Due 90 Days
-                    </th>
-                    <th>
-                        Collections Balance
-                    </th>
-                    <th>
-                        Counselors Balance
-                    </th>
+                    <th>Customer</th>
+                    <th>Past Due</th>
+                    <th>Past Due 30 Days</th>
+                    <th>Past Due 60 Days</th>
+                    <th>Past Due 90 Days</th>
+                    <th>Collections Balance</th>
+                    <th>Counselors Balance</th>
                 </tr>
             </thead>
             <tbody>
@@ -72,7 +58,10 @@
     {
     <script type="text/javascript">
         $(document).ready(function () {
-            $("#results").DataTable({ "order": [[1, "asc"]] });
+            $("#results").DataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
+                "order": [[1, "asc"]]
+            });
         })
     </script>
 }

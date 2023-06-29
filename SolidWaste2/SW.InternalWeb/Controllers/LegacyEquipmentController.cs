@@ -73,7 +73,6 @@ public class LegacyEquipmentController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.Clear();
             vm = new LegacyEquipmentDetailViewModel{ EquipmentNumber = vm.EquipmentNumber };
 
             return View("Detail", vm).WithDanger(ex.Message, "");
