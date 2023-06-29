@@ -32,6 +32,8 @@ public sealed class CashReceiptUpdateService
             Context.CashReceiptForDate,
             Context.CashReceiptForDate.AddDays(1));
 
+        Context.TotalPaymentsFound = allPayments.Count;
+
         var customers = allPayments.Select(p => p.Customer).Distinct().ToArray();
         foreach (var customer in customers)
         {

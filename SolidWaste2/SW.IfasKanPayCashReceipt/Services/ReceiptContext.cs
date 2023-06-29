@@ -1,23 +1,20 @@
-﻿namespace SW.IfasCashReceipt.Services;
+﻿namespace SW.IfasKanPayCashReceipt.Services;
 
-public class CashReceiptContext
+public sealed class ReceiptContext
 {
-
-    public FileInfo ErrorFile { get; init; }  // Error.txt
-    public FileInfo GoodFile { get; init; }   // Good.txt
-    public FileInfo ReportFile { get; init; } // SW_Cash_Receipt_Rpt.txt
-    public FileInfo ExceptionFile { get; init; } // SW_Cash_Receipt_Err_Rpt.txt
+    public FileInfo GoodFile { get; init; } // KPGood.txt
+    public FileInfo ErrorFile { get; init; }    // KPError.txt
+    public FileInfo ReportFile { get; init; }   // SW_KanPay_Cash_Receipt_Rpt.txt
+    public FileInfo ExceptionFile { get; init; }    //
 
     public int TotalPaymentsFound { get; set; }
-
-    public DateTime CashReceiptBeginDatetime { get; init; }
-    public DateTime CashReceiptForDate { get; init; }
-
-    private TextWriter _errorWriter;
-    public TextWriter ErrorWriter => _errorWriter ??= ErrorFile.AppendText();
+    public int TotalChargesFound { get; set; }
 
     private TextWriter _goodWriter;
     public TextWriter GoodWriter => _goodWriter ??= GoodFile.AppendText();
+
+    private TextWriter _errorWriter;
+    public TextWriter ErrorWriter => _errorWriter ??= ErrorFile.AppendText();
 
     private TextWriter _reportWriter;
     public TextWriter ReportWriter => _reportWriter ??= ReportFile.AppendText();
@@ -25,7 +22,10 @@ public class CashReceiptContext
     private TextWriter _exceptionWriter;
     public TextWriter ExceptionWriter => _exceptionWriter ??= ExceptionFile.AppendText();
 
-    public CashReceiptContext()
+    public DateTime CashReceiptBeginDatetime { get; init; } 
+    public DateTime CashReceiptForDate { get; init; }
+
+    public ReceiptContext()
     {
         GoodFile = new FileInfo(Path.GetTempPath() + Path.GetRandomFileName());
         ErrorFile = new FileInfo(Path.GetTempPath() + Path.GetRandomFileName());
@@ -53,7 +53,7 @@ public class CashReceiptContext
         CloseFiles();
 
         var files = new[] { GoodFile, ErrorFile, ReportFile, ExceptionFile };
-        foreach (var file in files)
+        foreach(var file in files)
         {
             if (file.Exists)
             {
