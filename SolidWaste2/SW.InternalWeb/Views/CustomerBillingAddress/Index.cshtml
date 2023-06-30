@@ -1,5 +1,6 @@
 ﻿@model SW.InternalWeb.Models.CustomerBillingAddress.CustomerBillingAddressViewModel
 @{
+    ViewBag.Title = "Customer Billing Address";
     ViewBag.faTitleClass = "wrench";
     ViewBag.ATitle = "Customer Maintenance : Account#" + Model.CustomerId;
     var index = 0;
@@ -16,12 +17,7 @@
     </ul>
     <div class="panel panel-default">
         <div class="panel-body">
-            
-            <form asp-action="SelectBillingAddress"
-                  asp-controller="CustomerBillingAddress"
-                  method="post"
-                  class="form-horizontal">
-
+            <form asp-action="SelectBillingAddress" asp-controller="CustomerBillingAddress" method="post" class="form-horizontal">
                 @if (Model.Addresses != null)
                 {
                     @Html.HiddenFor(m => m.Id)
@@ -54,15 +50,9 @@
                     </div>
                 }
             </form>
-
-            <form asp-action="Index"
-                  asp-controller="CustomerBillingAddress"
-                  method="post"
-                  class="form-horizontal">
-
+            <form asp-action="Index" asp-controller="CustomerBillingAddress" method="post" class="form-horizontal">
                 @Html.HiddenFor(m => m.Id)
                 @Html.HiddenFor(m => m.CustomerId)
-
                 <div class="row">
                     <div class="col-md-8">
                         <div class="form-group">
@@ -112,14 +102,10 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-12">
                         <hr />
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-8">
                         <div class="row">
                             <div class="col-md-4">
@@ -134,6 +120,3 @@
         </div>
     </div>
 </div>
-
-<br />
-<br />

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph;
 using Notify.BL.Services;
-using SW.InternalWeb.Views.NotifyAPI;
+using SW.InternalWeb.Models.NotifyAPI;
 
 namespace SW.InternalWeb.Controllers;
 
@@ -30,7 +30,7 @@ public class NotifyApiController : ControllerBase
     {
         var email = User.GetEmail();
         var list = await notifyService.GetUnreadByTo(email, 5);
-        return list;
+        return new { notifications = list };
     }
 
     [Route("NotificationsListAllJson")]

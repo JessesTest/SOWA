@@ -47,14 +47,10 @@
             }
         }
     </div>
-</div>
-
-<div class="row">
     <div class="col-md-12">
         <hr />
     </div>
 </div>
-
 <div class="row">
     <div class="col-md-6">
         <div class="row">
@@ -67,7 +63,7 @@
                                 <div class="col-md-9">
                                     <select name="ServiceAddressListIndex" class="form-control">
                                         @{ int i = 0; }
-                                        @foreach(var temp in Model.ServiceAddressList)
+                                        @foreach (var temp in Model.ServiceAddressList)
                                         {
                                             <option value="@i">@temp.Address @Model.ServiceAddress.AddressLine2 @temp.City @temp.State @temp.Zip</option>
                                             i++;
@@ -77,8 +73,6 @@
                                 <div class="col-md-3">
                                     <button type="submit" class="btn btn-block btn-primary" data-form-action="@Url.Action("SelectAddress", "CustomerServiceAddress")">Select</button>
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="col-md-12">
                                     <hr />
                                 </div>
@@ -104,7 +98,6 @@
                                 <span asp-validation-for="ServiceAddress.CancelDate"></span>
                             </div>
                         </div>
-
                         <div class="row form-group">
                             <div class="col-md-12">
                                 @Html.LabelFor(m => m.ServiceAddress.LocationName, new { @class = "control-label font-bold" }) <em>*</em>
@@ -112,7 +105,6 @@
                                 <span asp-validation-for="ServiceAddress.LocationName"></span>
                             </div>
                         </div>
-
                         <div class="row form-group">
                             <div class="col-md-12">
                                 @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
@@ -130,18 +122,15 @@
                             <div class="col-md-12">
                                 @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
                                 {
-                                    @*@Html.LabelFor(m => m.ServiceAddress.AddressLine2, new { @class = "control-label font-bold" })*@
                                     @Html.TextBoxFor(m => m.ServiceAddress.AddressLine2, new { @class = "form-control address-group", @readonly = "readonly"})
                                 }
                                 else
                                 {
-                                    @*@Html.LabelFor(m => m.ServiceAddress.AddressLine2, new { @class = "control-label font-bold" })*@
                                     @Html.TextBoxFor(m => m.ServiceAddress.AddressLine2, new { @class = "form-control address-group" })
                                 }
                                 <span asp-validation-for="ServiceAddress.AddressLine2"></span>
                             </div>
                         </div>
-
                         <div class="row form-group">
                             <div class="col-md-6">
                                 @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
@@ -183,26 +172,20 @@
                                 <span asp-validation-for="ServiceAddress.Zip"></span>
                             </div>
                         </div>
-
                         <div class="row form-group">
                             <div class="col-md-12">
                                 @if (DateTime.Today.Date > Model.ServiceAddress.EffectiveDate)
                                 {
                                     @Html.CheckBoxFor(m => m.ServiceAddress.AddressOverride, new { @class = "checkbox-inline address-group", @onclick = "return false" })
-                                    @Html.LabelFor(m => m.ServiceAddress.AddressOverride, new { @class = "control-label font-bold" })
-
-                                    <br />
+                                    @Html.LabelFor(m => m.ServiceAddress.AddressOverride, new { @class = "control-label font-bold m-l-xs" })
                                 }
                                 else
                                 {
                                     @Html.CheckBoxFor(m => m.ServiceAddress.AddressOverride, new { @class = "checkbox-inline address-group" })
-                                    @Html.LabelFor(m => m.ServiceAddress.AddressOverride, new { @class = "control-label font-bold" })
-
-                                    <br />
+                                    @Html.LabelFor(m => m.ServiceAddress.AddressOverride, new { @class = "control-label font-bold m-l-xs" })
                                 }
                             </div>
                         </div>
-
                         <div class="row form-group">
                             <div class="col-md-12">
                                 @Html.LabelFor(m => m.ServiceAddress.LocationContact, new { @class = "control-label font-bold" })
@@ -210,7 +193,6 @@
                                 <span asp-validation-for="ServiceAddress.LocationContact"></span>
                             </div>
                         </div>
-
                         <div class="row ">
                             <div class="col-md-6">
                                 @Html.LabelFor(m => m.ServiceAddress.Phone, new { @class = "control-label font-bold" })
@@ -229,14 +211,10 @@
                                 (* Denotes Required Field)
                             </div>
                         </div>
-
                         <div class="row">
                             <div class="col-md-12">
                                 <hr />
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-12">
                                 @if (Model.ServiceAddress.Id > 0)
                                 {
@@ -268,7 +246,6 @@
                 </div>
             </div>
         </div>
-
     </div>
     @if (Model.ServiceAddress.Id > 0)
     {

@@ -29,12 +29,12 @@ public class CustomerPhoneNumberController : Controller
         var customer = await customerService.GetById(customerID);
         if (customer == null)
             return RedirectToAction("Index", "Customer")
-                .WithWarning("", "Customer not found");
+                .WithDanger("Customer not found", "");
 
         var person = await personEntityService.GetById(customer.Pe);
         if (person == null)
             return RedirectToAction("Index", "Customer")
-                .WithWarning("Error", "Customer record is invalid");
+                .WithDanger("Customer record is invalid", "");
 
         Phone phone = null;
         if (id != null)
@@ -59,8 +59,8 @@ public class CustomerPhoneNumberController : Controller
         };
 
         return View(vm)
-            .WithWarningWhen(person.Pab == true, "", "Account has undeliverable address.")
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
     }
 
     [HttpPost]
@@ -72,15 +72,15 @@ public class CustomerPhoneNumberController : Controller
         if (!ModelState.IsValid)
         {
             return View("Index", vm)
-                .WithWarning("", "There are errors on the form")
-                .WithWarningWhen(person.Pab == true, "", "Account has undeliverable address.")
-                .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+                .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
+                .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+                .WithDanger("There were field validation errors", "");
         }
 
         Phone phone = person.Phones.FirstOrDefault(p => p.Id == vm.Id);
         if (phone == null)
             return RedirectToAction("Index", "Customer", new { vm.CustomerID })
-                .WithWarning("Update Failed", "Phone number not found");
+                .WithDanger("Phone number not found", "");
 
         phone.ChgDateTime = DateTime.Now;
         phone.ChgToi = User.GetNameOrEmail();
@@ -91,8 +91,8 @@ public class CustomerPhoneNumberController : Controller
         phone.Code = null;
         await phoneService.Update(phone);
 
-        return RedirectToAction("Index", new { customer.CustomerId, phone.Id })
-            .WithSuccess("Success", "Phone number updated");
+        return RedirectToAction(nameof(Index), new { customer.CustomerId, phone.Id })
+            .WithSuccess("Phone number updated", "");
     }
 
     [HttpPost]
@@ -106,8 +106,8 @@ public class CustomerPhoneNumberController : Controller
         vm.PhoneNumber = string.Empty;
 
         return View("Index", vm)
-            .WithWarningWhen(person.Pab == true, "", "Account has undeliverable address.")
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
     }
 
     [HttpPost]
@@ -119,9 +119,9 @@ public class CustomerPhoneNumberController : Controller
         if (!ModelState.IsValid)
         {
             return View("Index", vm)
-                .WithWarning("", "There are errors on the form")
-                .WithWarningWhen(person.Pab == true, "", "Account has undeliverable address.")
-                .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+                .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
+                .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+                .WithDanger("There are errors on the form", "");
         }
 
         Phone phone = new()
@@ -136,8 +136,8 @@ public class CustomerPhoneNumberController : Controller
 
         await phoneService.Add(phone);
 
-        return RedirectToAction("Index", new { vm.CustomerID, vm.Id })
-            .WithSuccess("Success", "Phone number added");
+        return RedirectToAction(nameof(Index), new { vm.CustomerID, vm.Id })
+            .WithSuccess("Phone number added", "");
     }
 
     [HttpPost]
@@ -154,7 +154,7 @@ public class CustomerPhoneNumberController : Controller
             nextIndex = 0;
 
         var nextPhone = phones[nextIndex];
-        return RedirectToAction("Index", new { vm.CustomerID, nextPhone.Id });
+        return RedirectToAction(nameof(Index), new { vm.CustomerID, nextPhone.Id });
     }
 
     [HttpPost]
@@ -171,6 +171,6 @@ public class CustomerPhoneNumberController : Controller
             nextIndex = phones.Count - 1;
 
         var prevPhone = phones[nextIndex];
-        return RedirectToAction("Index", new { vm.CustomerID, prevPhone.Id });
+        return RedirectToAction(nameof(Index), new { vm.CustomerID, prevPhone.Id });
     }
 }

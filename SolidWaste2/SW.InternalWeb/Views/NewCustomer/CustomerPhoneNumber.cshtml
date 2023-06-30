@@ -2,6 +2,7 @@
 @using SW.InternalWeb.Extensions
 @inject SW.InternalWeb.Services.PhoneTypeSelectItemsService phoneTypeService
 @{
+    ViewBag.Title = "New Customer";
     ViewBag.faTitleClass = "user-plus";
     ViewBag.ATitle = "New Customer : Phone Number";
 
@@ -49,14 +50,10 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-12">
                         <hr />
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-12">
                         <input type="submit" value="Previous" class="btn btn-primary btn-s-xs" name="Previous" data-form-action="@Url.Action("CustomerPhoneNumber_Prev", "NewCustomer")" />
                         <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>

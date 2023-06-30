@@ -1,4 +1,5 @@
 ﻿using Common.Extensions;
+using Common.Web.Extensions.Alerts;
 using Microsoft.AspNetCore.Mvc;
 using SW.BLL.Services;
 using SW.DM;
@@ -64,9 +65,7 @@ public class ContainerCodeController : Controller
 
         await containerCodeService.Add(containerCode);
 
-        ModelState.Clear();
-        ModelState.AddModelError("success", "Add Successful");
-        return RedirectToAction("Edit", new { id = containerCode.ContainerCodeId });
+        return RedirectToAction(nameof(Edit), new { id = containerCode.ContainerCodeId }).WithSuccess("Add Successful", "");
     }
 
     #endregion
@@ -78,10 +77,7 @@ public class ContainerCodeController : Controller
     {
         var containerCode = await containerCodeService.GetById(id);
         if (containerCode == null || containerCode.DeleteFlag)
-        {
-            ModelState.AddModelError("exception", "Invalid container code");
-            return RedirectToAction(nameof(Index));
-        }
+            return RedirectToAction(nameof(Index)).WithDanger("Invalid container code", "");
 
         var vm = new ContainerCodeEditViewModel
         {
@@ -100,23 +96,16 @@ public class ContainerCodeController : Controller
 
         var containerCode = await containerCodeService.GetById(vm.ContainerCodeID);
         if (containerCode == null || containerCode.DeleteFlag)
-        {
-            ModelState.AddModelError("exception", "Invalid container code");
-            return RedirectToAction(nameof(Index));
-        }
-
-        var username = User.GetNameOrEmail();
+            return RedirectToAction(nameof(Index)).WithDanger("Invalid container code", "");
 
         containerCode.Description = vm.Description;
         containerCode.Type = vm.Type;
         containerCode.ChgDateTime = DateTime.Now;
-        containerCode.ChgToi = username;
+        containerCode.ChgToi = User.GetNameOrEmail();
 
         await containerCodeService.Update(containerCode);
 
-        ModelState.Clear();
-        ModelState.AddModelError("success", "Update Successful");
-        return RedirectToAction("Edit", new { id = vm.ContainerCodeID });
+        return RedirectToAction("Edit", new { id = vm.ContainerCodeID }).WithSuccess("Update Successful", "");
     }
 
     #endregion
@@ -128,17 +117,14 @@ public class ContainerCodeController : Controller
     {
         var containerCode = await containerCodeService.GetById(id);
         if (containerCode == null || containerCode.DeleteFlag)
-        {
-            ModelState.AddModelError("exception", "Invalid container code");
-            return RedirectToAction(nameof(Index));
-        }
+            return RedirectToAction(nameof(Index)).WithDanger("Invalid container code", "");
 
         containerCode.DelDateTime = DateTime.Now;
         containerCode.DeleteFlag = true;
         containerCode.DelToi = User.GetNameOrEmail();
         await containerCodeService.Delete(containerCode);
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index)).WithSuccess("Delete Successful", "");
     }
 
     #endregion

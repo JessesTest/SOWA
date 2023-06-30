@@ -1,4 +1,5 @@
 ﻿using Common.Extensions;
+using Common.Web.Extensions.Alerts;
 using Microsoft.AspNetCore.Mvc;
 using SW.BLL.Services;
 using SW.DM;
@@ -40,7 +41,7 @@ public class ContainerRateController : Controller
     public async Task<IActionResult> Add(ContainerRateAddViewModel vm)
     {
         if (!ModelState.IsValid)
-            return View(vm);
+            return View(vm).WithDanger("There are errors on the form", "");
 
         ContainerRate containerRate = new()
         {
@@ -58,9 +59,7 @@ public class ContainerRateController : Controller
 
         await containerRateService.Add(containerRate);
 
-        ModelState.Clear();
-        ModelState.AddModelError("success", "Add Successful");
-        return RedirectToAction("Edit", new { id = containerRate.ContainerRateId });
+        return RedirectToAction(nameof(Edit), new { id = containerRate.ContainerRateId }).WithSuccess("Add Successful", "");
     }
 
     #endregion
@@ -72,10 +71,7 @@ public class ContainerRateController : Controller
     {
         var rate = await containerRateService.GetById(id);
         if (rate == null || rate.DeleteFlag)
-        {
-            ModelState.AddModelError("exception", "Invalid container rate");
-            return RedirectToAction(nameof(Index));
-        }
+            return RedirectToAction(nameof(Index)).WithDanger("Invalid container rate", "");
 
         var model = new ContainerRateEditViewModel
         {
@@ -97,17 +93,11 @@ public class ContainerRateController : Controller
     public async Task<IActionResult> Edit(ContainerRateEditViewModel model)
     {
         if (!ModelState.IsValid)
-        {
-            ModelState.AddModelError("exception", "Invalid container rate");
-            return View(model);
-        }
+            return View(model).WithDanger("Invalid container rate", "");
 
         var rate = await containerRateService.GetById(model.ContainerRateID);
         if (rate == null || rate.DeleteFlag)
-        {
-            ModelState.AddModelError("exception", "Invalid container rate");
-            return RedirectToAction(nameof(Index));
-        }
+            return RedirectToAction(nameof(Index)).WithDanger("Invalid container rate", "");
 
         rate.ChgDateTime = DateTime.Now;
         rate.ChgToi = User.GetNameOrEmail();
@@ -122,7 +112,7 @@ public class ContainerRateController : Controller
 
         await containerRateService.Update(rate);
 
-        return RedirectToAction("Edit", new { id = model.ContainerRateID });
+        return RedirectToAction(nameof(Edit), new { id = model.ContainerRateID }).WithSuccess("Update Successful", "");
     }
 
     #endregion
@@ -134,19 +124,14 @@ public class ContainerRateController : Controller
     {
         var containerRate = await containerRateService.GetById(id);
         if(containerRate == null || containerRate.DeleteFlag)
-        {
-            ModelState.AddModelError("exception", "Invalid container rate");
-            return RedirectToAction(nameof(Index));
-        }
+            return RedirectToAction(nameof(Index)).WithDanger("Invalid container rate", "");
 
         containerRate.DelDateTime = DateTime.Now;
         containerRate.DeleteFlag = true;
         containerRate.DelToi = User.GetNameOrEmail();
         await containerRateService.Delete(containerRate);
 
-        ModelState.Clear();
-        ModelState.AddModelError("success", "Delete Successful");
-        return RedirectToAction("Index");
+        return RedirectToAction("Index").WithSuccess("Delete Successful", "");
     }
 
     #endregion

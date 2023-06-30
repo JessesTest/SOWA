@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PE.BL.Services;
 using SW.BLL.Services;
+using SW.DM;
 using SW.InternalWeb.Models.Writeoff;
 
 namespace SW.InternalWeb.Controllers;
@@ -40,12 +41,12 @@ public class WriteoffController : Controller
         var customer = await customerService.GetById(customerId.Value);
         if (customer == null)
             return View(new WriteoffPaymentViewModel())
-                .WithWarning("", "Customer not found");
+                .WithDanger("Customer not found", "");
 
         var person = await personService.GetById(customer.Pe);
         if (person == null)
             return View(new WriteoffPaymentViewModel())
-                .WithWarning("", "Customer is invalid");
+                .WithDanger("Customer is invalid", "");
 
         var lastTransaction = await transactionService.GetLatest(customer.CustomerId);
 
@@ -68,7 +69,7 @@ public class WriteoffController : Controller
         };
 
         return View(model)
-            .WithWarningWhen(customer.PaymentPlan, "", "Customer has a payment plan");
+            .WithWarningWhen(customer.PaymentPlan, "Customer has a payment plan", "");
     }
 
     [HttpPost]
@@ -76,7 +77,7 @@ public class WriteoffController : Controller
     {
         if (!ModelState.IsValid)
             return View(model).WithDanger("There are errors on the form", "");
-         
+
         var result = await transactionService.MakeDelinquencyPayment(model.CustomerId.Value, model.TransactionCode, model.Amount, model.Comment);
         if (result != null)
             return View(model).WithDanger(result, "");

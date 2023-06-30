@@ -7,7 +7,6 @@ using SW.BLL.Services;
 using SW.DM;
 using SW.InternalWeb.Extensions;
 using SW.InternalWeb.Models.CustomerBillingAddress;
-
 namespace SW.InternalWeb.Controllers;
 
 public class CustomerBillingAddressController : Controller
@@ -42,7 +41,7 @@ public class CustomerBillingAddressController : Controller
         var customer = await customerService.GetById(customerId);
         if (customer == null)
             return RedirectToAction("Index", "CustomerInquiry")
-                .WithWarning("", "Customer not found");
+                .WithDanger("Customer not found", "");
 
         var personEntity = await personEntityService.GetById(customer.Pe);
         var addresses = await addressService.GetByPerson(personEntity.Id, false);
@@ -75,8 +74,8 @@ public class CustomerBillingAddressController : Controller
         }
 
         return View(model)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.")
-            .WithInfoWhen(personEntity.Pab == true, "", "Account has undeliverable address.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+            .WithWarningWhen(personEntity.Pab == true, "Account has undeliverable address.", "");
     }
 
     [HttpPost]
@@ -85,32 +84,30 @@ public class CustomerBillingAddressController : Controller
         var customer = await customerService.GetById(model.CustomerId);
         if (customer == null)
             return RedirectToAction("Index", "CustomerInquiry")
-                .WithWarning("", "Customer not found");
+                .WithDanger("Customer not found", "");
 
         var personEntity = await personEntityService.GetById(customer.Pe);
         var updated = false;
-        string additionalInfo = null;
+        bool additionalInfo;
 
         if (!ModelState.IsValid)
-        {
-            return View(model)
-                .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.")
-                .WithInfoWhen(personEntity.Pab == true, "", "Account has undeliverable address.")
-                .WithWarning("", "There are field errors");
-        }
-        if (model.Override && model.Zip == null)
-        {
-            ModelState.AddModelError(nameof(model.Zip), "Zip code Required if address override is checked");
-        }
+            return View(model).WithDanger("There are field errors", "");
+        else if (model.Override && model.Zip == null)
+            return View(model).WithDanger("Zip code Required if address override is checked", "");
         else if (model.State.ToUpper() != "KS" && model.Zip == null)
-        {
-            ModelState.AddModelError(nameof(model.Zip), "Zip code Required if State is not KS");
-        }
+            return View(model).WithDanger("Zip code Required if State is not KS", "");
         else
         {
-            additionalInfo = await Process(model);
+            try
+            {
+                additionalInfo = await Process(model);
+            }
+            catch (Exception ex)
+            {
+                return View(model).WithDanger(ex.Message, "");
+            }
 
-            if(ModelState.ErrorCount == 0 && additionalInfo == null)
+            if (additionalInfo)
             {
                 await Update(model, customer);
                 updated = true;
@@ -118,27 +115,25 @@ public class CustomerBillingAddressController : Controller
         }
 
         return View(model)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.")
-            .WithInfoWhen(personEntity.Pab == true, "", "Account has undeliverable address.")
-            .WithInfoWhen(additionalInfo != null, "", additionalInfo)
-            .WithSuccessWhen(updated, "", "Billing address updated");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+            .WithWarningWhen(personEntity.Pab == true, "Account has undeliverable address.", "")
+            .WithInfoWhen(!additionalInfo, "Select an address from the list", "")
+            .WithSuccessWhen(updated, "Billing address updated", "");
     }
 
-    private async Task<string> Process(CustomerBillingAddressViewModel model)
+    private async Task<bool> Process(CustomerBillingAddressViewModel model)
     {
         if (model.Override || (model.State != null && model.State.ToUpper() != "KS"))
         {
-            return null;
+            return true;
         }
         if (model.City == null || model.City.Trim().Length == 0)
         {
-            ModelState.AddModelError(nameof(model.City), "City is required.");
-            return null;
+            throw new ArgumentException("City is required.");
         }
         if (model.State == null || model.State.Trim().Length == 0)
         {
-            ModelState.AddModelError(nameof(model.State), "State is required.");
-            return null;
+            throw new ArgumentException("State is required.");
         }
 
         ICollection<ValidAddress> temp;
@@ -148,12 +143,12 @@ public class CustomerBillingAddressController : Controller
         }
         catch (Exception)
         {
-            return "Address not found.";
+            throw new ArgumentException("Address not found.");
         }
 
         if (temp.Count == 0)
         {
-            return "Address not found";
+            throw new ArgumentException("Address not found");
         }
 
         if (temp.Count == 1)
@@ -164,7 +159,7 @@ public class CustomerBillingAddressController : Controller
             model.City = a.City;
             model.State = a.State;
             model.Zip = a.Zip;
-            return null;
+            return true;
         }
 
         ModelState.Clear();
@@ -182,7 +177,7 @@ public class CustomerBillingAddressController : Controller
 
         HttpContext.Session.SetString("CustomerBillingAddress.Addresses", System.Text.Json.JsonSerializer.Serialize(model.Addresses));
 
-        return "Select an address from the list";
+        return false;
     }
 
     private async Task Update(CustomerBillingAddressViewModel model, Customer customer)
@@ -231,7 +226,7 @@ public class CustomerBillingAddressController : Controller
     {
         var customer = await customerService.GetById(model.CustomerId);
         if (customer == null || customer.DelDateTime != null)
-            return RedirectToAction("Index", "Home").WithDanger("", "Customer not found");
+            return RedirectToAction("Index", "Home").WithDanger("Customer not found", "");
 
         var json = HttpContext.Session.GetString("CustomerBillingAddress.Addresses");
         var addresses = System.Text.Json.JsonSerializer.Deserialize<ValidAddressDto[]>(json);
@@ -253,6 +248,7 @@ public class CustomerBillingAddressController : Controller
 
         await Update(cbavm, customer);
 
-        return RedirectToAction("Index", new { customerId = customer.CustomerId });
+        return RedirectToAction(nameof(Index), new { customerId = customer.CustomerId })
+            .WithSuccess("Billing address updated", "");
     }
 }

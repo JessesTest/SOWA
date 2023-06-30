@@ -59,12 +59,9 @@
                     {
                         @Html.CheckBoxFor(m => m.Canceled, new { @class = "form-control" })
                     }
-
                 </div>
             </div>
-
-
-            <div class="row form-group">
+            <div class="row">
                 <div class="col-xs-2">
                     @if (!Model.Canceled)
                     {
@@ -79,7 +76,6 @@
                     @Html.ActionLink("Agreement", "PaymentPlanAgreement", "Reports", new { paymentPlanId = Model.Id }, new { @class = "btn btn-block btn-info" })
                 </div>
             </div>
-
         </div>
     </div>
 }

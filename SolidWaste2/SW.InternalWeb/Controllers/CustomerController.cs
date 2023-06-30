@@ -31,16 +31,11 @@ public class CustomerController : Controller
     public async Task<IActionResult> Index(int? customerID)
     {
         if (!customerID.HasValue)
-        {
             return View(new CustomerViewModel());
-        }
 
-        int customerId = customerID.Value;
-        var customer = await customerService.GetById(customerId);
+        var customer = await customerService.GetById(customerID.Value);
         if (customer == null)
-        {
-            return View(new CustomerViewModel()).WithDanger("", "Customer not found");
-        }
+            return View(new CustomerViewModel()).WithDanger("Customer not found", "");
 
         var personEntityTask = personEntityService.GetById(customer.Pe);
         var latestTransactionTask = transactionService.GetLatest(customer.CustomerId);
@@ -90,8 +85,8 @@ public class CustomerController : Controller
         };
 
         return View(vm)
-            .WithInfoWhen(customer.PaymentPlan, "info", "Customer has a payment plan.")
-            .WithWarningWhen(personEntity.Pab == true, "warning", "Account has undeliverable address.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+            .WithWarningWhen(personEntity.Pab == true, "Account has undeliverable address.", "");
     }
 
     [HttpPost]
@@ -105,21 +100,15 @@ public class CustomerController : Controller
         var customer = await customerTask;
 
         if (!ModelState.IsValid)
-        {
-            return View(nameof(Index), vm)
-                .WithInfoWhen(customer.PaymentPlan, "info", "Customer has a payment plan.")
-                .WithWarning("Error", "There are errors on the form");
-        }
+            return View("Index", vm).WithDanger("There are errors on the form", "");
 
         bool customerCancel = false;
         if (customer.CancelDate != vm.CancelDate)
         {
             if (vm.CancelDate < DateTime.Today.Date)
             {
-                ModelState.AddModelError(nameof(vm.CancelDate), "Cancel Date before " + DateTime.Today.Date.ToShortDateString());
-                return View(nameof(Index), vm)
-                    .WithInfoWhen(customer.PaymentPlan, "info", "Customer has a payment plan.")
-                    .WithWarning("Error", "There are errors on the form");
+                return View("Index", vm)
+                    .WithDanger("Cancel Date before " + DateTime.Today.Date.ToShortDateString(), "");
             }
             else
             {
@@ -153,13 +142,13 @@ public class CustomerController : Controller
             await customerService.CancelRelatedEntities(customer, User.GetNameOrEmail());
         }
 
-        return View(nameof(Index), vm)
-            .WithInfoWhen(customer.PaymentPlan, "info", "Customer has a payment plan.")
-            .WithSuccess("Success", "Customer updated");
+        return View("Index", vm)
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+            .WithSuccess("Customer updated", "");
     }
 
     public IActionResult Search(int CustomerID)
     {
-        return RedirectToAction("Index", new { customerID = CustomerID });
+        return RedirectToAction(nameof(Index), new { customerID = CustomerID });
     }
 }
