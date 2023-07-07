@@ -5,20 +5,34 @@ using SW.BLL.Services;
 using Common.Web.Extensions.Alerts;
 using Microsoft.Extensions.Options;
 using Common.Services.TelerikReporting;
+using Microsoft.Graph;
+using System.Data;
+using SW.DM;
 
 namespace SW.InternalWeb.Controllers
-{
+{    
     public class ReportsController : Controller
     {
         private readonly ITransactionCodeService transactionCodeService;
         private readonly IReportingService _reportingService;
         private readonly ReportingServiceOptions _options;
-        
-        public ReportsController(ITransactionCodeService transactionCodeService, IReportingService reportingService, IOptions<ReportingServiceOptions> options)
+        private readonly IPaymentPlanService _paymentPlanService;
+
+        public ReportsController(ITransactionCodeService transactionCodeService, IReportingService reportingService, IOptions<ReportingServiceOptions> options, IPaymentPlanService paymentPlanService)
         {
             this.transactionCodeService = transactionCodeService;
             this._reportingService = reportingService;
             _options = options.Value;
+            _paymentPlanService = paymentPlanService;
+        }
+
+        [HttpPost]
+        public ActionResult GetConnectionString() 
+        {
+            return Json(new
+            {
+                connection_string = _options.ConnectionString
+            });
         }
 
         public async Task<IActionResult> Index()
@@ -98,8 +112,8 @@ namespace SW.InternalWeb.Controllers
                 if (!vm.TransActionCode.SpreadSheet)
                 {
                     var report = await _reportingService.GenerateReportPDF("Transactions", parameters);
-
                     return File(report, "application/pdf", "transactions_" + DateTime.Now + ".pdf");
+                    //return File("Html5ReportViewer.html", "text/html");
                 }
                 else
                 {
@@ -113,22 +127,28 @@ namespace SW.InternalWeb.Controllers
                 return RedirectToAction("Index", "Reports").WithDanger("", ex.Message);
             }
         }
-
-        //[HttpGet]
+        
         [HttpPost]
         public async Task<IActionResult> TransactionsbyDateRange(DateTime startDate, DateTime endDate, int customerId)
         {
-            var parameters = new Dictionary<string, object>
+            try 
             {
-                {"startDate", startDate.ToString()},
-                {"endDate", endDate.ToString()},
-                {"customerID", customerId.ToString()},
-                {"connectionString", _options.ConnectionString}
-            };
+                var parameters = new Dictionary<string, object>
+                {
+                    {"startDate", startDate.ToString()},
+                    {"endDate", endDate.ToString()},
+                    {"customerID", customerId.ToString()},
+                    {"connectionString", _options.ConnectionString}
+                };
 
-            var report = await _reportingService.GenerateReportPDF("TransactionHistoryByCustomer", parameters);
+                var report = await _reportingService.GenerateReportPDF("TransactionHistoryByCustomer", parameters);
 
-            return File(report, "application/pdf", "transaction_history_" + customerId.ToString() + "_" + DateTime.Now + ".pdf");
+                return File(report, "application/pdf", "transaction_history_" + customerId.ToString() + "_" + DateTime.Now + ".pdf");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "CustomerTransactionHistory", new { customerId = customerId }).WithDanger("", ex.Message);
+            }
         }
 
         [HttpPost]
@@ -411,15 +431,24 @@ namespace SW.InternalWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> PaymentPlanAgreement(int paymentPlanId)
         {
-            var parameters = new Dictionary<string, object>
+            try 
             {
-                {"paymentPlanId", paymentPlanId},
-                {"connectionString", _options.ConnectionString}
-            };
+                var parameters = new Dictionary<string, object>
+                {
+                    {"paymentPlanId", paymentPlanId},
+                    {"connectionString", _options.ConnectionString}
+                };
 
-            var report = await _reportingService.GenerateReportPDF("PaymentPlanAgreement", parameters);
+                var report = await _reportingService.GenerateReportPDF("PaymentPlanAgreement", parameters);                
 
-            return File(report, "application/pdf", "payment_plan_agreement_" + DateTime.Now + ".pdf");
+                return File(report, "application/pdf", "payment_plan_agreement_" + DateTime.Now + ".pdf");
+            }
+            catch (Exception ex)
+            {
+                var payment_plan = await _paymentPlanService.GetById(paymentPlanId);
+
+                return RedirectToAction("Index", "PaymentPlan", new { customerId = payment_plan.CustomerId }).WithDanger("", ex.Message);
+            }
         }
 
         [HttpPost]

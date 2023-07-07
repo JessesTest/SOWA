@@ -1,5 +1,6 @@
 ﻿@model SW.InternalWeb.Models.Reports.ReportsViewModel
 @using SW.InternalWeb.Extensions
+@using Telerik.Reporting;
 @{
     ViewBag.Title = "Reports";
     ViewBag.ATitle = "Reports";
@@ -11,337 +12,133 @@
                 <section class="panel panel-primary">
                     <header class="panel-heading font-bold">Transactions</header>
                     <div class="panel-body">
-                        @using (Html.BeginForm("Transactions", "Reports", FormMethod.Post))
-                        {
-                            <div class="row">
-                                <div class="col-sm-8">
-                                    <div class="form-group">
-                                        <label>Type</label>
-                                        @Html.ListBoxFor(m => m.ListCodes, Model.SelectedListCodes, new { @class = "form-control", size = 3 })
-                                    </div>
-                                </div>
-                                <div class="col-sm-4">
-                                    <div class="form-group">
-                                        <label>Customer Number</label>
-                                        @Html.TextBoxFor(m => m.TransActionCode.CustomerNumber, new { @class = "form-control" })
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Transactions.html" target="_blank" style="text-decoration:underline">Transaction Listings</a>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Start Date</label>
-                                        @Html.TextBoxFor(m => m.TransActionCode.StartDate, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", data_provide = "datepicker", @autocomplete = "off" })
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>End Date</label>
-                                        @Html.TextBoxFor(m => m.TransActionCode.EndDate, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", data_provide = "datepicker", @autocomplete = "off" })
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        @Html.CheckBoxFor(m => m.TransActionCode.SpreadSheet, new { @class = "chk-style" })
-                                        <label>Excel Format</label>
-                                    </div>
-                                </div>
-                            </div>
-                        }
+                        </div>
                     </div>
-                </section>
-            </div>
-            <div class="col-md-12">
-                <div class="panel panel-primary">
-                    <header class="panel-heading font-bold">Work Orders</header>
-                    <div class="panel-body">
-                        @using (Html.BeginForm("WorkOrder", "Reports", FormMethod.Post, new { @role = "form" }))
-                        {
-                            <div class="row form-group">
-                                <div class="col-md-6">
-                                    <label for="@Html.NameFor(m => m.WorkOrder.WorkOrderIdStart)">Work Order Id Start</label>
-                                    @Html.TextBoxFor(m => m.WorkOrder.WorkOrderIdStart, new { @class = "form-control" })
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="@Html.NameFor(m => m.WorkOrder.WorkOrderIdEnd)">Work Order Id End</label>
-                                    @Html.TextBoxFor(m => m.WorkOrder.WorkOrderIdEnd, new { @class = "form-control" })
-                                </div>
-                            </div>
-                            <div class="row form-group">
-                                <div class="col-md-6">
-                                    <label>Start Date</label>
-                                    @Html.TextBoxFor(m => m.WorkOrder.TransDateStart, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", data_provide = "datepicker", @autocomplete = "off" })
-                                </div>
-                                <div class="col-md-6">
-                                    <label>End Date</label>
-                                    @Html.TextBoxFor(m => m.WorkOrder.TransDateEnd, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", data_provide = "datepicker", @autocomplete = "off" })
-                                </div>
-                            </div>
-                            <div class="row form-group">
-                                <div class="col-md-6">
-                                    <label for="@Html.NameFor(m => m.WorkOrder.DriverInitials)">Driver Initials</label>
-                                    @Html.TextBoxFor(m => m.WorkOrder.DriverInitials, new { @class = "form-control" })
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="@Html.NameFor(m => m.WorkOrder.CustomerType)">Customer Type</label>                                    
-                                    <select class="form-control" asp-for="WorkOrder.CustomerType" asp-items="Helpers.CustomerTypes"></select>
-                                </div>
-                            </div>
-                            <div class="row form-group">
-                                <div class="col-md-6">
-                                    <label for="@Html.NameFor(m => m.WorkOrder.ContainerRouteStart)">Route Start</label>
-                                    @Html.TextBoxFor(m => m.WorkOrder.ContainerRouteStart, new { @class = "form-control" })
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="@Html.NameFor(m => m.WorkOrder.ContainerRouteEnd)">Route End</label>
-                                    @Html.TextBoxFor(m => m.WorkOrder.ContainerRouteEnd, new { @class = "form-control" })
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                </div>
-                                <div class="col-md-9">
-                                    <div class="checkbox margin-top-5">
-                                        <label>
-                                            @Html.CheckBoxFor(m => m.WorkOrder.IncludeResolved, new { @class = "" }) Include Resolved
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-12">
-                <section class="panel panel-primary">
                     <header class="panel-heading font-bold">Collection Agency Reports</header>
                     <div class="panel-body">
-                        @using (Html.BeginForm("Delinquents", "Reports", FormMethod.Post))
-                        {
-                            <div class="row">
-                                <div class="col-sm-8">
-                                    <div class="form-group">
-                                        <label>Type</label>
-                                        @Html.DropDownListFor(m => m.DelinquentAccount.Account, Model.ListAccounts, new { @class = "form-control" })
-                                    </div>
-                                </div>
-                                <div class="col-sm-4">
-                                    <div class="form-group">
-                                        <label>Customer Number</label>
-                                        @Html.TextBoxFor(m => m.DelinquentAccount.CustomerNumber, new { @class = "form-control" })
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Collections.html" target="_blank" style="text-decoration:underline">Collections Report</a>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Start Date</label>
-                                        @Html.TextBoxFor(m => m.DelinquentAccount.StartDate, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", data_provide = "datepicker", @autocomplete = "off" })
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>End Date</label>
-                                        @Html.TextBoxFor(m => m.DelinquentAccount.EndDate, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", data_provide = "datepicker", @autocomplete = "off" })
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Counselors.html" target="_blank" style="text-decoration:underline">Counselors Report</a>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        @Html.CheckBoxFor(m => m.DelinquentAccount.SpreadSheet, new { @class = "chk-style" })
-                                        <label>Excel Format</label>
-                                    </div>
-                                </div>
-                            </div>
-                        }
+                        </div>
                     </div>
-                </section>
-            </div>
-        </div>
-    </div>
-    <div class="col-xs-6">
-        <div class="row">
-            <div class="col-xs-12">
-                <section class="panel panel-primary">
                     <header class="panel-heading font-bold">Financial Reports</header>
                     <div class="panel-body">
-                        @using (Html.BeginForm("Delinquency", "Reports", FormMethod.Post))
-                        {
-                            <div class="col-xs-12">
-                                <div class="row form-group">
-                                    <div class="col-xs-6">
-                                        Delinquency Report
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Delinquency.html" target="_blank" style="text-decoration:underline">Delinquency Report</a>
                                     </div>
-                                    <div class="col-xs-4">
-                                        <input type="checkbox" id="abc123" name="exportToXls" value="true" />
-                                        <label for="abc123">Excel Format</label>
-                                        <input type="hidden" name="exportToXls" value="false" />
-                                    </div>
-                                    <div class="col-xs-2">
-                                        <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        @using (Html.BeginForm("Balances", "Reports", FormMethod.Post))
-                        {
-                            <div class="col-xs-12">
-                                <div class="row form-group" style="background-color: gainsboro;">
-                                    <div class="col-xs-6">
-                                        Account Balances (Aging)
-                                    </div>
-                                    <div class="col-xs-4">
-                                        <input type="checkbox" id="xyz789" name="exportToXls" value="true" />
-                                        <label for="xyz789">Excel Format</label>
-                                        <input type="hidden" name="exportToXls" value="false" />
-                                    </div>
-                                    <div class="col-xs-2">
-                                        <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        <div class="col-xs-12">
-                            <div class="row form-group">
-                                <div class="col-xs-10">
-                                    Write-Off Recommendations
-                                </div>
-                                <div class="col-xs-2">
-                                    @Html.ActionLink("Submit", "WriteOffRecommendation", "Reports", null, new { @class = "btn btn-sm btn-default" })
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xs-12">
-                            <div class="row form-group" style="background-color: gainsboro;">
-                                <div class="col-xs-10">
-                                    Delinquency (Recycling Only)
-                                </div>
-                                <div class="col-xs-2">
-                                    @Html.ActionLink("Submit", "RecyclingOnlyDelinquency", "Reports", null, new { @class = "btn btn-sm btn-default" })
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Aging.html" target="_blank" style="text-decoration:underline">Account Balances (Aging) Report</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        @using (Html.BeginForm("Revenue", "Reports", FormMethod.Post))
-                        {
-                            <div class="col-xs-12">
-                                <div class="row form-group">
-                                    <div class="col-xs-4">
-                                        Revenue Report
-                                    </div>
-                                    <div class="col-xs-6">
-                                        <label for="revenueYear">Year (yyyy): </label>
-                                        <input type="text" name="revenueYear" />
-                                    </div>
-                                    <div class="col-xs-2" style="padding-top: 7px;">
-                                        <button type="submit" class="btn btn-sm btn-default">Submit</button>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_WriteOff.html" target="_blank" style="text-decoration:underline">Write-Off Recommendations Report</a>
                                     </div>
                                 </div>
                             </div>
-                        }
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_DelinquencyRecycling.html" target="_blank" style="text-decoration:underline">Delinquency (Recycling Only) Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_RevenueSummary.html" target="_blank" style="text-decoration:underline">Revenue Summary Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </section>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="row">
-            <div class="col-sm-12">
-                <section class="panel panel-primary">
                     <header class="panel-heading font-bold">Other Reports</header>
                     <div class="panel-body">
-                        @using (Html.BeginForm("ContractCharge", "Reports", FormMethod.Post))
-                        {
-                            <div class="col-xs-12">
-                                <div class="row form-group" style="background-color:gainsboro">
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
                                     <div class="col-xs-12">
-                                        <div class="row">
-                                            <div class="col-xs-6">
-                                                Contract Charges
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="form-group">
-                                                    @Html.CheckBoxFor(m => m.ContractChargeValue.ContractChargeZero, new { @class = "chk-style" })
-                                                    <label>Zero Contract Charge</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-xs-12">
-                                            <div class="row">
-                                                <div class="col-sm-4 col-xs-offset-6">
-                                                    <div class="form-group">
-                                                        @Html.CheckBoxFor(m => m.ContractChargeValue.SpreadSheet, new { @class = "chk-style" })
-                                                        <label>Excel Format</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-xs-2">
-                                                    <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <a href="Html5ReportViewer_ContractCharges.html" target="_blank" style="text-decoration:underline">Contract Charges</a>
                                     </div>
                                 </div>
                             </div>
-                        }
-                        @using (Html.BeginForm("PaymentPlanCustomers", "Reports", FormMethod.Post))
-                        {
-                            <div class="col-xs-12">
-                                <div class="row form-group">
-                                    <div class="col-xs-10">
-                                        Payment Plan Customers
-                                    </div>
-                                    <div class="col-xs-2">
-                                        <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        @using (Html.BeginForm("ActiveCustomerList", "Reports", FormMethod.Post))
-                        {
-                            <div class="col-xs-12">
-                                <div class="row form-group" style="background-color: gainsboro">
-                                    <div class="col-xs-10">
-                                        Active Customer List
-                                    </div>
-                                    <div class="col-xs-2">
-                                        <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        <div class="col-xs-12">
-                            <div class="row form-group">
-                                @using (Html.BeginForm("Routes", "Reports", FormMethod.Post))
-                                {
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
                                     <div class="col-xs-12">
-                                        <div class="row">
-                                            <div class="col-xs-6">
-                                                Routes
-                                            </div>
-                                            <div class="col-xs-4">
-                                                <input type="checkbox" name="RoutesExporttoXls" value="true" />
-                                                <label>Excel Format</label>
-                                                <input type="hidden" name="RoutesExporttoXls" value="false" />
-                                            </div>
-                                            <div class="col-xs-2">
-                                                <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                                            </div>
-                                        </div>
+                                        <a href="Html5ReportViewer_PaymentPlanCustomers.html" target="_blank" style="text-decoration:underline">Payment Plan Customers</a>
                                     </div>
-                                }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_ActiveCustomerList.html" target="_blank" style="text-decoration:underline">Active Customer List</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Routes.html" target="_blank" style="text-decoration:underline">Routes Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <header class="panel-heading font-bold">KanPay</header>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_KanPay.html" target="_blank" style="text-decoration:underline">KanPay Transactions</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -349,59 +146,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <section class="panel panel-primary">
-            <header class="panel-heading font-bold">KanPay</header>
-            <div class="panel-body">
-                @using (Html.BeginForm("KanPay", "Reports", FormMethod.Post))
-                {
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label>Type</label>
-                                @Html.DropDownListFor(m => m.KanPayActionCode.PayType, Model.KanPayListPayTypes, new { @class = "form-control" })
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label>Customer Number</label>
-                                @Html.TextBoxFor(m => m.KanPayActionCode.CustomerNumber, new { @class = "form-control" })
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Start Date</label>
-                                @Html.TextBoxFor(m => m.KanPayActionCode.StartDate, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", data_provide = "datepicker", @autocomplete = "off" })
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>End Date</label>
-                                @Html.TextBoxFor(m => m.KanPayActionCode.EndDate, "{0:MM/dd/yyyy}", new { @class = "form-control container-group", data_provide = "datepicker", @autocomplete = "off" })
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                @Html.CheckBoxFor(m => m.KanPayActionCode.SpreadSheet, new { @class = "chk-style" })
-                                <label>Excel Format</label>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </section>
-    </div>
     @*SOWA-56: SW Batch Billing Telerik Report Testing*@
-    @*<div class="col-md-6">
+    @*<div class="col-xs-6">
         <div class="panel panel-primary">
             <header class="panel-heading font-bold">SW Batch Billing</header>
             <div class="panel-body">
@@ -437,7 +183,7 @@
 <br />
 <br />
 
-@section scripts
+@*@section scripts
 {
     <script type="text/javascript">
         $(document).ready(function () {
@@ -447,4 +193,4 @@
             });
         });
     </script>
-}
+}*@

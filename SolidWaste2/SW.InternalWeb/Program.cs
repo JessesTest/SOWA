@@ -1,3 +1,8 @@
+using Telerik.Reporting.Cache.File;
+using Telerik.Reporting.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.IO;
 using Azure.Core;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -27,6 +32,18 @@ var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurre
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+    builder.Services.AddRazorPages().AddNewtonsoftJson();
+    builder.Services.AddControllers();
+    builder.Services.AddMvc();
+    builder.Services.TryAddSingleton<IReportServiceConfiguration>(sp => new ReportServiceConfiguration
+    {
+	    ReportingEngineConfiguration = sp.GetService<IConfiguration>(),
+	    HostAppId = "Html5ReportViewerDemo",
+	    Storage = new FileStorage(),
+	    ReportSourceResolver = new UriReportSourceResolver(
+		    System.IO.Path.Combine(GetReportsDir(sp)))
+    });
+
     var configuration = builder.Configuration;
     var environment = builder.Environment;
     configuration.AddEnvironmentVariables();    // for sendgrid
@@ -152,6 +169,11 @@ try
     app.UseStaticFiles();
 
     app.UseRouting();
+    app.UseEndpoints(endpoints =>
+    {
+	    endpoints.MapControllers();
+	    // ... 
+    });
 
     app.UseAuthentication();
     app.UseAuthorization();
@@ -162,6 +184,11 @@ try
     app.MapDefaultControllerRoute();
 
     app.Run();
+
+    static string GetReportsDir(IServiceProvider sp)
+    {
+	    return Path.Combine(sp.GetService<IWebHostEnvironment>().ContentRootPath, "Reports");
+    }
 }
 catch(Exception e)
 {

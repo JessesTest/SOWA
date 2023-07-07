@@ -21,6 +21,8 @@
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.3" />
     <PackageReference Include="StackifyLib.AspNetCore" Version="2.1.5" />
     <PackageReference Include="StackifyMiddleware" Version="3.3.3.4767" />
+    <PackageReference Include="Telerik.Reporting.OpenXmlRendering" Version="17.0.23.118" />
+    <PackageReference Include="Telerik.Reporting.Services.AspNetCore" Version="17.0.23.118" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +37,15 @@
   <ItemGroup>
     <Folder Include="wwwroot\fonts\" />
     <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Telerik.ReportServer.HttpClient">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Progress\Telerik Report Server\Tools\Telerik.ReportServer.HttpClient.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.ReportServer.Services.Models">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Progress\Telerik Report Server\Tools\Telerik.ReportServer.Services.Models.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
