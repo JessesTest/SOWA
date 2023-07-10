@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common.Web.Extensions.Alerts;
+using Microsoft.AspNetCore.Mvc;
 using PE.BL.Services;
 using SW.BLL.Services;
 using SW.InternalWeb.Models.Collections;
@@ -57,24 +58,24 @@ public class CollectionsController : Controller
     [HttpPost]
     public async Task<IActionResult> Payment(CollectionsPaymentViewModel model)
     {
-        var customer = await customerService.GetById(model.CustomerId.GetValueOrDefault());
-        if (customer == null)
-            return NotFound();
-
         try
         {
-            if (ModelState.IsValid)
-            {
-                await transactionService.MakeDelinquencyPayment(model.CustomerId.Value, model.TransactionCode, model.Amount, model.Comment);
-                return RedirectToAction("Index", "Customer", new { customerID = model.CustomerId });
-            }
-            ModelState.AddModelError("exception", "There are errors on the form");
+            if (!ModelState.IsValid)
+                throw new ArgumentException("There are errors on the form");
+
+            var customer = await customerService.GetById(model.CustomerId.GetValueOrDefault());
+            if (customer == null)
+                throw new ArgumentException("Customer not found");
+
+            var result = await transactionService.MakeDelinquencyPayment(model.CustomerId.Value, model.TransactionCode, model.Amount, model.Comment);
+            if (result != null)
+                throw new ArgumentException(result);
+
+            return RedirectToAction("Index", "Customer", new { customerID = model.CustomerId });
         }
         catch (Exception e)
         {
-            ModelState.AddModelError("exception", e.Message);
+            return View(model).WithDanger(e.Message, "");
         }
-
-        return View(model);
     }
 }

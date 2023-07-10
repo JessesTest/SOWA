@@ -67,13 +67,12 @@ public class LegacyEquipmentController : Controller
         {
             var equipmentLegacy = await _equipmentLegacyService.GetByEquipmentNumber(vm.EquipmentNumber);
             if (equipmentLegacy == null)
-                throw new ApplicationException("Equipment # not found!");
+                throw new ArgumentException("Equipment # not found!");
 
             return RedirectToAction(nameof(Detail), new { id = equipmentLegacy.EquipmentLegacyId });
         }
         catch (Exception ex)
         {
-            ModelState.Clear();
             vm = new LegacyEquipmentDetailViewModel{ EquipmentNumber = vm.EquipmentNumber };
 
             return View("Detail", vm).WithDanger(ex.Message, "");

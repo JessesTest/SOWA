@@ -56,7 +56,7 @@ public class CustomerServiceAddressController : Controller
         var customer = await customerService.GetById(customerId);
         if (customer == null)
             return RedirectToAction("Index", "Customer")
-                .WithWarning("Error", "Customer not found");
+                .WithDanger("Customer not found", "");
 
         var addresses = await serviceAddressService
             .GetByCustomer(customer.CustomerId);
@@ -73,7 +73,7 @@ public class CustomerServiceAddressController : Controller
     {
         var serviceAddress = await serviceAddressService.GetById(id);
         if (serviceAddress == null)
-            return RedirectToAction("Index", "Customer").WithWarning("Error", "Service address not found");
+            return RedirectToAction("Index", "Customer").WithDanger("Service address not found", "");
 
         var serviceAddresses = (await serviceAddressService.GetByCustomer(serviceAddress.CustomerId))
             .OrderBy(a => a.CancelDate)
@@ -85,7 +85,6 @@ public class CustomerServiceAddressController : Controller
         var address = person.Addresses.First(a => a.Id == serviceAddress.PeaddressId);
         var note = serviceAddress.ServiceAddressNotes.FirstOrDefault();
         var container = serviceAddress.Containers.FirstOrDefault();
-
 
         ContainerViewModel containerViewModel = container == null ?
             new()
@@ -159,14 +158,14 @@ public class CustomerServiceAddressController : Controller
 
         ModelState.Clear();
 
-        if(Request.IsAjaxRequest())
+        if (Request.IsAjaxRequest())
             return PartialView("Index", model);
 
         return View("Index", model)
-            .WithWarningWhen(!serviceAddress.Containers.Any(), "Error", "No contaienrs found")
-            .WithWarningWhen(customer == null, "Error", "Could not find customer record!")
-            .WithWarningWhen(person.Pab == true, "", "Account has undeliverable address.")
-            .WithInfoWhen(customer?.PaymentPlan == true, "", "Customer has a payment plan.");
+            .WithDangerWhen(!serviceAddress.Containers.Any(), "No containers found", "")
+            .WithDangerWhen(customer == null, "Could not find customer record!", "")
+            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
+            .WithInfoWhen(customer?.PaymentPlan == true, "Customer has a payment plan.", "");
     }
 
     [HttpPost]
@@ -207,8 +206,8 @@ public class CustomerServiceAddressController : Controller
 
         ModelState.Clear();
         return View("Index", model)
-            .WithWarningWhen(person.Pab == true, "", "Account has undeliverable address.")
-            .WithInfoWhen(customer?.PaymentPlan == true, "", "Customer has a payment plan.");
+            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
+            .WithInfoWhen(customer?.PaymentPlan == true, "Customer has a payment plan.", "");
     }
 
     [HttpPost]
@@ -221,7 +220,7 @@ public class CustomerServiceAddressController : Controller
         await customerService.Update(customer);
 
         return RedirectToAction("Index", new { customerId = model.ServiceAddress.CustomerId })
-            .WithSuccess("Success", "Customer reactivated");
+            .WithSuccess("Customer reactivated", "");
     }
 
     [HttpPost]
@@ -229,8 +228,8 @@ public class CustomerServiceAddressController : Controller
     {
         var serviceAddress = await serviceAddressService.GetById(model.ServiceAddress.Id);
         if (serviceAddress == null)
-            return RedirectToAction("Index", new { customerId = model.ServiceAddress.CustomerId })
-                .WithWarning("Reactivate Address Failed", "Service address not found");
+            return RedirectToAction(nameof(Index), new { customerId = model.ServiceAddress.CustomerId })
+                .WithWarning("Service address not found", "");
 
         serviceAddress.ChgDateTime = DateTime.Now;
         serviceAddress.ChgToi = User.GetNameOrEmail();
@@ -238,7 +237,7 @@ public class CustomerServiceAddressController : Controller
         await serviceAddressService.Update(serviceAddress);
 
         return RedirectToAction("Index", new { customerId = model.ServiceAddress.CustomerId })
-            .WithSuccess("Reactivated Address", "Service address was reactivated");
+            .WithSuccess("Address reactivated", "");
     }
 
     [HttpPost]
@@ -250,10 +249,7 @@ public class CustomerServiceAddressController : Controller
     private async Task<IActionResult> SaveAddressInternal(ServiceAddressMasterViewModel model)
     {
         if (!TryValidateModel(model.ServiceAddress))
-        {
-            return View("Index", model)
-                .WithWarning("", "Invalid Service Address");
-        }
+            return View("Index", model).WithDanger("Invalid Service Address", "");
 
         var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
 
@@ -329,43 +325,25 @@ public class CustomerServiceAddressController : Controller
         }
 
         if (serviceAddress.CancelDate != null && serviceAddress.CancelDate.Value <= DateTime.Today)
-        {
-            return View("Index", model)
-                .WithWarning("Cancel Date", "Cancel date is before today");
-        }
+            return View("Index", model).WithDanger("Cancel date is before today", "");
 
         var additionalError = await serviceAddressService.TryValidateServiceAddress(serviceAddress);
         if (additionalError != null)
-        {
-            return View("Index", model)
-                .WithWarning("Error", additionalError);
-        }
+            return View("Index", model).WithDanger(additionalError, "");
 
         // validate address
         if (model.ServiceAddress.AddressOverride || model.ServiceAddress.State.ToUpper() != "KS")
         {
             if (string.IsNullOrWhiteSpace(address.Zip))
-            {
-                return View("Index", model)
-                    .WithWarning("Error", "Address Override, Zip code required");
-            }
+                return View("Index", model).WithDanger("Address Override", "Zip code required");
             if (string.IsNullOrWhiteSpace(address.State))
-            {
-                return View("Index", model)
-                    .WithWarning("Error", "Address Override, State required");
-            }
+                return View("Index", model).WithDanger("Address Override", "State required");
             if (string.IsNullOrWhiteSpace(address.City))
-            {
-                return View("Index", model)
-                    .WithWarning("Error", "Address Override, City required");
-            }
+                return View("Index", model).WithDanger("Address Override", "City required");
         }
 
         if (model.ServiceAddress.CancelDate.HasValue && model.ServiceAddress.CancelDate < DateTime.Today)
-        {
-            return View("Index", model)
-                .WithWarning("Error", $"Cancel Date Before {DateTime.Today:d}");
-        }
+            return View("Index", model).WithDanger($"Cancel Date Before {DateTime.Today:d}", "");
 
         var validAddresses = await addressValidationService.GetCandidates(
             model.ServiceAddress.AddressLine1,
@@ -373,10 +351,7 @@ public class CustomerServiceAddressController : Controller
             model.ServiceAddress.Zip,
             8);
         if (validAddresses.Count == 0)
-        {
-            return View("Index", model)
-                .WithWarning("Error", "Address not found");
-        }
+            return View("Index", model).WithDanger("Address not found", "");
         else if (validAddresses.Count == 1 || model.ServiceAddressListIndex != null)
         {
             var valid = validAddresses[model.ServiceAddressListIndex ?? 0];
@@ -395,9 +370,8 @@ public class CustomerServiceAddressController : Controller
         {
             model.ServiceAddressList = validAddresses;
             return View("Index", model)
-                .WithInfo("", "Select an adddress from the list");
+                .WithInfo("Select an adddress from the list", "");
         }
-
 
         if (address.Id > 0)
             await addressService.Update(address);
@@ -412,8 +386,8 @@ public class CustomerServiceAddressController : Controller
         else
             await serviceAddressService.Add(serviceAddress);
 
-        return RedirectToAction("EditAddress", new { id = serviceAddress.Id })
-            .WithSuccess("", "Address updated");
+        return RedirectToAction(nameof(EditAddress), new { id = serviceAddress.Id })
+            .WithSuccess("Address updated", "");
     }
 
     [HttpPost]
@@ -468,7 +442,6 @@ public class CustomerServiceAddressController : Controller
         if (containerCode == null)
             return NotFound();
 
-
         var containerSubtypes = await containerSubtypeService.GetByContainerType(containerCodeId);
         var optionHtml = new StringBuilder();
         foreach(var s in containerSubtypes)
@@ -496,6 +469,7 @@ public class CustomerServiceAddressController : Controller
 
         return Json(dict);
     }
+
     private async Task ContainerTypeChanged_RInfo(Dictionary<string, object> dict, int serviceAddressId)
     {
         var serviceAddress = await serviceAddressService.GetById(serviceAddressId);
@@ -634,9 +608,10 @@ public class CustomerServiceAddressController : Controller
         var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
 
         return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
     }
-    private int DisplayIndexOf(Container container, IList<Container> containers)
+
+    private static int DisplayIndexOf(Container container, IList<Container> containers)
     {
         for (var i = 0; i < containers.Count; i++)
         {
@@ -649,7 +624,6 @@ public class CustomerServiceAddressController : Controller
     public async Task<IActionResult> ClearContainer(ServiceAddressMasterViewModel model)
     {
         ModelState.Clear();
-
         var containers = await containerService.GetByServiceAddress(model.ServiceAddress.Id);
         model.Container = new ContainerViewModel();
         model.Container.EffectiveDate = DateTime.Now;
@@ -662,7 +636,7 @@ public class CustomerServiceAddressController : Controller
         var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
 
         return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
     }
 
     public async Task<IActionResult> SaveContainer(ServiceAddressMasterViewModel model)
@@ -774,8 +748,8 @@ public class CustomerServiceAddressController : Controller
         }
 
         return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.")
-            .WithWarningWhen(!string.IsNullOrWhiteSpace(xAlertMessage), "", xAlertMessage);
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+            .WithDangerWhen(!string.IsNullOrWhiteSpace(xAlertMessage), xAlertMessage, "");
     }
 
     #endregion
@@ -795,7 +769,6 @@ public class CustomerServiceAddressController : Controller
     private async Task<IActionResult> PageNote(ServiceAddressMasterViewModel model, int indexIncrement)
     {
         ModelState.Clear();
-
         var notes = (await noteService.GetByServiceAddress(model.ServiceAddress.Id)).ToList();
         var index = IndexOf(model.Note.Id, notes);
         if(index >= 0)
@@ -822,7 +795,6 @@ public class CustomerServiceAddressController : Controller
         }
         else
         {
-
             model.Note = new ServiceAddressNoteViewModel();
         }
 
@@ -831,9 +803,10 @@ public class CustomerServiceAddressController : Controller
 
         var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
         return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
     }
-    private int IndexOf(int id, IEnumerable<ServiceAddressNote> notes)
+
+    private static int IndexOf(int id, IEnumerable<ServiceAddressNote> notes)
     {
         int i = 0;
         foreach(var note in notes)
@@ -857,7 +830,7 @@ public class CustomerServiceAddressController : Controller
 
         var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
         return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
     }
 
     public async Task<IActionResult> AddNote(ServiceAddressMasterViewModel model)
@@ -871,8 +844,8 @@ public class CustomerServiceAddressController : Controller
                 return PartialView("Note", model);
 
             return View("Index", model)
-                .WithDanger("", "Invalid Container Code")
-                .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+                .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+                .WithDanger("Invalid Container Code", "");
         }
 
         var note = new ServiceAddressNote
@@ -895,8 +868,8 @@ public class CustomerServiceAddressController : Controller
             return PartialView("Note", model);
         
         return View("Index", model)
-            .WithSuccess("", "Note Added")
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+            .WithSuccess("Note Added", "");
     }
 
     #endregion

@@ -1,5 +1,6 @@
 ﻿@model SW.InternalWeb.Models.Customer.CustomerViewModel
 @{
+    ViewBag.Title = "Customer Maintenance";
     ViewBag.faTitleClass = "wrench";
     ViewBag.ATitle = "Customer Maintenance : " + Model.FullName + "   Account#" + Model.CustomerID;
 }
@@ -26,7 +27,6 @@
     </ul>
     <div class="panel panel-default">
         <div class="panel-body">
-
             @using (Html.BeginForm("Javascript", "Enable", FormMethod.Post, new { @class = "form-horizontal" }))
             {
                 if (Model.PastDueAmount > 0)
@@ -98,12 +98,12 @@
                                 </label>
                             </div>
                             @*<div class="col-md-6">
-                        <label class="font-bold">
-                        Bad Address (
-                        <input name="@Html.NameFor(model=> Model.Undeliverable)" value="true" @(Model.Undeliverable.GetValueOrDefault(false) ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
-                        Check if Undeliverable )
-                        </label>
-                        </div>*@
+                                <label class="font-bold">
+                                Bad Address (
+                                <input name="@Html.NameFor(model=> Model.Undeliverable)" value="true" @(Model.Undeliverable.GetValueOrDefault(false) ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
+                                Check if Undeliverable )
+                                </label>
+                            </div>*@
                         </div>
                         <div class="form-group">
                             <div class="col-md-12">
@@ -151,12 +151,10 @@
                                 @Html.LabelFor(model => model.Notes, new { @class = "font-bold" })
                                 @if (Model.CustomerID == null)
                                 {
-                                    @*@Html.TextBoxFor(model => model.Notes, new { @class = "form-control", @disabled = "disabled" })*@
                                     @Html.TextAreaFor(model => model.Notes, new { @class = "form-control", @disabled = "disabled" })
                                 }
                                 else
                                 {
-                                    @*@Html.TextBoxFor(model => model.Notes, new { @class = "form-control" })*@
                                     @Html.TextAreaFor(model => model.Notes, new { @class = "form-control" })
                                 }
                                 @Html.ValidationMessageFor(model => model.Notes, null, new { @class = "text-danger" })
@@ -167,11 +165,11 @@
                                 (* Denotes Required Field)
                             </div>
                             @*<div class="col-md-8 text-right">
-                        <label class="font-bold">
-                        Check if Using Payment Plan&nbsp;
-                        <input name="@Html.NameFor(model=> Model.PaymentPlan)" value="true" @(Model.PaymentPlan ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
-                        </label>
-                        </div>*@
+                                <label class="font-bold">
+                                Check if Using Payment Plan&nbsp;
+                                <input name="@Html.NameFor(model=> Model.PaymentPlan)" value="true" @(Model.PaymentPlan ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
+                                </label>
+                            </div>*@
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -282,7 +280,7 @@
                                     @Html.ActionLink("Payment Plans", "Index", "PaymentPlan", new { customerId = Model.CustomerID }, new { @class = "btn btn-block btn-success margin-bottom-5" })
                                 </div>
                             </div>
-                            if ((Model.PastDue90Days > 0 || Model.CollectionsBalance > 0 || Model.CounselorsBalance > 0 || Model.UncollectableBalance > 0))
+                            @if (User.IsInRole("role.write-off") && (Model.PastDue90Days > 0 || Model.CollectionsBalance > 0 || Model.CounselorsBalance > 0 || Model.UncollectableBalance > 0))
                             {
                                 <div class="form-group">
                                     <div class="col-md-6 col-md-offset-3">
@@ -293,14 +291,10 @@
                         }
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-12">
                         <hr />
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-8">
                         <div class="row">
                             <div class="col-md-4">
@@ -349,7 +343,7 @@
                                         @if (Model.InactiveImages.Any())
                                         {
                                             <h3 class="m-t-none m-b text-right">Inactive Contracts</h3>
-                                            @foreach(var image in Model.InactiveImages)
+                                            @foreach (var image in Model.InactiveImages)
                                             {
                                                 <p class="text-right">
                                                     @Html.ActionLink(image.MieDataImageFileName, "ImageDownload", "MieData", new { id = image.MieDataId, mieDataActive = false, customerId = Model.CustomerID }, new { @class = "text-ul", @style = "line-height:15px;" })
@@ -360,9 +354,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div><!-- /.modal-content -->
-                </div><!-- /.modal-dialog -->
-            </div>                                  @*end Contract Charge modal form*@
+                    </div>
+                </div>
+                @*end Contract Charge modal form*@
+            </div>
 
             @if (Model.CustomerID > 0)
             {
@@ -373,18 +368,13 @@
                     </div>
                 </div>
             }
-
         </div>
     </div>
 </div>
 
-<br />
-<br />
-
 @section scripts
 {
     <script type="text/javascript">
-
         $.ajax({
             url: '@Url.Action("BillingSummary", "Common")',
             data: {
@@ -447,6 +437,5 @@
             var location = '@Url.Action("Index", "Customer")' + '?customerId=' + id;
             window.location.href = location;
         });
-
     </script>
 }

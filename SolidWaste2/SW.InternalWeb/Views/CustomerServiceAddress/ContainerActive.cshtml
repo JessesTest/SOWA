@@ -198,10 +198,7 @@
     </div>
     <div class="col-md-4">
         @Html.LabelFor(m => m.Container.AdditionalCharge, new { @class = "control-label font-bold" })
-        @* if (User.IsInRole(System.Configuration.ConfigurationManager.AppSettings["Access.Admin"].ToString())) *@
-        @* @if (User.IsInRole(configuration["Access.Admin"] ?? "")) *@
-        @*@if (User.IsInRole("SNCO\\ITData"))*@
-        @if ("SNCO\\ITData" == "SNCO\\ITData")
+        @if (User.IsInRole("role.admin"))
         {
             @Html.TextBoxFor(m => m.Container.AdditionalCharge, new { @class = "form-control container-group" })
         }

@@ -7,6 +7,7 @@ public interface ITransactionService
 {
     // Transaction
     Task AddTransaction(Transaction transaction);
+    Task<string> AddTransactionAutoCalc(Transaction transaction);
     Task<ICollection<Transaction>> GetByCustomer(int customerId, bool includeDeleted);
     Task<decimal> GetCurrentBalance(int customerId);
     Task<Transaction> GetLatest(int customerId);
@@ -26,7 +27,7 @@ public interface ITransactionService
     Task<ICollection<CustomerDelinquency>> GetAllDelinquencies();
     Task<ICollection<Transaction>> GetPayments(DateTime thruDate, Transaction bill);
     Task<ICollection<Transaction>> GetLatestTransactionsWithDelinquency();
-    Task MakeDelinquencyPayment(int customerId, string transactionTypeCode, decimal amount, string comment, DateTime? dateTime = null);
+    Task<string> MakeDelinquencyPayment(int customerId, string transactionTypeCode, decimal amount, string comment);
 
     // KanPay
     Task AddKanpayTransaction(Transaction transaction, TransactionKanPayFee fee, int kanpayid, string user);

@@ -35,18 +35,11 @@ public class CustomerTransactionHistoryController : Controller
     public async Task<IActionResult> Index(int customerId)
     {
         var customer = await customerService.GetById(customerId);
-
-        if (customerId == customer.LegacyCustomerId)
-        {
-            return RedirectToAction("Index", new { customerId = customer.CustomerId });
-        }
+        if (customer == null)
+            return RedirectToAction("Index", "CustomerInquiry")
+                .WithDanger("Customer not found", "");
 
         var personEntity = await personService.GetById(customer.Pe);
-
-        if (personEntity.Pab.HasValue && personEntity.Pab.Value)
-        {
-            ModelState.AddModelError("warning", "Account has undeliverable address.");
-        }
         var transactions = (await transactionService.GetByCustomer(customer.CustomerId, false))
             .OrderByDescending(t => t.Sequence)
             .OrderByDescending(m => m.AddDateTime)
@@ -54,27 +47,28 @@ public class CustomerTransactionHistoryController : Controller
 
         CustomerTransactionHistoryViewModel vm = new()
         {
-            CustomerID = customerId,
-            endDate = DateTime.Today.AddDays(1)
+            CustomerID = customer.CustomerId,
+            EndDate = DateTime.Today.AddDays(1)
         };
 
         if (transactions.Count >= 10)
         {
-            vm.startDate = transactions[9].AddDateTime;
+            vm.StartDate = transactions[9].AddDateTime;
         }
-        if (transactions.Count <= 0)
+        else if (transactions.Count <= 0)
         {
-            vm.startDate = DateTime.Now;
+            vm.StartDate = DateTime.Now;
         }
         else
         {
-            vm.startDate = transactions[transactions.Count - 1].AddDateTime;
+            vm.StartDate = transactions[transactions.Count - 1].AddDateTime;
         }
 
         TempData["FullName"] = personEntity.FullName;
 
         return View(vm)
-            .WithInfoWhen(customer.PaymentPlan, "", "Customer has a payment plan.");
+            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
+            .WithWarningWhen(personEntity.Pab == true, "Account has undeliverable address.", "");
     }
 
     public async Task<IActionResult> IndexJson(int customerID)
@@ -86,7 +80,7 @@ public class CustomerTransactionHistoryController : Controller
             .OrderByDescending(t => t.AddDateTime)
             .ToList();
 
-        List<CustomerTransactionViewModel> transactions = new List<CustomerTransactionViewModel>();
+        var transactions = new List<CustomerTransactionViewModel>();
         foreach (var t in listDM)
         {
             CustomerTransactionViewModel tran = new()

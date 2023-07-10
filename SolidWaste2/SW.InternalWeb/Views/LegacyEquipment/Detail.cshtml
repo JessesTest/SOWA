@@ -53,7 +53,7 @@
                         @Html.TextBoxFor(m => m.MonthlyDepreciationAmt, new { @class = "form-control", @readonly = "readonly" })
                     </div>
                 </div>
-                <div class="row form-group">
+                <div class="row">
                     <div class="col-xs-12">
                         @Html.LabelFor(m => m.EquipmentDescription)
                         @Html.TextBoxFor(m => m.EquipmentDescription, new { @class = "form-control", @readonly = "readonly" })
@@ -62,7 +62,7 @@
             </fieldset>
             <fieldset class="form-group">
                 <legend>Preventative Maintenance Information</legend>
-                <div class="row form-group">
+                <div class="row">
                     <div class="col-xs-3">
                         @Html.LabelFor(m => m.DateOfLastPM)
                         @Html.TextBoxFor(m => m.DateOfLastPM, new { @class = "form-control", @readonly = "readonly" })
@@ -79,7 +79,7 @@
             </fieldset>
             <fieldset class="form-group">
                 <legend>Record Details</legend>
-                <div class="row form-group">
+                <div class="row">
                     <div class="col-xs-3">
                         @Html.LabelFor(m => m.AddDateTime)
                         @Html.TextBoxFor(m => m.AddDateTime, new { @class = "form-control", @readonly = "readonly" })

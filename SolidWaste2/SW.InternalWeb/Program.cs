@@ -25,13 +25,20 @@ using SW.BLL.Extensions;
 using SW.DAL.Extensions;
 using SW.InternalWeb.Extensions;
 using SW.InternalWeb.Identity;
-using Common.Services.TelerikReporting;
-
+using Common.Services.TelerikReporting;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Extensions.Options;
+
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+    var configuration = builder.Configuration;
+    var environment = builder.Environment;
+    configuration.AddEnvironmentVariables();    // for sendgrid
+
     builder.Services.AddRazorPages().AddNewtonsoftJson();
     builder.Services.AddControllers();
     builder.Services.AddMvc();
@@ -44,21 +51,21 @@ try
 		    System.IO.Path.Combine(GetReportsDir(sp)))
     });
 
-    var configuration = builder.Configuration;
-    var environment = builder.Environment;
-    configuration.AddEnvironmentVariables();    // for sendgrid
+    //var configuration = builder.Configuration;
+    //var environment = builder.Environment;
+    //configuration.AddEnvironmentVariables();    // for sendgrid
 
-    // key vault
-    var keyVaultEndpoint = new Uri(configuration["AzureKeyVaultEndpoint"]);
-    TokenCredential tokenCredential =
-        builder.Environment.IsEnvironment("Local")
-        ? new VisualStudioCredential()
-        : new ManagedIdentityCredential();
-    configuration.AddAzureKeyVault(keyVaultEndpoint, tokenCredential, new AzureKeyVaultConfigurationOptions
-    {
-        // Manager = new PrefixKeyVaultSecretManager(secretPrefix),
-        ReloadInterval = TimeSpan.FromMinutes(5)
-    });
+    //// key vault
+    //var keyVaultEndpoint = new Uri(configuration["AzureKeyVaultEndpoint"]);
+    //TokenCredential tokenCredential =
+    //    environment.IsEnvironment("Local")
+    //    ? new VisualStudioCredential()
+    //    : new ManagedIdentityCredential();
+    //configuration.AddAzureKeyVault(keyVaultEndpoint, tokenCredential, new AzureKeyVaultConfigurationOptions
+    //{
+    //    // Manager = new PrefixKeyVaultSecretManager(secretPrefix),
+    //    ReloadInterval = TimeSpan.FromMinutes(5)
+    //});
 
     // razor pages
     builder.Services
@@ -68,16 +75,20 @@ try
     builder.Services
         .AddControllersWithViews(mvcOptions =>
         {
-            mvcOptions.EnableEndpointRouting = false;
+            mvcOptions.EnableEndpointRouting = false;
+            var policy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+                .Build();
+            mvcOptions.Filters.Add(new AuthorizeFilter(policy));
         })
         .AddRazorRuntimeCompilation()
         .AddViewOptions(options =>
         {
             // restores legacy mvc behaviour for auto-generated checkbox fields
             options.HtmlHelperOptions.CheckBoxHiddenInputRenderMode = CheckBoxHiddenInputRenderMode.Inline;
-        });
+        })
         //.AddSessionStateTempDataProvider()
-        //.AddMicrosoftIdentityUI()     // azure ad
+        .AddMicrosoftIdentityUI();     // azure ad
 
     // our services
     builder.Services
@@ -169,11 +180,11 @@ try
     app.UseStaticFiles();
 
     app.UseRouting();
-    app.UseEndpoints(endpoints =>
-    {
-	    endpoints.MapControllers();
-	    // ... 
-    });
+    //app.UseEndpoints(endpoints =>
+    //{
+	   // endpoints.MapControllers();
+	   // // ... 
+    //});
 
     app.UseAuthentication();
     app.UseAuthorization();
@@ -187,7 +198,7 @@ try
 
     static string GetReportsDir(IServiceProvider sp)
     {
-	    return Path.Combine(sp.GetService<IWebHostEnvironment>().ContentRootPath, "Reports");
+        return Path.Combine(sp.GetService<IWebHostEnvironment>().ContentRootPath, "Reports");
     }
 }
 catch(Exception e)

@@ -44,22 +44,19 @@ public class RouteTypeController : Controller
     public async Task<IActionResult> Update(RouteTypeEditViewModel vm)
     {
         if (!ModelState.IsValid)
-            return View("Edit", vm);
+            return View("Edit", vm).WithDanger("There are errors on the form", "");
 
         var routeType = await routeTypeService.GetById(vm.RouteTypeID);
         if (routeType == null)
             return RedirectToAction(nameof(Index))
-                .WithWarning("", "Route type not found");
+                .WithDanger("Route type not found", "");
 
         int routeNumber = int.Parse(vm.RouteNumber);
         if(routeNumber != routeType.RouteNumber)
         {
             var other = await routeTypeService.GetByRouteNumber(routeNumber);
             if(other != null)
-            {
-                ModelState.AddModelError(nameof(vm.RouteNumber), $"Duplicate route number {vm.RouteNumber}");
-                return View("Edit", vm);
-            }
+                return View("Edit", vm).WithDanger($"Duplicate route number {vm.RouteNumber}", "");
         }
 
         routeType.ChgDateTime = DateTime.Now;
@@ -69,15 +66,14 @@ public class RouteTypeController : Controller
         await routeTypeService.Update(routeType);
 
         return RedirectToAction("Edit", new { id = routeType.RouteTypeId })
-            .WithSuccess("", "Route type updated");
+            .WithSuccess("Route type updated", "");
     }
 
     public async Task<IActionResult> Delete(int id)
     {
         var routeType = await routeTypeService.GetById(id);
         if (routeType == null || routeType.DeleteFlag)
-            return RedirectToAction(nameof(Index))
-                .WithWarning("", "Route type not found");
+            return RedirectToAction(nameof(Index)).WithDanger("Route type not found", "");
 
         routeType.DelDateTime = DateTime.Now;
         routeType.DeleteFlag = true;
@@ -86,7 +82,7 @@ public class RouteTypeController : Controller
         await routeTypeService.Update(routeType);
 
         return RedirectToAction(nameof(Index))
-            .WithSuccess("", "Route type deleted");
+            .WithSuccess("Route type deleted", "");
     }
 
     public IActionResult Add()
@@ -99,16 +95,13 @@ public class RouteTypeController : Controller
     public async Task<IActionResult> Add(RouteTypeAddViewModel vm)
     {
         if (!ModelState.IsValid)
-            return View(vm);
+            return View(vm).WithDanger("There are errors on the form", "");
 
         var routeNumber = int.Parse(vm.RouteNumber);
 
         var other = await routeTypeService.GetByRouteNumber(routeNumber);
         if (other != null)
-        {
-            ModelState.AddModelError(nameof(vm.RouteNumber), $"Duplicate route number {vm.RouteNumber}");
-            return View(vm);
-        }
+            return View(vm).WithDanger($"Duplicate route number {vm.RouteNumber}", "");
 
         var routeType = new RouteType
         {
@@ -119,6 +112,7 @@ public class RouteTypeController : Controller
         };
         await routeTypeService.Add(routeType);
 
-        return RedirectToAction("Edit", new { id = routeType.RouteTypeId });
+        return RedirectToAction("Edit", new { id = routeType.RouteTypeId })
+            .WithSuccess("Route type added", "");
     }
 }

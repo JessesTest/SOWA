@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PE.BL.Services;
 using SW.BLL.Services;
 using SW.DM;
 using SW.InternalWeb.Extensions;
-using SW.InternalWeb.Models.Transaction;
+using SW.InternalWeb.Models.TransactionApi;
+using System.ComponentModel;
 
 namespace SW.InternalWeb.Controllers;
 
@@ -134,21 +135,27 @@ public class TransactionApiController : ControllerBase
 
             var rules = await _transactionCodeRuleService.GetByTransactionCodeId(code.TransactionCodeId);
 
-            Formula formula = null;
+            var formulaJson = new FormulaJson();
 
             if (rules.Count == 1)
-                formula = rules.First().Formula;
-
-            // test if this is actually necessary? SOWA-92
-            if (formula != null && formula.Parameters != null)
             {
-                foreach (var p in formula.Parameters)
+                var formula = rules.First().Formula;
+                formulaJson = new FormulaJson
                 {
-                    p.Formula = null;
-                }
+                    Name = formula.Name,
+                    FormulaString = formula.FormulaString,
+                    CommentString = formula.CommentString,
+                    Parameters = formula.Parameters.Select(p => new FormulaJson.ParameterJson
+                    {
+                        ParameterId = p.ParameterId,
+                        Name = p.Name,
+                        Value = p.Value.GetValueOrDefault(),
+                        Constant = p.Constant
+                    })
+                };
             }
 
-            var jsonResult = new { code = code.TransactionCodeId, formula, containerSelectList = await GenerateContainerSelectList(address.Id, rules) };
+            var jsonResult = new { code = code.TransactionCodeId, formula = formulaJson, containerSelectList = await GenerateContainerSelectList(address.Id, rules) };
             return Ok(jsonResult);
         }
         catch (Exception ex)
@@ -176,13 +183,13 @@ public class TransactionApiController : ControllerBase
             if (containerId == 0)
                 throw new ArgumentException("Error: ContainerID not selected");
 
-            var rules = new List<TransactionCodeRule>();
+            List<TransactionCodeRule> rules;
 
             decimal transactionAmount = 0;
 
             if (transactionCodeId == 48 && containerId == -1)
             {
-                rules = (await _transactionCodeRuleService.GetByTransactionCodeId(transactionCodeId)).ToList();
+                rules = (await _transactionCodeRuleService.GetByContainerAndTransactionCode(code.TransactionCodeId)).ToList();
             }
             else
             {
@@ -203,7 +210,7 @@ public class TransactionApiController : ControllerBase
                 if (containerRate == null)
                     throw new ArgumentException("Error: Container has no matching ContainerRate");
 
-                rules = (await _transactionCodeRuleService.GetByContainerAndTransactionCode(container, code.TransactionCodeId)).ToList();
+                rules = (await _transactionCodeRuleService.GetByContainerAndTransactionCode(code.TransactionCodeId, container)).ToList();
                 transactionAmount = code.Code == "EP" ? containerRate.ExtraPickup : containerRate.PullCharge;
             }
 
@@ -214,20 +221,24 @@ public class TransactionApiController : ControllerBase
                 throw new ArgumentException("Error: More than one formula found");
 
             var formula = rules.First().Formula;
-
-            // test if this is actually necessary? SOWA-92
-            if (formula != null && formula.Parameters != null)
+            var formulaJson = new FormulaJson
             {
-                foreach (var p in formula.Parameters)
+                Name = formula.Name,
+                FormulaString = formula.FormulaString,
+                CommentString = formula.CommentString,
+                Parameters = formula.Parameters.Select(p => new FormulaJson.ParameterJson
                 {
-                    p.Formula = null;
-                }
-            }
+                    ParameterId = p.ParameterId,
+                    Name = p.Name,
+                    Value = p.Value.GetValueOrDefault(),
+                    Constant = p.Constant
+                })
+            };
 
             if (code.Code == "CR")
                 transactionAmount = 75.00m;
 
-            var jsonResult = new { formula, transAmt = transactionAmount };
+            var jsonResult = new { formula = formulaJson, transAmt = transactionAmount };
             return Ok(jsonResult);
         }
         catch (Exception ex)
@@ -238,7 +249,7 @@ public class TransactionApiController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> CheckIDPayment(int customerId)
+    public async Task<IActionResult> CheckIdPayment(int customerId)
     {
         try
         {
@@ -255,20 +266,22 @@ public class TransactionApiController : ControllerBase
 
             var paymentPlan = (await _paymentPlanService.GetByCustomer(customer.CustomerId, true)).SingleOrDefault(m => m.Status == "Active");
 
-            // test if this is actually necessary? SOWA-92
-            if (paymentPlan != null)
+            var paymentPlanJson = paymentPlan == null ? null : new PaymentPlanJson
             {
-                foreach (var p in paymentPlan.Details)
+                Details = paymentPlan.Details.Select(pp => new PaymentPlanJson.DetailJson
                 {
-                    p.PaymentPlan = null;
-                }
-            }
+                    DueDate = pp.DueDate.ToString("d"),
+                    Amount = pp.Amount,
+                    PaymentTotal = pp.PaymentTotal,
+                    Paid = pp.Paid ?? false
+                })
+            };
 
             var jsonResult = new
             {
                 customerName = person.FullName,
+                paymentPlan = paymentPlanJson,
                 currentBalance = await _transactionService.GetCurrentBalance(customer.CustomerId),
-                paymentPlan = paymentPlan,
                 counselorsBalance = await _transactionService.GetCounselorsBalance(customer.CustomerId),
                 collectionsBalance = await _transactionService.GetCollectionsBalance(customer.CustomerId),
                 transactionHoldingSelectList = await GenerateTransactionHoldingSelectList(customer.CustomerId),
@@ -323,7 +336,7 @@ public class TransactionApiController : ControllerBase
                 return Ok(jsonResult);
             }
 
-            return Ok();
+            return Ok(null);
         }
         catch (Exception ex)
         {
@@ -333,7 +346,7 @@ public class TransactionApiController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> CheckIDAdjustment(int customerId)
+    public async Task<IActionResult> CheckIdAdjustment(int customerId)
     {
         try
         {
@@ -351,9 +364,7 @@ public class TransactionApiController : ControllerBase
             var jsonResult = new
             {
                 customerName = person.FullName,
-                currentBalance = await _transactionService.GetCurrentBalance(customer.CustomerId),
-                counselorsBalance = await _transactionService.GetCounselorsBalance(customer.CustomerId),
-                collectionsBalance = await _transactionService.GetCollectionsBalance(customer.CustomerId),
+                //currentBalance = await _transactionService.GetCurrentBalance(customer.CustomerId),
                 transactionCodeSelectList = await GenerateTransactionCodeSelectListGroupA()
             };
 
@@ -385,13 +396,10 @@ public class TransactionApiController : ControllerBase
                 throw new ArgumentException("Error: TransactionCodeID invalid");
 
             var isAssociatedTransactionIdRequired = transactionCode.Code == "LFR";
-            var associatedTransactionSelectList = await GenerateAssociatedTransactionSelectList(customerId);
+            var associatedTransactionSelectList = isAssociatedTransactionIdRequired ? await GenerateAssociatedTransactionSelectList(customerId) : new List<SelectListItem>();
 
             var jsonResult = new
             {
-                // SOWA-92  need to replace with new role info once that is setup
-                //security = ConfigurationManager.AppSettings["Access.Admin"],
-                security = @"SNCO\ITData",
                 isAssociatedTransactionIdRequired,
                 associatedTransactionSelectList
             };
@@ -404,8 +412,32 @@ public class TransactionApiController : ControllerBase
         }
     }
 
+    //[HttpGet]
+    //public async Task<IActionResult> GetTransactionCodeSign(int transactionCodeId)
+    //{
+    //    try
+    //    {
+    //        // Make sure TransactionCodeID is valid
+    //        var transactionCode = await _transactionCodeService.GetById(transactionCodeId);
+    //        if (transactionCode == null)
+    //            throw new ArgumentException("Error: TransactionCodeID invalid");
+
+    //        var jsonResult = new
+    //        {
+    //            sign = transactionCode.TransactionSign
+    //        };
+
+    //        return Ok(jsonResult);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        var jsonResult = new { message = ex.Message };
+    //        return Ok(jsonResult);
+    //    }
+    //}
+
     [HttpGet]
-    public async Task<IActionResult> BatchAjaxCustomerID(int customerId)
+    public async Task<IActionResult> BatchAjaxCustomerId(int customerId)
     {
         try
         {
@@ -422,47 +454,25 @@ public class TransactionApiController : ControllerBase
 
             var paymentPlan = (await _paymentPlanService.GetByCustomer(customer.CustomerId, true)).SingleOrDefault(m => m.Status == "Active");
 
-            // test if this is actually necessary? SOWA-92
-            if (paymentPlan != null)
+            var paymentPlanJson = paymentPlan == null ? null : new PaymentPlanJson
             {
-                foreach (var p in paymentPlan.Details)
+                Details = paymentPlan.Details.Select(pp => new PaymentPlanJson.DetailJson
                 {
-                    p.PaymentPlan = null;
-                }
-            }
+                    DueDate = pp.DueDate.ToString("d"),
+                    Amount = pp.Amount,
+                    PaymentTotal = pp.PaymentTotal,
+                    Paid = pp.Paid ?? false
+                })
+            };
 
             var jsonResult = new
             {
                 customerName = person.FullName,
-                paymentPlan,
+                paymentPlan = paymentPlanJson,
                 currentBalance = await _transactionService.GetCurrentBalance(customer.CustomerId),
                 counselorsBalance = await _transactionService.GetCounselorsBalance(customer.CustomerId),
                 collectionsBalance = await _transactionService.GetCollectionsBalance(customer.CustomerId),
                 transactionCodeSelectList = await GenerateTransactionCodeSelectListGroupP(customer.PaymentPlan)
-            };
-
-            return Ok(jsonResult);
-        }
-        catch (Exception ex)
-        {
-            var jsonResult = new { message = ex.Message };
-            return Ok(jsonResult);
-        }
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetTransactionCodeSign(int transactionCodeId)
-    {
-        try
-        {
-            // Make sure TransactionCodeID is valid
-            var transactionCode = await _transactionCodeService.GetById(transactionCodeId);
-            if (transactionCode == null)
-                throw new ArgumentException("Error: TransactionCodeID invalid");
-
-            var jsonResult = new
-            {
-                sign = transactionCode.TransactionSign
             };
 
             return Ok(jsonResult);
@@ -491,7 +501,7 @@ public class TransactionApiController : ControllerBase
     [NonAction]
     private async Task<IEnumerable<SelectListItem>> GenerateTransactionCodeSelectListGroupS()
     {
-        var transactionCodes = (await _transactionCodeService.GetAll()).Where(c => c.Group == "S");
+        var transactionCodes = await _transactionCodeService.GetAllByGroup("S");
 
         return transactionCodes.Select(tc => new SelectListItem
         {
@@ -503,7 +513,7 @@ public class TransactionApiController : ControllerBase
     [NonAction]
     private async Task<IEnumerable<SelectListItem>> GenerateTransactionCodeSelectListGroupP(bool paymentPlan)
     {
-        var transactionCodes = (await _transactionCodeService.GetAll()).Where(tc => tc.Group == "P");
+        var transactionCodes = await _transactionCodeService.GetAllByGroup("P");
 
         return transactionCodes
             .Where(tc => (paymentPlan && tc.Code == "PP") || (!paymentPlan && tc.Code != "PP"))
@@ -517,7 +527,7 @@ public class TransactionApiController : ControllerBase
     [NonAction]
     private async Task<IEnumerable<SelectListItem>> GenerateTransactionCodeSelectListGroupA()
     {
-        var transactionCodes = (await _transactionCodeService.GetAll()).Where(c => c.Group == "A");
+        var transactionCodes = await _transactionCodeService.GetAllByGroup("A");
 
         return transactionCodes.Select(tc => new SelectListItem
         {
@@ -546,10 +556,10 @@ public class TransactionApiController : ControllerBase
             var containers = sa.Containers.Where(c => !c.DeleteFlag);
 
             var anyContainers = containers.Any(c => transactionCodeRules
-                .Any(t => t.ContainerCodeId == c.ContainerCodeId
-                    && t.ContainerSubtypeId == c.ContainerSubtypeId
-                    && t.ContainerNumDaysService == c.NumDaysService
-                    && t.ContainerBillingSize == c.BillingSize)
+                .Any(t => (t.ContainerCodeId == null || t.ContainerCodeId.Value == c.ContainerCodeId)
+                    && (t.ContainerSubtypeId == null || t.ContainerSubtypeId.Value == c.ContainerSubtypeId)
+                    && (t.ContainerNumDaysService == null || t.ContainerNumDaysService.Value == c.NumDaysService)
+                    && (t.ContainerBillingSize == null || t.ContainerBillingSize.Value == c.BillingSize))
                 );
 
             if (anyRules || anyContainers)
@@ -592,10 +602,10 @@ public class TransactionApiController : ControllerBase
             return list;
 
         var validContainers = containers.Where(c => transactionCodeRules
-            .Any(t => t.ContainerCodeId == c.ContainerCodeId
-                && t.ContainerSubtypeId == c.ContainerSubtypeId
-                && t.ContainerNumDaysService == c.NumDaysService
-                && t.ContainerBillingSize == c.BillingSize)
+            .Any(t => (t.ContainerCodeId == null || t.ContainerCodeId.Value == c.ContainerCodeId)
+                && (t.ContainerSubtypeId == null || t.ContainerSubtypeId.Value == c.ContainerSubtypeId)
+                && (t.ContainerNumDaysService == null || t.ContainerNumDaysService.Value == c.NumDaysService)
+                && (t.ContainerBillingSize == null || t.ContainerBillingSize.Value == c.BillingSize))
             );
         
         foreach (var c in validContainers)

@@ -12,7 +12,6 @@
 
     <div class="panel panel-default">
         <div class="panel-body">
-
             <div class="row form-group">
                 <div class="col-xs-2">
                     @Html.LabelFor(m => m.CustomerType)
@@ -27,7 +26,6 @@
                     @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", @readonly = "readonly" })
                 </div>
             </div>
-
             <div class="row form-group">
                 <div class="col-xs-2">
                     @Html.LabelFor(m => m.TotalDue)
@@ -42,8 +40,7 @@
                     @Html.TextBoxFor(m => m.FirstPaymentDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
                 </div>
             </div>
-
-            <div class="row form-group">
+            <div class="row">
                 @for (int i = 2; i <= 6; i++)
                 {
                     <div class="col-xs-2">
@@ -66,7 +63,6 @@
                     @Html.ActionLink("Cancel", "Index", "PaymentPlan", new { customerId = Model.CustomerId }, new { @class = "btn btn-block btn-info" })
                 </div>
             </div>
-
         </div>
     </div>
 }

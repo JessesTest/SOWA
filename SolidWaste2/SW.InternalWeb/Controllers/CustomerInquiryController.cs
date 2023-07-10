@@ -16,13 +16,17 @@ public class CustomerInquiryController : Controller
 
     public IActionResult Index()
     {
-        return View(new CustomerInquiryParametersViewModel());
+        var model = new CustomerInquiryParametersViewModel 
+        { 
+            Include = true
+        };
+        return View(model);
     }
 
     public async Task<IActionResult> Search(CustomerInquiryParametersViewModel model)
     {
         if (!ModelState.IsValid)
-            return View("Index", model).WithWarning("There are errors on the form", "");
+            return View("Index", model).WithDanger("There are errors on the form", "");
 
         switch (model.Command)
         {

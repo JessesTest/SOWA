@@ -1,6 +1,7 @@
 ﻿@model SW.InternalWeb.Models.NewCustomer.EmailViewModel
 @inject SW.InternalWeb.Services.EmailTypeSelectItemsService emailTypeService
 @{
+    ViewBag.Title = "New Customer";
     ViewBag.faTitleClass = "user-plus";
     ViewBag.ATitle = "New Customer : Email Address";
 
@@ -48,14 +49,10 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-12">
                         <hr />
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-12">
                         <input type="submit" value="Previous" class="btn btn-primary btn-s-xs" name="Previous" data-form-action="@Url.Action("CustomerEmail_Prev", "NewCustomer")" />
                         <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>

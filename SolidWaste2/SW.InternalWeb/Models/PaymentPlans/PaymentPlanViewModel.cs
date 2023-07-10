@@ -23,7 +23,7 @@ public class PaymentPlanViewModel
     [Display(Name = "Billed Amount Due")]
     public decimal TotalDue { get; set; }
 
-    [Display(Name = "Estimated Monthly Bill")]
+    [Display(Name = "Est. Monthly Bill")]
     public decimal MonthlyTotal { get; set; }
 
     [Display(Name = "Plan Amount")]

@@ -1,17 +1,15 @@
 ﻿@if (User.Identity.IsAuthenticated)
 {
-    <text>
-        <ul class="nav navbar-nav navbar-right">
-            <li class="navbar-text">
-                <div id="notify-div">
-                    <a href="#">
-                        Hello, @User.Identity.Name!&nbsp;&nbsp;&nbsp;
-                        <i id="notify-icon" class="fa fa-2x fa-envelope fa-color-grey"></i>
-                        <div id="notify-icon-txt"></div>
-                    </a>
-                </div>
-                <div id="notify-list" hidden="hidden"></div>
-            </li>
-        </ul>
-    </text>
+    <ul class="nav navbar-nav navbar-right">
+        <li class="navbar-text">
+            <div id="notify-div">
+                <a href="#">
+                    Hello, @User.Identity.Name!&nbsp;&nbsp;&nbsp;
+                    <i id="notify-icon" class="fa fa-2x fa-envelope fa-color-grey"></i>
+                    <div id="notify-icon-txt"></div>
+                </a>
+            </div>
+            <div id="notify-list" hidden="hidden"></div>
+        </li>
+    </ul>
 }

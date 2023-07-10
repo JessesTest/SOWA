@@ -19,7 +19,7 @@ function heartbeat() {
     $.ajax({
         type: 'GET',
         dataType: 'json',
-        url: 'https://sncowebdev/SOWA/Home/ResetSessionTimeout',
+        url: getPath('~/Home/ResetSessionTimeout'),
         data: null,
         success: setHeartbeat(),
         cache: false

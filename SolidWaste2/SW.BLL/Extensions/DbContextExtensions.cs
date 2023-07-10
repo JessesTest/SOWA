@@ -81,6 +81,20 @@ namespace SW.BLL.Extensions
                 .SingleOrDefaultAsync();
         }
 
+        internal static Task<List<PaymentPlan>> GetPaymentPlanByCustomer(this SwDbContext db, int customerId, bool includeDetails = true)
+        {
+            var query = db.PaymentPlans
+                .Where(pp => pp.CustomerId == customerId)
+                .Where(pp => !pp.DelFlag);
+
+            if (includeDetails)
+                query = query.Include(e => e.Details);
+
+            return query
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         #endregion
 
         #region Service Address
@@ -158,6 +172,15 @@ namespace SW.BLL.Extensions
                 .FirstOrDefaultAsync();
         }
 
+        internal static async Task<Transaction> GetTransactionById(this SwDbContext db, int transactionId)
+        {
+            return await db.Transactions
+                .Where(e => e.Id == transactionId)
+                .Include(e => e.TransactionCode)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
         internal static async Task AddTransaction(this SwDbContext db, Transaction transaction)
         {
             var customerId = transaction.CustomerId;
@@ -199,6 +222,18 @@ namespace SW.BLL.Extensions
         internal static Task<TransactionCode> GetTransactionCodeByCode(this SwDbContext db, string code)
         {
             return db.TransactionCodes.Where(c => c.Code == code && !c.DeleteFlag).SingleOrDefaultAsync();
+        }
+
+        #endregion
+
+        #region Transaction Holding
+
+        internal static Task<TransactionHolding> GetTransactionHolding(this SwDbContext db, int transactionHoldingId)
+        {
+            return db.TransactionHoldings
+                .Where(e => e.TransactionHoldingId == transactionHoldingId)
+                .Include(e => e.TransactionCode)
+                .SingleOrDefaultAsync();
         }
 
         #endregion

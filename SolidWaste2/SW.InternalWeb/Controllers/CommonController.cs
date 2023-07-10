@@ -42,17 +42,8 @@ public class CommonController : Controller
         if (effective_date > DateTime.Today)
             effective_date = DateTime.Today;
 
-        var rates = await containerRateService.GetContainerRateByCodeDaysSize(
-            containerSubtypeId,
-            daysOfService,
-            size,
-            effective_date);
-
-        var rate = rates
-            .OrderByDescending(r => r.EffectiveDate)
-            .FirstOrDefault();
-
-        if(rate == null)
+        var rate = (await containerRateService.GetByCodeDaysSize(containerSubtypeId, daysOfService, size, effective_date)).FirstOrDefault();
+        if (rate == null)
         {
             return Json(new { amount = "n/a", frequency = "" });
         }
