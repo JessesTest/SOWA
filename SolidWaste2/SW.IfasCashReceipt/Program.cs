@@ -26,9 +26,11 @@ try
 
     hostBuilder.ConfigureAppConfiguration((context, configBuilder) =>
     {
-        var environment = args.Length == 1 ?
-            args[0] :
-            context.HostingEnvironment.EnvironmentName;
+        var environment =
+            args.Length == 1 ? args[0] :
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??
+            Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ??
+            context.HostingEnvironment.EnvironmentName; // defaults to "Production"
 
         configBuilder
             .SetBasePath(Directory.GetCurrentDirectory())
