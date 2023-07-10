@@ -58,9 +58,7 @@ public class CustomerPhoneNumberController : Controller
             Type = phone?.Type ?? 3
         };
 
-        return View(vm)
-            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
+        return View(vm);
     }
 
     [HttpPost]
@@ -70,12 +68,8 @@ public class CustomerPhoneNumberController : Controller
         var person = await personEntityService.GetById(customer.Pe);
 
         if (!ModelState.IsValid)
-        {
             return View("Index", vm)
-                .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
-                .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
                 .WithDanger("There were field validation errors", "");
-        }
 
         Phone phone = person.Phones.FirstOrDefault(p => p.Id == vm.Id);
         if (phone == null)
@@ -96,39 +90,29 @@ public class CustomerPhoneNumberController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Clear(CustomerPhoneNumberViewModel vm)
+    public IActionResult Clear(CustomerPhoneNumberViewModel vm)
     {
-        var customer = await customerService.GetById(vm.CustomerID);
-        var person = await personEntityService.GetById(customer.Pe);
-
         ModelState.Clear();
         vm.Id = null;
         vm.PhoneNumber = string.Empty;
 
-        return View("Index", vm)
-            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
+        return View("Index", vm);
     }
 
     [HttpPost]
     public async Task<IActionResult> Add(CustomerPhoneNumberViewModel vm)
     {
         var customer = await customerService.GetById(vm.CustomerID);
-        var person = await personEntityService.GetById(customer.Pe);
 
         if (!ModelState.IsValid)
-        {
             return View("Index", vm)
-                .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
-                .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
                 .WithDanger("There are errors on the form", "");
-        }
 
         Phone phone = new()
         {
             AddDateTime = DateTime.Now,
             AddToi = User.GetNameOrEmail(),
-            PersonEntityID = person.Id,
+            PersonEntityID = customer.Pe,
             PhoneNumber = vm.PhoneNumber,
             Status = vm.Status,
             Type = vm.Type

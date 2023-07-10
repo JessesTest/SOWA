@@ -6,6 +6,8 @@
     var index = 0;
 }
 
+@await Component.InvokeAsync("CustomerAlerts", new { customerId = Model.CustomerId })
+
 <div id="crumbs">
     <ul class="v-bottom">
         <li class=""><a href="@Url.Action("Index", "Customer", new { customerID = Model.CustomerId })">Customer Information</a></li>

@@ -51,7 +51,7 @@ public class CustomerEmailController : Controller
         }
         var currentIndex = email == null ? 0 : emails.IndexOf(email);
 
-        var paperLess = person.PaperLess switch
+        var paperless = person.PaperLess switch
         {
             null => 3,
             true => 1,
@@ -67,14 +67,12 @@ public class CustomerEmailController : Controller
             FullName = person.FullName,
             Id = email?.Id,
             MaxIndex = person.Emails.Count,
-            PaperLess = paperLess,
+            Paperless = paperless,
             Status = email?.Status ?? true,
             Type = email?.Type ?? 7
         };
 
-        return View(vm)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
-            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "");
+        return View(vm);
     }
 
     [HttpPost]
@@ -102,17 +100,17 @@ public class CustomerEmailController : Controller
         email.Status = vm.Status;
         await emailService.Update(email);
 
-        bool? paperLess = vm.PaperLess switch
+        bool? paperless = vm.Paperless switch
         {
             1 => true,
             2 => false,
             _ => null
         };
-        if(person.PaperLess != paperLess)
+        if(person.PaperLess != paperless)
         {
             person.ChgDateTime = DateTime.Now;
             person.ChgToi = User.GetNameOrEmail();
-            person.PaperLess = paperLess;
+            person.PaperLess = paperless;
             person.Addresses = null;
             person.Code = null;
             person.Emails = null;
@@ -125,15 +123,13 @@ public class CustomerEmailController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Clear(CustomerEmailViewModel vm)
+    public IActionResult Clear(CustomerEmailViewModel vm)
     {
         ModelState.Clear();
         vm.Id = null;
         vm.Email1 = string.Empty;
 
-        var customer = await customerService.GetById(vm.CustomerID);
-        return View("Index", vm)
-            .WithInfoWhen(customer?.PaymentPlan ?? false, "Customer has a payment plan.", "");
+        return View("Index", vm);
     }
 
     [HttpPost]
@@ -167,7 +163,6 @@ public class CustomerEmailController : Controller
         }
 
         return View("Index", vm)
-            .WithInfoWhen(customer?.PaymentPlan ?? false, "", "Customer has a payment plan.")
             .WithDanger("There were field validation errors", "");
     }
 
