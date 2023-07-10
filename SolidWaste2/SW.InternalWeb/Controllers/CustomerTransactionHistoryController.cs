@@ -66,9 +66,7 @@ public class CustomerTransactionHistoryController : Controller
 
         TempData["FullName"] = personEntity.FullName;
 
-        return View(vm)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
-            .WithWarningWhen(personEntity.Pab == true, "Account has undeliverable address.", "");
+        return View(vm);
     }
 
     public async Task<IActionResult> IndexJson(int customerID)

@@ -1,0 +1,36 @@
+﻿@model SW.InternalWeb.Models.CustomerAlertsViewModel
+@*@if (!string.IsNullOrEmpty(type))
+    {
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="alert alert-@type alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <strong>@title</strong> @body
+                </div>
+            </div>
+        </div>
+    }*@
+
+@if (Model.PaymentPlanFlag)
+{
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="alert alert-info alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Customer has a payment plan.</strong>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.BadAddressFlag)
+{
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Account has undeliverable address.</strong>
+            </div>
+        </div>
+    </div>
+}

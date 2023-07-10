@@ -84,9 +84,7 @@ public class CustomerController : Controller
             InactiveImages = inactiveImages
         };
 
-        return View(vm)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
-            .WithWarningWhen(personEntity.Pab == true, "Account has undeliverable address.", "");
+        return View(vm);
     }
 
     [HttpPost]
@@ -142,9 +140,7 @@ public class CustomerController : Controller
             await customerService.CancelRelatedEntities(customer, User.GetNameOrEmail());
         }
 
-        return View("Index", vm)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
-            .WithSuccess("Customer updated", "");
+        return View("Index", vm).WithSuccess("Customer updated", "");
     }
 
     public IActionResult Search(int CustomerID)

@@ -163,9 +163,7 @@ public class CustomerServiceAddressController : Controller
 
         return View("Index", model)
             .WithDangerWhen(!serviceAddress.Containers.Any(), "No containers found", "")
-            .WithDangerWhen(customer == null, "Could not find customer record!", "")
-            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
-            .WithInfoWhen(customer?.PaymentPlan == true, "Customer has a payment plan.", "");
+            .WithDangerWhen(customer == null, "Could not find customer record!", "");
     }
 
     [HttpPost]
@@ -205,9 +203,7 @@ public class CustomerServiceAddressController : Controller
         };
 
         ModelState.Clear();
-        return View("Index", model)
-            .WithWarningWhen(person.Pab == true, "Account has undeliverable address.", "")
-            .WithInfoWhen(customer?.PaymentPlan == true, "Customer has a payment plan.", "");
+        return View("Index", model);
     }
 
     [HttpPost]
@@ -605,10 +601,7 @@ public class CustomerServiceAddressController : Controller
         if (Request.IsAjaxRequest())
             return PartialView("Container", model);
 
-        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
-
-        return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
+        return View("Index", model);
     }
 
     private static int DisplayIndexOf(Container container, IList<Container> containers)
@@ -633,16 +626,12 @@ public class CustomerServiceAddressController : Controller
         if (Request.IsAjaxRequest())
             return PartialView("Container", model);
 
-        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
-
-        return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
+        return View("Index", model);
     }
 
     public async Task<IActionResult> SaveContainer(ServiceAddressMasterViewModel model)
     {
         ModelState.Clear();
-        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
         string xAlertMessage = null;
 
         if (!TryValidateModel(model.Container))
@@ -748,7 +737,6 @@ public class CustomerServiceAddressController : Controller
         }
 
         return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
             .WithDangerWhen(!string.IsNullOrWhiteSpace(xAlertMessage), xAlertMessage, "");
     }
 
@@ -801,9 +789,7 @@ public class CustomerServiceAddressController : Controller
         if (Request.IsAjaxRequest())
             return PartialView("Note", model);
 
-        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
-        return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
+        return View("Index", model);
     }
 
     private static int IndexOf(int id, IEnumerable<ServiceAddressNote> notes)
@@ -819,7 +805,7 @@ public class CustomerServiceAddressController : Controller
         return -1;
     }
 
-    public async Task<IActionResult> ClearNote(ServiceAddressMasterViewModel model)
+    public IActionResult ClearNote(ServiceAddressMasterViewModel model)
     {
         ModelState.Clear();
         model.Note = new ServiceAddressNoteViewModel();
@@ -828,15 +814,12 @@ public class CustomerServiceAddressController : Controller
         if (Request.IsAjaxRequest())
             return PartialView("Note", model);
 
-        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
-        return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "");
+        return View("Index", model);
     }
 
     public async Task<IActionResult> AddNote(ServiceAddressMasterViewModel model)
     {
         ModelState.Clear();
-        var customer = await customerService.GetById(model.ServiceAddress.CustomerId);
 
         if (!TryValidateModel(model.Note))
         {
@@ -844,7 +827,6 @@ public class CustomerServiceAddressController : Controller
                 return PartialView("Note", model);
 
             return View("Index", model)
-                .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
                 .WithDanger("Invalid Container Code", "");
         }
 
@@ -868,7 +850,6 @@ public class CustomerServiceAddressController : Controller
             return PartialView("Note", model);
         
         return View("Index", model)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
             .WithSuccess("Note Added", "");
     }
 
