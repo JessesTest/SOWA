@@ -1,11 +1,13 @@
 ﻿@model SW.InternalWeb.Models.CustomerTransactionHistory.CustomerTransactionHistoryViewModel
 @using System.Configuration;
+@using SW.InternalWeb.Extensions
 @{
-    ViewBag.ATitle = "Customer Transaction History";
+    ViewBag.Title = "Customer Transaction History";
     ViewBag.faTitleClass = "wrench";
     ViewBag.ATitle = "Customer Maintenance : " + TempData["FullName"] + "   Account#" + Model.CustomerID;
 }
-@using SW.InternalWeb.Extensions
+
+@await Component.InvokeAsync("CustomerAlerts", new { customerId = Model.CustomerID })
 
 <div id="crumbs">
     <ul class="v-bottom">

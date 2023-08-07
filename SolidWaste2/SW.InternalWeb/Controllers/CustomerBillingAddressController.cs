@@ -73,9 +73,7 @@ public class CustomerBillingAddressController : Controller
             };
         }
 
-        return View(model)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
-            .WithWarningWhen(personEntity.Pab == true, "Account has undeliverable address.", "");
+        return View(model);
     }
 
     [HttpPost]
@@ -86,8 +84,6 @@ public class CustomerBillingAddressController : Controller
             return RedirectToAction("Index", "CustomerInquiry")
                 .WithDanger("Customer not found", "");
 
-        var personEntity = await personEntityService.GetById(customer.Pe);
-        var updated = false;
         bool additionalInfo;
 
         if (!ModelState.IsValid)
@@ -107,18 +103,13 @@ public class CustomerBillingAddressController : Controller
                 return View(model).WithDanger(ex.Message, "");
             }
 
-            if (additionalInfo)
-            {
-                await Update(model, customer);
-                updated = true;
-            }
+            if (!additionalInfo)
+                return View(model).WithInfo("Select an address from the list", "");
+
+            await Update(model, customer);
         }
 
-        return View(model)
-            .WithInfoWhen(customer.PaymentPlan, "Customer has a payment plan.", "")
-            .WithWarningWhen(personEntity.Pab == true, "Account has undeliverable address.", "")
-            .WithInfoWhen(!additionalInfo, "Select an address from the list", "")
-            .WithSuccessWhen(updated, "Billing address updated", "");
+        return View(model).WithSuccess("Billing address updated", "");
     }
 
     private async Task<bool> Process(CustomerBillingAddressViewModel model)

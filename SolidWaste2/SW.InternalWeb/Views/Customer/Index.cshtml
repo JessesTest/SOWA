@@ -5,6 +5,8 @@
     ViewBag.ATitle = "Customer Maintenance : " + Model.FullName + "   Account#" + Model.CustomerID;
 }
 
+@await Component.InvokeAsync("CustomerAlerts", new { customerId = Model.CustomerID })
+
 <div id="crumbs">
     <ul class="v-bottom">
         <li class="active"><a href="@Url.Action("Index", "Customer", new { customerID = Model.CustomerID })">Customer Information</a></li>
@@ -49,7 +51,7 @@
                         <div class="form-group">
                             <div class="col-md-4">
                                 @Html.LabelFor(model => model.CustomerID, new { @class = "font-bold" })
-                                @Html.TextBoxFor(model => model.CustomerID, new { @class = "form-control", @autofocus = "autofocus", @required = "required" , @id= "customerIdSearchBox"})
+                                @Html.TextBoxFor(model => model.CustomerID, new { @class = "form-control", @autofocus = "autofocus", @required = "required", @id = "customerIdSearchBox" })
                                 @Html.ValidationMessageFor(model => model.CustomerID, null, new { @class = "text-danger" })
                             </div>
                             <div class="col-xs-4">
@@ -98,12 +100,12 @@
                                 </label>
                             </div>
                             @*<div class="col-md-6">
-                                <label class="font-bold">
-                                Bad Address (
-                                <input name="@Html.NameFor(model=> Model.Undeliverable)" value="true" @(Model.Undeliverable.GetValueOrDefault(false) ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
-                                Check if Undeliverable )
-                                </label>
-                            </div>*@
+                                    <label class="font-bold">
+                                    Bad Address (
+                                    <input name="@Html.NameFor(model=> Model.Undeliverable)" value="true" @(Model.Undeliverable.GetValueOrDefault(false) ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
+                                    Check if Undeliverable )
+                                    </label>
+                                </div>*@
                         </div>
                         <div class="form-group">
                             <div class="col-md-12">
@@ -165,11 +167,11 @@
                                 (* Denotes Required Field)
                             </div>
                             @*<div class="col-md-8 text-right">
-                                <label class="font-bold">
-                                Check if Using Payment Plan&nbsp;
-                                <input name="@Html.NameFor(model=> Model.PaymentPlan)" value="true" @(Model.PaymentPlan ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
-                                </label>
-                            </div>*@
+                                    <label class="font-bold">
+                                    Check if Using Payment Plan&nbsp;
+                                    <input name="@Html.NameFor(model=> Model.PaymentPlan)" value="true" @(Model.PaymentPlan ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
+                                    </label>
+                                </div>*@
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -210,7 +212,7 @@
                                 @if (Model.UncollectableBalance > 0)
                                 {
                                     <div class="font-bold">Uncollectable Balance</div>
-                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.UncollectableBalance),"Payment", "Collections", new { customerId = Model.CustomerID, transactionType = "PU" }, null)</div>
+                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.UncollectableBalance), "Payment", "Collections", new { customerId = Model.CustomerID, transactionType = "PU" }, null)</div>
                                 }
                             </div>
                         </div>
@@ -235,7 +237,7 @@
                                         <input asp-for="ContractCharge" type="text" class="form-control" readonly />
                                     }
 
-                                    @foreach(var image in Model.ActiveImages)
+                                    @foreach (var image in Model.ActiveImages)
                                     {
                                         <div class="text-ellipsis">
                                             <a asp-action="ImageDownload" asp-controller="MieData" asp-route-id="@image.MieDataId" asp-route-mieDataActive="@image.MieDataActive" asp-route-customerId="@Model.CustomerID" class="text-ul" style="line-height:25px;">@image.MieDataImageFileName</a>

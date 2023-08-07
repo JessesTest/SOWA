@@ -6,6 +6,8 @@
     ViewBag.ATitle = "Customer Maintenance : " + Model.FullName + "   Account#" + Model.ServiceAddress.CustomerId;
 }
 
+@await Component.InvokeAsync("CustomerAlerts", new { customerId = Model.ServiceAddress.CustomerId })
+
 <div id="crumbs">
     <ul class="v-bottom">
         <li class=""><a href="@Url.Action("Index", "Customer", new { customerID = Model.ServiceAddress.CustomerId })">Customer Information</a></li>
