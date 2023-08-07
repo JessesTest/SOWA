@@ -7,14 +7,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
 
     <link href="https://kendo.cdn.telerik.com/2022.3.913/styles/kendo.common.min.css" rel="stylesheet" />
     <link href="https://kendo.cdn.telerik.com/2022.3.913/styles/kendo.blueopal.min.css" rel="stylesheet" />
 
     <!--If Kendo is used it should be added before the report viewer.-->
-    <!--<script src="http://localhost:83//api/reports/resources/js/telerikReportViewer-17.0.23.118.min.js/"></script>-->
-    <script src="http://localhost:83/api/reports/resources/js/telerikReportViewer-17.0.23.315.min.js/"></script>
+    <!--<script src="http://localhost:83/api/reports/resources/js/telerikReportViewer-17.0.23.118.min.js/"></script>--> <!--default-->
+    <script src="http://localhost:83/api/reports/resources/js/telerikReportViewer-17.0.23.315.min.js/"></script> <!--local IT5166-->
+    <!--<script src="http://localhost:83/api/reports/resources/js/telerikReportViewer-17.1.23.606.min.js/"></script>--> <!--local IT4580-->
+    <!--<script src="https://reports.sncoapps.us/api/reports/resources/js/telerikReportViewer-17.1.23.606.min.js/"></script>--> <!--Dev-->
 
     <style>
         #reportViewer1 {
@@ -36,7 +37,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var connection_string = null;
+            /*var connection_string = null;*/
 
             function connectionString() {
                 return new Promise((resolve, reject) => {
@@ -60,6 +61,7 @@
                 .then((data) => {
                     console.log(data)
                     connection_string = data.connection_string
+                    report_server_url = data.report_server_url
                     loadTelerikReportViewer()
                 })
                 .catch((error) => {
@@ -75,7 +77,8 @@
                         // The report server should have its Guest account enabled along with configured permissions for accessing the report.
                         // For more information see http://www.telerik.com/help/reporting/html5-report-viewer-howto-use-it-with-reportserver.html.
                         reportServer: {
-                            url: "http://localhost:83/",
+                            /*url: "http://localhost:83/",*/
+                            url: report_server_url,
                             username: null,
                             password: null
                         },
@@ -91,8 +94,7 @@
                             // {Category/ReportName}
                             report: "SolidWaste/DelinquentCounselors",
                             parameters: {
-                                //connectionString: "Server=.\\SQLDEV2016;Database=SolidWaste;Trusted_Connection=Yes;"
-                                connectionString: connection_string
+                                /*connectionString: connection_string*/
                             }
                         },
 

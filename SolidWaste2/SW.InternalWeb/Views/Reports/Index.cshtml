@@ -146,51 +146,7 @@
             </div>
         </div>
     </div>
-    @*SOWA-56: SW Batch Billing Telerik Report Testing*@
-    @*<div class="col-xs-6">
-        <div class="panel panel-primary">
-            <header class="panel-heading font-bold">SW Batch Billing</header>
-            <div class="panel-body">
-                @using (Html.BeginForm("BatchBilling", "Reports", FormMethod.Post, new { @role = "form" }))
-                {
-                    <div class="row form-group">
-                        <div class="col-md-6">
-                            <label for="@Html.NameFor(m => m.BatchBilling.BegDateTime)">Date Start</label>
-                            @Html.TextBoxFor(m => m.BatchBilling.BegDateTime, new { @class = "form-control" })
-                        </div>
-                        <div class="col-md-6">
-                            <label for="@Html.NameFor(m => m.BatchBilling.EndDateTime)">Date End</label>
-                            @Html.TextBoxFor(m => m.BatchBilling.EndDateTime, new { @class = "form-control" })
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col-md-6">
-                            <label for="@Html.NameFor(m => m.BatchBilling.CustomerId)">Customer ID</label>
-                            @Html.TextBoxFor(m => m.BatchBilling.CustomerId, new { @class = "form-control" })
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-sm btn-default">Submit</button>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>*@
 </div>
 
 <br />
 <br />
-
-@*@section scripts
-{
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $(".datepicker14").datepicker({
-                minDate: new Date("@string.Format("{0:d}", DateTime.Now)"),
-                maxDate: new Date("@string.Format("{0:d}", DateTime.Now.AddDays(14))")
-            });
-        });
-    </script>
-}*@

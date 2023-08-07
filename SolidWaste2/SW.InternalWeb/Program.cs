@@ -25,11 +25,10 @@ using SW.BLL.Extensions;
 using SW.DAL.Extensions;
 using SW.InternalWeb.Extensions;
 using SW.InternalWeb.Identity;
-using Common.Services.TelerikReporting;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
+using Common.Services.TelerikReporting;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Options;
-
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
 try
