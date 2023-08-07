@@ -1,3 +1,8 @@
+using Telerik.Reporting.Cache.File;
+using Telerik.Reporting.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.IO;
 using Azure.Core;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -23,8 +28,7 @@ using SW.InternalWeb.Identity;
 using Common.Services.TelerikReporting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.Extensions.Options;
-
+using Microsoft.Extensions.Options;
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
 try
@@ -33,6 +37,22 @@ try
     var configuration = builder.Configuration;
     var environment = builder.Environment;
     configuration.AddEnvironmentVariables();    // for sendgrid
+
+    builder.Services.AddRazorPages().AddNewtonsoftJson();
+    builder.Services.AddControllers();
+    builder.Services.AddMvc();
+    builder.Services.TryAddSingleton<IReportServiceConfiguration>(sp => new ReportServiceConfiguration
+    {
+	    ReportingEngineConfiguration = sp.GetService<IConfiguration>(),
+	    HostAppId = "Html5ReportViewerDemo",
+	    Storage = new FileStorage(),
+	    ReportSourceResolver = new UriReportSourceResolver(
+		    System.IO.Path.Combine(GetReportsDir(sp)))
+    });
+
+    //var configuration = builder.Configuration;
+    //var environment = builder.Environment;
+    //configuration.AddEnvironmentVariables();    // for sendgrid
 
     //// key vault
     //var keyVaultEndpoint = new Uri(configuration["AzureKeyVaultEndpoint"]);
@@ -54,8 +74,7 @@ try
     builder.Services
         .AddControllersWithViews(mvcOptions =>
         {
-            mvcOptions.EnableEndpointRouting = false;
-
+            mvcOptions.EnableEndpointRouting = false;
             var policy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
                 .Build();
@@ -160,6 +179,11 @@ try
     app.UseStaticFiles();
 
     app.UseRouting();
+    //app.UseEndpoints(endpoints =>
+    //{
+	   // endpoints.MapControllers();
+	   // // ... 
+    //});
 
     app.UseAuthentication();
     app.UseAuthorization();
@@ -170,6 +194,11 @@ try
     app.MapDefaultControllerRoute();
 
     app.Run();
+
+    static string GetReportsDir(IServiceProvider sp)
+    {
+        return Path.Combine(sp.GetService<IWebHostEnvironment>().ContentRootPath, "Reports");
+    }
 }
 catch(Exception e)
 {
