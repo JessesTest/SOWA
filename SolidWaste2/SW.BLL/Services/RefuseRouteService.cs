@@ -19,8 +19,10 @@ public class RefuseRouteService : IRefuseRouteService
     {
         Dictionary<string, object> data = new()
         {
-            { "SingleKey", address },
-            { "outFields", "User_fld" },
+            //{ "SingleKey", address },
+            { "Address", address },
+            //{ "outFields", "User_fld" },
+            { "outFields", "Day_Route" },
             { "f", "json" }
         };
 

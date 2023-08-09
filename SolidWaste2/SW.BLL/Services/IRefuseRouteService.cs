@@ -34,21 +34,25 @@ public class RouteLocation
 
 public class RouteAttributes
 {
-    public string User_fld { get; set; }
+    //public string User_fld { get; set; }
+    public string Day_Route { get; set; }
 
     private bool parsed = false;
     private string day;
     private string route;
     private string color;
+    private string recycling_route;
 
     private void Parse()
     {
         if (parsed)
             return;
-        var strings = User_fld.ToLower().Split(',');
+        //var strings = User_fld.ToLower().Split(',');
+        var strings = Day_Route.ToLower().Split(',');
         day = strings[0];
         route = strings[1];
         color = strings[2];
+        recycling_route = strings[3];
         parsed = true;
     }
 
