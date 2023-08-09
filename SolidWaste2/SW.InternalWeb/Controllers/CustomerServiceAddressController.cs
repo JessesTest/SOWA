@@ -24,6 +24,7 @@ public class CustomerServiceAddressController : Controller
     private readonly IRefuseRouteService refuseRouteService;
     private readonly IContainerService containerService;
     private readonly IServiceAddressNoteService noteService;
+    private readonly IContainerCodeService containerCodeService;
 
     public CustomerServiceAddressController(
         ICustomerService customerService,
@@ -35,7 +36,8 @@ public class CustomerServiceAddressController : Controller
         IContainerSubtypeService containerSubtypeService,
         IRefuseRouteService refuseRouteService,
         IContainerService containerService,
-        IServiceAddressNoteService noteService)
+        IServiceAddressNoteService noteService,
+        IContainerCodeService containerCodeService)
     {
         this.customerService = customerService;
         this.serviceAddressService = serviceAddressService;
@@ -47,6 +49,7 @@ public class CustomerServiceAddressController : Controller
         this.refuseRouteService = refuseRouteService;
         this.containerService = containerService;
         this.noteService = noteService;
+        this.containerCodeService = containerCodeService;
     }
 
     #region ServiceAddress
@@ -434,7 +437,7 @@ public class CustomerServiceAddressController : Controller
 
     public async Task<IActionResult> ContainerTypeChanged(int containerCodeId, int serviceAddressId, int? containerSubtypeId)
     {
-        var containerCode = await codeService.GetById(containerCodeId);
+        var containerCode = await containerCodeService.GetById(containerCodeId);
         if (containerCode == null)
             return NotFound();
 
