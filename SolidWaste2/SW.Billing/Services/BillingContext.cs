@@ -11,8 +11,8 @@ public class BillingContext
     public string Mthly_Bill_Past_Due_Date { get; init; }
     public string Mthly_Bill_Curr_Due_Date { get; init; }
 
-    public FileInfo BillingSummaryFile { get; init; } // SW_Billing_Summary.txt
-    public FileInfo BillingExceptionFile { get; init; } // SW_Billing_Err_Rpt.txt
+    public FileInfo BillingSummaryFile { get; init; } // SW_Billing_Summary_Rpt.txt
+    public FileInfo BillingExceptionFile { get; init; } // SW_Billing_Error_Rpt.txt
 
     private TextWriter _billingSummaryWriter;
     public TextWriter BillingSummaryWriter => _billingSummaryWriter ??= BillingSummaryFile.AppendText();
