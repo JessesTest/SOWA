@@ -40,7 +40,7 @@ public class BillingBlobService
 
     private async Task SendFileToStorage(FileInfo file, string fileName, bool sendIfEmpty)
     {
-        var time = context.Process_Date;
+        var time = DateTime.Now;
         var name = $"{time:yyyy}/{time:MM}/{time:dd}/{fileName}";
         if (file.Exists)
         {

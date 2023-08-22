@@ -17,7 +17,7 @@ public class BillBlobService : IBillBlobService
     {
         using var db = dbFactory.CreateDbContext();
         return await db.BillBlobs
-            .Where(e => e.TransactionId == transactionId)
+            .Where(e => e.TransactionId == transactionId && !e.DelFlag)
             .AsNoTracking()
             .SingleOrDefaultAsync();
     }

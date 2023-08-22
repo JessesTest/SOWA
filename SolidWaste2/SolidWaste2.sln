@@ -55,7 +55,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW.WeeklyRental", "SW.Weekl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW.Billing", "SW.Billing\SW.Billing.csproj", "{58354697-4862-49D6-8787-DCEEE29136BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SW.BillGenerate", "SW.BillGenerate\SW.BillGenerate.csproj", "{C733A942-A267-47F2-9973-64D83258F71A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW.BillGenerate", "SW.BillGenerate\SW.BillGenerate.csproj", "{C733A942-A267-47F2-9973-64D83258F71A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SW.BillBlobs", "SW.BillBlobs\SW.BillBlobs.csproj", "{97848204-5FE7-4B87-85C4-36944B67DA01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -151,6 +153,10 @@ Global
 		{C733A942-A267-47F2-9973-64D83258F71A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C733A942-A267-47F2-9973-64D83258F71A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C733A942-A267-47F2-9973-64D83258F71A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97848204-5FE7-4B87-85C4-36944B67DA01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97848204-5FE7-4B87-85C4-36944B67DA01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97848204-5FE7-4B87-85C4-36944B67DA01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97848204-5FE7-4B87-85C4-36944B67DA01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,19 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SW.BillGenerate.Services;
+namespace SW.BillBlobs.Services;
 
-public class BillGenerateBlobService
+public class BillBlobStorageService
 {
     private readonly IBlobStorageService storageService;
-    private BillGenerateContext context;
+    private BillBlobContext context;
 
-    public BillGenerateBlobService(IBlobStorageService storageService)
+    public BillBlobStorageService(IBlobStorageService storageService)
     {
         this.storageService = storageService;
     }
 
-    public async Task Handle(BillGenerateContext context)
+    public async Task Handle(BillBlobContext context)
     {
         this.context = context;
         //...
@@ -34,31 +34,24 @@ public class BillGenerateBlobService
     private async Task SendFilesToStorage()
     {
         context.CloseFiles();
-        await SendFileToStorage(context.BillGenerateBatchPdfFile, "SW_Bills_" + DateTime.Now.ToString("yyyy-MM-dd") + ".pdf", true);
-        await SendFileToStorage(context.BillGenerateExceptionFile, "SW_Bill_Generate_Error_Rpt.txt", false);
+        await SendFileToStorage(context.BillBlobSummaryFile, "SW_Bill_Blob_Summary_Rpt.txt", true);
+        await SendFileToStorage(context.BillBlobExceptionFile, "SW_Bill_Blob_Error_Rpt.txt", false);
     }
 
     private async Task SendFileToStorage(FileInfo file, string fileName, bool sendIfEmpty)
     {
         var time = DateTime.Now;
         var name = $"{time:yyyy}/{time:MM}/{time:dd}/{fileName}";
-
-        var content_type = "text/plain";
-        if (fileName != "SW_Bill_Generate_Error_Rpt.txt")
-        {
-            content_type = "application/pdf";
-        }
-
         if (file.Exists)
         {
             using var readStream = file.OpenRead();
-            await storageService.Add(readStream, name, content_type);
+            await storageService.Add(readStream, name, "text/plain");
         }
         else if (sendIfEmpty)
         {
             var bytes = new byte[0];
             using var stream = new MemoryStream(bytes);
-            await storageService.Add(stream, name, content_type);
+            await storageService.Add(stream, name, "text/plain");
         }
     }
 }
