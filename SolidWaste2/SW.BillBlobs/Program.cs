@@ -8,19 +8,21 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 using SW.DAL.Extensions;
 using PE.DAL.Extensions;
-using SW.BillGenerate.Services;
+using SW.BillBlobs.Services;
 using System.Globalization;
 using Common.Services.TelerikReporting;
 
-var process_date = DateTime.Parse($"{DateTime.Today.Year}-{DateTime.Today.Month}-01", new CultureInfo("en-US"));
+var process_date_beg = DateTime.Parse($"{DateTime.Today.Year}-{DateTime.Today.Month}-01", new CultureInfo("en-US"));
+var process_date_end = DateTime.Now;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("Nlog.config", false).GetCurrentClassLogger();
 
-BillGenerateEmailService bill_generate_email_service = null;
+BillBlobEmailService bill_blob_email_service = null;
 
-BillGenerateContext context = new()
+BillBlobContext context = new()
 {
-    Process_Date = process_date
+    Process_Date_Beg = process_date_beg,
+    Process_Date_End = process_date_end
 };
 
 try 
@@ -65,11 +67,11 @@ try
             .AddSolidWasteDbContext(configuration, "SolidWaste")
             .AddPersonEntityDbContext(configuration, "PersonEntity")
             .Configure<SendEmailSettings>(configuration.GetSection("Email"))
-            .AddTransient<BillGenerateEmailService>()
-            .AddTransient<BillGenerateBatchPdfService>()
+            .AddTransient<BillBlobEmailService>()
+            .AddTransient<BillBlobGenerateService>()
             .AddAzureServices(configuration)
             .AddBlobStorageService(configuration, "BlobService")
-            .AddTransient<BillGenerateBlobService>()
+            .AddTransient<BillBlobStorageService>()
             .AddTransient<IReportingService, ReportingService>()
             .AddOptions<ReportingServiceOptions>()
             .Configure(options =>
@@ -80,27 +82,27 @@ try
 
     var app = hostBuilder.Build();
 
-    bill_generate_email_service = app.Services.GetRequiredService<BillGenerateEmailService>();
+    bill_blob_email_service = app.Services.GetRequiredService<BillBlobEmailService>();
 
-    var bill_generate_batch_pdf_service = app.Services.GetRequiredService<BillGenerateBatchPdfService>();
-    await bill_generate_batch_pdf_service.Handle(context);
+    var bill_blob_generate_service = app.Services.GetRequiredService<BillBlobGenerateService>();
+    await bill_blob_generate_service.Handle(context);
 
-    //var bill_generate_blob_service = app.Services.GetRequiredService<BillGenerateBlobService>();
-    //await bill_generate_blob_service.Handle(context);
+    //var bill_blob_storage_service = app.Services.GetRequiredService<BillBlobStorageService>();
+    //await bill_blob_storage_service.Handle(context);
 
-    await bill_generate_email_service.SendEmail(context);
+    await bill_blob_email_service.SendEmail(context);
 }
 catch (Exception e)
 {
     for (var ex = e; ex != null; ex = ex.InnerException)
     {
-        context.BillGenerateExceptionWriter.WriteLine(ex.Message);
-        context.BillGenerateExceptionWriter.WriteLine(ex.StackTrace);
+        context.BillBlobExceptionWriter.WriteLine(ex.Message);
+        context.BillBlobExceptionWriter.WriteLine(ex.StackTrace);
     }
 
-    await bill_generate_email_service?.SendEmail(context);
+    await bill_blob_email_service?.SendEmail(context);
 
-    logger.Error(e, "Exception encountered generating SW Bills batch PDF!");
+    logger.Error(e, "Exception encountered generating SW Bill blobs!");
     throw;
 }
 finally

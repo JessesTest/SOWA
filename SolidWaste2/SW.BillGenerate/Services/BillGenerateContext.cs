@@ -11,11 +11,8 @@ public class BillGenerateContext
 {
     public DateTime Process_Date { get; init; }
 
-    public FileInfo BillGenerateBatchPdfFile { get; init; } //SW Bills Batch PDF
+    public FileInfo BillGenerateBatchPdfFile { get; init; } //SW_Bills_ + DateTime.Now.ToString("yyyy-MM-dd") + .pdf
     public FileInfo BillGenerateExceptionFile { get; init; } //SW_Bill_Generate_Error_Rpt.txt
-
-    //private TextWriter _billGenerateBatchPdfWriter;
-    //public TextWriter BillGenerateBatchPdfWriter => _billGenerateBatchPdfWriter ??= BillGenerateBatchPdfFile.AppendText();
 
     private FileStream _billGenerateBatchPdfWriter;
     public FileStream BillGenerateBatchPdfWriter => _billGenerateBatchPdfWriter ??= BillGenerateBatchPdfFile.OpenWrite();
@@ -34,7 +31,6 @@ public class BillGenerateContext
 
     public void CloseFiles()
     {
-        //var writers = new[] { _billGenerateBatchPdfWriter, _billGenerateExceptionWriter };
         var writers = new[] { _billGenerateExceptionWriter };
         foreach (var writer in writers)
         {
@@ -44,8 +40,7 @@ public class BillGenerateContext
                 writer.Close();
             }
         }
-
-        //SOWA-117
+        
         if (_billGenerateBatchPdfWriter != null) 
         {
             _billGenerateBatchPdfWriter.Close(); 

@@ -80,7 +80,7 @@ public class BillingUpdateService
 
         List<Customer> customer_records = await swdb.GetAllCustomers();
 
-        List<BillMaster> bill_master_records = new List<BillMaster>(); //SW-116 Remove this variable and its occurrences from the program. Isn't needed.
+        List<BillMaster> bill_master_records = new List<BillMaster>();
 
         foreach (var customer in customer_records) 
         {
@@ -804,8 +804,6 @@ public class BillingUpdateService
         bill_master.Transaction = bill_master_transaction;
 
         bill_master_records.Add(bill_master);
-
-        //db.BillMasters.Add(bill_master); //SW-116
     }
 
     public void Add_Bill_Service_Address_Record(PE.DM.Address pe_service_address, ServiceAddress service_address, List<BillServiceAddress> bill_service_address_records, List<BillContainerDetail> bill_container_detail_records)
@@ -829,8 +827,6 @@ public class BillingUpdateService
         bill_service_address.BillContainerDetails = bill_container_detail_records;
 
         bill_service_address_records.Add(bill_service_address);
-
-        //db.BillServiceAddresses.Add(bill_service_address); //SW-116
     }
     
     public void Add_Bill_Container_Detail_Record(Customer customer, ContainerCode container_code, Container container, List<ContainerRate> container_rate_record, int i, int container_prorated_num_days_service, decimal container_charge, List<BillContainerDetail> bill_container_detail_records)
@@ -875,8 +871,6 @@ public class BillingUpdateService
         bill_container_detail.AddToi = "Monthly Billing";
 
         bill_container_detail_records.Add(bill_container_detail);
-
-        //db.BillContainerDetails.Add(bill_container_detail); //SW-116
     }
 
     public Transaction Add_Monthly_Billing_Transaction_Record(Customer customer, List<TransactionCode> billing_transaction_code_records, DateTime mthly_bill_beg_datetime, DateTime mthly_bill_end_datetime, List<Transaction> transaction_records)
@@ -946,8 +940,6 @@ public class BillingUpdateService
         billing_transaction.AddDateTime = DateTime.Now;
 
         billing_transaction.AddToi = "Monthly Billing";
-
-        //db.Transactions.Add(billing_transaction); //SW-116
 
         return billing_transaction;
     }

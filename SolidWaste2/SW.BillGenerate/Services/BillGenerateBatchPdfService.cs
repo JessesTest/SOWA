@@ -1,15 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SW.DAL.Contexts;
 using PE.DAL.Contexts;
-using SW.DM;
-using PE.DM;
-using System.Collections.Generic;
-using System.Net.Mail;
-using Microsoft.Graph;
 using Common.Services.TelerikReporting;
 using Microsoft.Extensions.Options;
-using Telerik.Reporting.Cache.File;
-using Telerik.Reporting.Services;
 
 namespace SW.BillGenerate.Services;
 
@@ -67,9 +60,8 @@ public class BillGenerateBatchPdfService
                 };
         var byte_array = await _reportingService.GenerateReportPDF("SW_Bill", parameters);
 
-        //return File(report, "application/pdf", "sw_bills_" + DateTime.Now + ".pdf");
-        //System.IO.File.WriteAllBytes($"C:\\temp\\{reportName}.{"pdf"}", byte_array);
-
         context.BillGenerateBatchPdfWriter.Write(byte_array);
+
+        Console.WriteLine("Successful Job Completion");
     }
 }
