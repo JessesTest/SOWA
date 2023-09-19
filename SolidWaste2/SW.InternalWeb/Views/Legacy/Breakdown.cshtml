@@ -1,0 +1,96 @@
+﻿@model SW.InternalWeb.Models.Legacy.LegacyBViewModel
+@{
+    ViewBag.Title = "Legacy Breakdown";
+    ViewBag.ATitle = "Legacy Breakdown";
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <fieldset class="form-group">
+            <legend>Breakdown Order</legend>
+            <div class="row form-group">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.EquipmentNumber, new { @class = "font-bold" })
+                    @if (Model.LegacyEquipmentId.HasValue)
+                    {
+                        @Html.ActionLink(Model.EquipmentNumber.ToString(), "Detail", "LegacyEquipment", new { id = Model.LegacyEquipmentId }, new { @class = "btn btn-block btn-primary" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.EquipmentNumber, new { @class = "form-control", @readonly = "readonly" })
+                    }
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.ResolveDate, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.ResolveDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.Driver, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.Driver, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.ProblemNumber, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.ProblemNumber, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.Route, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.Route, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.Mileage, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.Mileage, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.TransDate, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.TransDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="form-group">
+            <legend>Breakdown Details</legend>
+            <div class="row form-group">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.BreakdownCode, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.BreakdownCode, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.ReplaceEuipmentNumber, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.ReplaceEuipmentNumber, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-8">
+                    @Html.LabelFor(m => m.BreakdownLocation, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.BreakdownLocation, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.BreakdownDescription, new { @class = "font-bold" })
+                    @Html.TextAreaFor(m => m.BreakdownDescription, 2, 80, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Record Details</legend>
+            <div class="row">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.AddDate, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.AddDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.AddToi, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.AddToi, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.ChgDate, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.ChgDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.ChgToi, new { @class = "font-bold" })
+                    @Html.TextBoxFor(m => m.ChgToi, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>

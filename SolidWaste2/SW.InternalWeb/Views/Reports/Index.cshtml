@@ -1,0 +1,152 @@
+@model SW.InternalWeb.Models.Reports.ReportsViewModel
+@using SW.InternalWeb.Extensions
+@using Telerik.Reporting;
+@{
+    ViewBag.Title = "Reports";
+    ViewBag.ATitle = "Reports";
+}
+<div class="row">
+    <div class="col-xs-6">
+        <div class="row">
+            <div class="col-sm-12">
+                <section class="panel panel-primary">
+                    <header class="panel-heading font-bold">Transactions</header>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Transactions.html" target="_blank" style="text-decoration:underline">Transaction Listings</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <header class="panel-heading font-bold">Collection Agency Reports</header>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Collections.html" target="_blank" style="text-decoration:underline">Collections Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Counselors.html" target="_blank" style="text-decoration:underline">Counselors Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <header class="panel-heading font-bold">Financial Reports</header>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Delinquency.html" target="_blank" style="text-decoration:underline">Delinquency Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Aging.html" target="_blank" style="text-decoration:underline">Account Balances (Aging) Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_WriteOff.html" target="_blank" style="text-decoration:underline">Write-Off Recommendations Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_DelinquencyRecycling.html" target="_blank" style="text-decoration:underline">Delinquency (Recycling Only) Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_RevenueSummary.html" target="_blank" style="text-decoration:underline">Revenue Summary Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <header class="panel-heading font-bold">Other Reports</header>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_ContractCharges.html" target="_blank" style="text-decoration:underline">Contract Charges</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_PaymentPlanCustomers.html" target="_blank" style="text-decoration:underline">Payment Plan Customers</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 form-group">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_ActiveCustomerList.html" target="_blank" style="text-decoration:underline">Active Customer List</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_Routes.html" target="_blank" style="text-decoration:underline">Routes Report</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <header class="panel-heading font-bold">KanPay</header>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="row" style="background-color: white;">
+                                    <div class="col-xs-12">
+                                        <a href="Html5ReportViewer_KanPay.html" target="_blank" style="text-decoration:underline">KanPay Transactions</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+<br />

@@ -1,0 +1,106 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.CustomerViewModel
+@using SW.InternalWeb.Extensions
+@{
+    ViewBag.Title = "New Customer";
+    ViewBag.faTitleClass = "user-plus";
+    ViewBag.ATitle = "New Customer : General";
+}
+
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li class="active">@Html.ActionLink("Customer Information", "CustomerInformation")</li>
+        <li class=""><a>Billing Address</a></li>
+        <li class=""><a>Phone Number</a></li>
+        <li class=""><a>Email</a></li>
+        <li class=""><a>Service Address</a></li>
+        <li class=""><a>Summary</a></li>
+    </ul>
+    <div class="panel panel-default">
+        @using (Html.BeginForm("CustomerInformation", "NewCustomer", FormMethod.Post, new { @class = "form-horizontal", @role = "form" }))
+        {
+            <div class="panel-body default-click-parent">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.CustomerType)
+                                @Html.DropDownListFor(model => model.CustomerType, Helpers.NewCustomerTypes, new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.EffectiveDate) *
+                                <input asp-for="EffectiveDate" asp-format="{0:MM/dd/yyyy}" type="text" data-provide="datepicker" class="form-control" autocomplete="off" />
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.PurchaseOrder)
+                                @Html.TextBoxFor(model => model.PurchaseOrder, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.CustomerType, null, new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.EffectiveDate, null, new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.PurchaseOrder, null, new { @class = "text-danger" })
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <label for="@Html.NameFor(model => model.FullName)">
+                                    Customer Name * ( @Html.CheckBoxFor(model => model.NameTypeFlag, new { @class = "checkbox-inline" }) Check if Business )
+                                </label>
+                                @Html.TextBoxFor(model => model.FullName, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.FullName, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @Html.LabelFor(model => model.NameAttn)
+                                @Html.TextBoxFor(model => model.NameAttn, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.NameAttn, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @Html.LabelFor(model => model.Contact)
+                                @Html.TextBoxFor(model => model.Contact, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Contact, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                @Html.LabelFor(model => model.Notes)
+                                @Html.TextBoxFor(model => model.Notes, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Notes, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12">
+                                (* Denotes Required Field)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <hr />
+                    </div>
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>
+                        <input type="submit" value="Clear" class="btn btn-info btn-s-xs" name="Clear" data-form-action="@Url.Action("CustomerInformation_Clear", "NewCustomer")" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("[data-provide='datepicker']").mask("99/99/9999", { placeholder: "mm/dd/yyyy" });
+            $(".default-click-parent input").keypress(function ($event) {
+                if ($event.which == 13) {
+                    $event.preventDefault();
+                    $(this).closest(".default-click-parent").find(".default-click").click();
+                }
+            });
+        });
+    </script>
+}

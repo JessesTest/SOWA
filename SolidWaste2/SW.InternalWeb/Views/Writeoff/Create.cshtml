@@ -1,0 +1,145 @@
+﻿@model SW.InternalWeb.Models.Writeoff.WriteoffPaymentViewModel
+@inject SW.InternalWeb.Services.WriteoffCodeSelectItemService codeService
+@{
+    ViewBag.Title = "Write-off";
+    ViewBag.ATitle = "Write-off";
+
+    var writeoffCodes = await codeService.Get();
+}
+
+@using (Html.BeginForm())
+{
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.CustomerId, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.CustomerId, new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-9">
+                            @Html.LabelFor(m => m.Name, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.PastDue90Days, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.PastDue90Days, "{0:0.00}", new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.Collections, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Collections, "{0:0.00}", new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.Counselors, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Counselors, "{0:0.00}", new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.Uncollectable, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Uncollectable, "{0:0.00}", new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            @Html.LabelFor(m => m.TransactionCode, new { @class = "control-label font-bold" })
+                            <select asp-for="TransactionCode" asp-items="writeoffCodes" class="form-control font-mono text-uppercase"></select>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.Amount, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Amount, new { @class = "form-control font-mono text-uppercase" })
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                            @Html.LabelFor(m => m.Comment, new { @class = "control-label font-bold" })
+                            @Html.TextAreaFor(m => m.Comment, new { @class = "form-control font-mono text-uppercase", rows = 3 })
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            <label for="BalanceAfter" class="control-label font-bold">Balance Before</label>
+                            <input type="text" id="BalanceBefore" class="form-control text-mono" disabled="disabled" value="" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="BalanceAfter" class="control-label font-bold">Balance After</label>
+                            <input type="text" id="BalanceAfter" class="form-control text-mono" disabled="disabled" value="" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            <button type="submit" id="Save" class="btn btn-block btn-primary">Add Write-off</button>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.ActionLink("Back", "Index", new { }, new { @class = "btn btn-block btn-info" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.ActionLink("Account", "Index", "Customer", new { customerId = Model.CustomerId }, new { @class = "btn btn-block btn-info" })
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        function updateTransactionCode() {
+            $("#Save").attr("disabled", true);
+            
+            var $beforeTxt = $("#BalanceBefore");
+            var $afterTxt = $("#BalanceAfter");
+            var transactionCode = $("#TransactionCode").val();
+            var amountStr = $("#Amount").val();
+            var beforeStr;
+
+            if (transactionCode == "VWO") {
+                beforeStr = $("#Collections").val();
+            } else if (transactionCode == "CWO") {
+                beforeStr = $("#Counselors").val();
+            } else if (transactionCode == "BWO") {
+                beforeStr = $("#PastDue90Days").val();
+            } else if (transactionCode == "UWO") {
+                beforeStr = $("#Uncollectable").val();
+            } else {
+                beforeStr = "";
+            }
+
+            $beforeTxt.val(beforeStr);
+
+            if (isNaN(amountStr)) {
+                $afterTxt.val("");
+                return;
+            }
+
+            var amount = parseFloat(amountStr);
+            var before = parseFloat(beforeStr);
+            var after = before - amount;
+            $afterTxt.val(after.toFixed(2));
+
+            if (after < 0) {
+                alert("Invalid amount");
+                return;
+            }
+            
+            $("#Save").attr("disabled", false);
+        }
+
+        $(document).ready(function () {
+            if (!$.isNumeric($("#CustomerId").val())) {
+                $("#TransactionCode").attr("disabled", true);
+                $("#Amount").attr("readonly", true);
+                $("#Comment").attr("readonly", true);
+            }
+
+            $('#Amount').on('change', updateTransactionCode);
+            $('#TransactionCode').on('change', updateTransactionCode);
+
+            $('#TransactionCode').trigger('change');
+        });
+    </script>
+}

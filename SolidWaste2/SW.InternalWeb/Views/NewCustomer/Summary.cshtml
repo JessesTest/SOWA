@@ -1,0 +1,303 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.SummaryViewModel
+@using SW.InternalWeb.Extensions
+@inject SW.InternalWeb.Services.ContainerCodeSelectItemsService typeService;
+@inject SW.InternalWeb.Services.ContainerSubtypeSelectItemsService subtypeService;
+@{
+    ViewBag.Title = "New Customer";
+    ViewBag.faTitleClass = "user-plus";
+    ViewBag.ATitle = "New Customer : Summary";
+
+    var containerCodes = await typeService.Get();
+    var containerSubtypes = await subtypeService.Get();
+}
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li class="">@Html.ActionLink("Customer Information", "CustomerInformation")</li>
+        <li class=""><a>Billing Address</a></li>
+        <li class=""><a>Phone Number</a></li>
+        <li class=""><a>Email</a></li>
+        <li class=""><a>Service Address</a></li>
+        <li class="active"><a>Summary</a></li>
+    </ul>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4 class="margin-vertical-0 font-bold">Customer Information</h4>
+                        </div>
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Type</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @Html.DisplayFor(m => m.Customer.CustomerType)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Effective Date</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @string.Format("{0:d}", Model.Customer.EffectiveDate)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Name</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @Html.DisplayFor(m => m.Customer.FullName)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Name Attn</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @Html.DisplayFor(m => m.Customer.NameAttn)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Contact</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @Html.DisplayFor(m => m.Customer.Contact)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Notes</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @Html.DisplayFor(m => m.Customer.Notes)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Purchase Order</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @Html.DisplayFor(m => m.Customer.PurchaseOrder)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Billing Address</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @{
+                                var a = Model.BillingAddress;
+                            }
+                            @string.Format("{0} {1}", a.AddressLine1, a.AddressLine2).Trim()
+                            <br />
+                            @string.Format("{0} {1} {2}", a.City, a.State, a.Zip).Trim()
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Contact Phone</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @Html.DisplayFor(m => m.Phone.PhoneNumber)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Contact Email</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            @Html.DisplayFor(m => m.Email.Email, new { @class = "control-label font-bold" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="control-label font-bold">Billing Amount</label>
+                        </div>
+                        <div class="col-md-7 text-ellipsis">
+                            <span action="control-label font-bold">@Model.GetBillingAmount()</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4 class="margin-vertical-0 font-bold">Service Information</h4>
+                        </div>
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                    </div>
+                    @for (int i = 0; i < Model.ServiceAddresses.Count(); i++)
+                    {
+                        var sa = Model.ServiceAddresses.ElementAt(i);
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="bg-light">
+                                    &nbsp;&nbsp;
+                                    <label class="control-label font-bold text-ul">Location #@(i + 1)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                &nbsp;&nbsp;
+                                <label class="control-label font-bold">Service Address</label>
+                            </div>
+                            <div class="col-md-7 text-ellipsis">
+                                @string.Format("{0} {1}", sa.AddressLine1, sa.AddressLine2).Trim()
+                                <br />
+                                @string.Format("{0} {1} {2}", sa.City, sa.State, sa.Zip).Trim()
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                &nbsp;&nbsp;
+                                @Html.LabelFor(m => sa.EffectiveDate, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-7 text-ellipsis">
+                                @string.Format("{0:d}", sa.EffectiveDate)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                &nbsp;&nbsp;
+                                <label action="control-label font-bold">Billing Amount</label>
+                            </div>
+                            <div class="col-md-7 text-ellipsis">
+                                @Model.GetBillingAmount(sa)
+                            </div>
+                        </div>
+                        for (int j = 0; j < sa.Containers.Count(); j++)
+                        {
+                            var c = sa.Containers.ElementAt(j);
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;
+                                    <label class="control-label font-bold text-ul">Container #@(j + 1)</label>
+                                </div>
+                                <div class="col-md-7 text-ellipsis">
+                                    @containerCodes.Where(cc => Int32.Parse(cc.Value) == c.ContainerCodeId).Select(cc => cc.Text).FirstOrDefault()
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5"></div>
+                                <div class="col-md-7 text-ellipsis">
+                                    @containerSubtypes.Where(st => Int32.Parse(st.Value) == c.ContainerSubtypeId).Select(st => st.Text).FirstOrDefault()
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    @Html.LabelFor(m => c.RouteNumber, new { @class = "control-label font-bold" })
+                                </div>
+                                <div class="col-md-7 text-ellipsis">
+                                    @Html.DisplayFor(m => c.RouteNumber)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    @Html.LabelFor(m => c.ActualSize, new { @class = "control-label font-bold" })
+                                </div>
+                                <div class="col-md-7 text-ellipsis">
+                                    @Html.DisplayFor(m => c.ActualSize)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    @Html.LabelFor(m => c.BillingSize, new { @class = "control-label font-bold" })
+                                </div>
+                                <div class="col-md-7 text-ellipsis">
+                                    @Html.DisplayFor(m => c.BillingSize)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <label class="control-label font-bold">Days Serviced</label>
+                                </div>
+                                <div class="col-md-7 text-ellipsis">
+                                    <span>@(c.MonService ? 'M' : '.')</span>
+                                    <span>@(c.TueService ? 'T' : '.')</span>
+                                    <span>@(c.WedService ? 'W' : '.')</span>
+                                    <span>@(c.ThuService ? 'T' : '.')</span>
+                                    <span>@(c.FriService ? 'F' : '.')</span>
+                                    <span>@(c.SatService ? 'S' : '.')</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <label class="control-label font-bold">Additional Charge</label>
+                                </div>
+                                <div class="col-md-7 text-ellipsis">
+                                    @Html.DisplayFor(m => c.AdditionalCharge)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    @Html.LabelFor(m => c.EffectiveDate, new { @class = "control-label font-bold" })
+                                </div>
+                                <div class="col-md-7 text-ellipsis">
+                                    @string.Format("{0:d}", c.EffectiveDate)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <label action="control-label font-bold">Billing Amount</label>
+                                </div>
+                                <div class="col-md-7 text-ellipsis">
+                                    @Model.GetBillingAmount(c)
+                                </div>
+                            </div>
+                        }
+                        for (int j = 0; j < sa.Notes.Count(); j++)
+                        {
+                            var n = sa.Notes.ElementAt(j);
+                            <div class="row">
+                                <div class="col-md-5">
+                                    &nbsp;&nbsp;
+                                    <label class="control-label font-bold text-ul">Note #@(j + 1)</label>
+                                </div>
+                                <div class="col-md-7">
+                                    @n.Note.FormatMultiLine()
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <hr />
+                </div>
+                <div class="col-md-12">
+                    @Html.ActionLink("Previous", "ServiceAddress", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
+                    @Html.ActionLink("Submit", "Done", "NewCustomer", null, new { @class = "btn btn-danger btn-s-xs" })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

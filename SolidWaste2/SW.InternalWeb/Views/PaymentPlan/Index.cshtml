@@ -1,0 +1,58 @@
+﻿@model SW.InternalWeb.Models.PaymentPlans.PaymentPlansViewModel
+@{
+    ViewBag.Title = "Payment Plans";
+    ViewBag.ATitle = "Payment Plans: " + Model.CustomerId;
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table id="results" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Months</th>
+                    <th>First Due Date</th>
+                    <th>Plan Amount</th>
+                    <th>Payment Total</th>
+                    <th>Status</th>
+                    <th>Agreement</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pp in Model.PaymentPlans)
+                {
+                    <tr>
+                        <td>@Html.ActionLink("Edit", "Edit", "PaymentPlan", new { id = pp.Id }, new { @class = "btn btn-primary" })</td>
+                        <td>@pp.Months</td>
+                        <td>@string.Format("{0:d}", pp.Details.First().DueDate)</td>
+                        <td>@string.Format("{0:c}", pp.Details.Last().Amount)</td>
+                        <td>@string.Format("{0:c}", pp.Details.Last().PaymentTotal)</td>
+                        <td>@pp.Status</td>
+                        <td>@Html.ActionLink("Agreement", "PaymentPlanAgreement", "Reports", new { paymentPlanId = pp.Id }, new { @class = "btn btn-info" })</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="col-xs-2">
+                @Html.ActionLink("Create Plan", "Create", "PaymentPlan", new { customerId = Model.CustomerId }, new { @class = "btn btn-block btn-primary" })
+            </div>
+            <div class="col-xs-2">
+                @Html.ActionLink("Account", "Index", "Customer", new { customerId = Model.CustomerId }, new { @class = "btn btn-block btn-info" })
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#results").DataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
+                "order": [[5, "asc"]]
+            });
+        })
+    </script>
+}

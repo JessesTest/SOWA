@@ -1,0 +1,183 @@
+﻿@model SW.InternalWeb.Models.Collections.CollectionsPaymentViewModel
+@inject SW.BLL.Services.ITransactionCodeService transactionCodeService
+@{
+    ViewBag.Title = "Collections Payment";
+    ViewBag.ATitle = "Collections Payment";
+
+    var items = (await transactionCodeService.CollectionPaymentCodes())
+        .Select(c => new SelectListItem { Text = c.Description, Value = c.Code })
+        .ToList();
+}
+
+@using (Html.BeginForm())
+{
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-8">
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.CustomerId, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.CustomerId, new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-9">
+                            @Html.LabelFor(m => m.Name, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.Collections, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Collections, "{0:0.00}", new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.Counselors, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Counselors, "{0:0.00}", new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.Uncollectable, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Uncollectable, "{0:0.00}", new { @class = "form-control font-mono text-uppercase", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            @Html.LabelFor(m => m.TransactionCode, new { @class = "control-label font-bold" })
+                            <select asp-for="TransactionCode" asp-items="items" class="form-control font-mono text-uppercase"></select>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.LabelFor(m => m.Amount, new { @class = "control-label font-bold" })
+                            @Html.TextBoxFor(m => m.Amount, new { @class = "form-control font-mono text-uppercase" })
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                            @Html.LabelFor(m => m.Comment, new { @class = "control-label font-bold" })
+                            @Html.TextAreaFor(m => m.Comment, new { @class = "form-control font-mono text-uppercase", rows = 2 })
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            <label for="BalanceAfter" class="control-label font-bold">Balance Before</label>
+                            <input type="text" id="BalanceBefore" class="form-control text-mono" disabled="disabled" value="" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="BalanceAfter" class="control-label font-bold">Balance After</label>
+                            <input type="text" id="BalanceAfter" class="form-control text-mono" disabled="disabled" value="" />
+                        </div>
+                        <div class="col-md-3" id="UncollectableBeforeCol" hidden="hidden">
+                            <label for="UncollectableBefore" class="control-label font-bold">Uncollect. Before</label>
+                            <input type="text" id="UncollectableBefore" class="form-control text-mono" disabled="disabled" value="" />
+                        </div>
+                        <div class="col-md-3" id="UncollectableAfterCol" hidden="hidden">
+                            <label for="UncollectableAfter" class="control-label font-bold">Uncollect. After</label>
+                            <input type="text" id="UncollectableAfter" class="form-control text-mono" disabled="disabled" value="" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            <button type="submit" id="Save" class="btn btn-block btn-primary">Add Payment</button>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.ActionLink("Back", "Index", new { }, new { @class = "btn btn-block btn-info" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.ActionLink("Account", "Index", "Customer", new { customerId = Model.CustomerId }, new { @class = "btn btn-block btn-info" })
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#TransactionCode").change(function () {
+                $("#Save").attr("disabled", true);
+                $("#UncollectableBeforeCol").prop("hidden", true);
+                $("#UncollectableAfterCol").prop("hidden", true);
+
+                var $beforeTxt = $("#BalanceBefore");
+                var $afterTxt = $("#BalanceAfter");
+                var $uncollectableBeforeTxt = $("#UncollectableBefore");
+                var $uncollectableAfterTxt = $("#UncollectableAfter");
+                var transactionCode = $("#TransactionCode").val();
+                var $amountTxt = $("#Amount");
+                var beforeStr;
+                var uncollectableBeforeStr;
+
+                if (transactionCode == "PV") {
+                    beforeStr = $("#Collections").val();
+                } else if (transactionCode == "PCC") {
+                    beforeStr = $("#Counselors").val();
+                } else if (transactionCode == "PU") {
+                    beforeStr = $("#Uncollectable").val();
+                } else if (transactionCode == "V2U") {
+                    beforeStr = $("#Collections").val();
+                    uncollectableBeforeStr = $("#Uncollectable").val();
+                    $("#UncollectableBeforeCol").prop("hidden", false);
+                    $("#UncollectableAfterCol").prop("hidden", false);
+                } else if (transactionCode == "C2U") {
+                    beforeStr = $("#Counselors").val();
+                    uncollectableBeforeStr = $("#Uncollectable").val();
+                    $("#UncollectableBeforeCol").prop("hidden", false);
+                    $("#UncollectableAfterCol").prop("hidden", false);
+                } else {
+                    beforeStr = "";
+                    uncollectableBeforeStr = "";
+                }
+
+                var amountStr = $amountTxt.val();
+                if (isNaN(parseFloat(amountStr)) || isNaN(parseFloat(beforeStr))) {
+                    $beforeTxt.val("");
+                    $afterTxt.val("");
+                    return;
+                }
+                $amountTxt.val(parseFloat(amountStr).toFixed(2));
+
+                $beforeTxt.val(beforeStr);
+                $uncollectableBeforeTxt.val(uncollectableBeforeStr);
+
+                var amount = parseFloat($amountTxt.val());
+                var before = parseFloat(beforeStr);
+                var after = before - amount;
+                var uncollectableBefore = parseFloat(uncollectableBeforeStr);
+                var uncollectableAfter = uncollectableBefore + amount;
+
+                $afterTxt.val(after.toFixed(2));
+                $uncollectableAfterTxt.val(uncollectableAfter.toFixed(2));
+
+                if (after < 0 || uncollectableBefore < 0)
+                {
+                    alert("Invalid amount");
+                    return;
+                }
+                if (amount == 0)
+                    return;
+
+                $("#Save").attr("disabled", false);
+            });
+            $("#Amount").change(function () {
+                $("#TransactionCode").change();
+            });
+
+            $("#TransactionCode").change();
+
+            if (!$.isNumeric($("#CustomerId").val())) {
+                $("#TransactionCode").attr("disabled", true);
+                $("#Amount").attr("readonly", true);
+                $("#Comment").attr("readonly", true);
+            }
+
+            $('form').submit(function () {
+                if ($(this).valid()) {
+                    $(':submit', this).attr('disabled', 'disabled');
+                }
+            });
+        });
+    </script>
+}

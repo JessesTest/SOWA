@@ -1,0 +1,92 @@
+name: release-publish artifact and trigger Azure to retrieve
+
+on:
+   release:
+     types: [created]
+   workflow_dispatch:
+
+jobs:
+  restore-build-publish:
+    runs-on: ubuntu-latest
+
+    steps:  
+      - name: Get Last 2 Releases
+        uses: octokit/graphql-action@v2.x
+        id: get_latest_releases
+        with:
+          query: |
+            query release($owner:String!,$repo:String!) {
+              repository(owner:$owner,name:$repo) {
+                releases(first:2) {
+                  nodes {
+                    tagName
+                  }
+                }
+              }
+            }
+          variables: |
+            owner: ${{ github.event.repository.name }}
+            repo: ${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}         
+          
+      - name: Get Tag Name of Previous Release
+        id: previous_release
+        run: echo "tagName=${{ fromJson(steps.get_latest_releases.outputs.data).repository.releases.nodes[1].tagName }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v3
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          base: ${{ steps.previous_release.outputs.tagName }}
+          filters: |
+            Shared:
+            - '${{ SOLUTION_NAME }}/Common/**'
+            - '${{ SOLUTION_NAME }}/Common.Web/**'
+            - '${{ SOLUTION_NAME }}/Identity.BL/**'
+            - '${{ SOLUTION_NAME }}/Notify.BL/**'
+            - '${{ SOLUTION_NAME }}/PE.BL/**'
+            - '${{ SOLUTION_NAME }}/SW.BLL/**'                      
+            External:
+            - '${{ SOLUTION_NAME }}/${{ EXTERNAL_WEB_PROJECT }}/**'
+            Internal:
+            - '${{ SOLUTION_NAME }}/${{ INTERNAL_WEB_PROJECT }}/**'
+
+      - name: Publish Internal
+        if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')
+        run: dotnet publish ./${{ SOLUTION_NAME }}/${{ INTERNAL_WEB_PROJECT }}/${{ INTERNAL_WEB_PROJECT }}.csproj --configuration Release
+
+      - name: Upload Internal Artifact
+        if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ SOLUTION_NAME }}-Internal
+          path: ./${{ SOLUTION_NAME }}/${{ INTERNAL_WEB_PROJECT }}/bin/Release/net6.0
+
+      - uses: azure/pipelines@v1
+        if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')      
+        with:
+          azure-devops-project-url: ${{ AZURE_DEVOPS_PROJECT_URL }}
+          azure-pipeline-name: Internal-Release-Deploy
+          azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+
+
+
+      - name: Publish External
+        if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')
+        run: dotnet publish ./${{ SOLUTION_NAME }}/${{ EXTERNAL_WEB_PROJECT }}/${{ EXTERNAL_WEB_PROJECT }}.csproj --configuration Release
+
+      - name: Upload External Artifact
+        if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ SOLUTION_NAME }}-External
+          path: ./${{ SOLUTION_NAME }}/${{ EXTERNAL_WEB_PROJECT }}/bin/Release/net6.0
+
+      - uses: azure/pipelines@v1
+        if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')      
+        with:
+          azure-devops-project-url: ${{ AZURE_DEVOPS_PROJECT_URL }}
+          azure-pipeline-name: External-Release-Deploy
+          azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}            

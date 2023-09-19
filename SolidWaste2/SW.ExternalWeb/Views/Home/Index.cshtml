@@ -1,0 +1,151 @@
+﻿@model SW.ExternalWeb.Models.AccountHomeViewModel
+@using System.Configuration
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="row">
+            <div class="col-xs-12">
+                <h3>Summary of Charges from @Html.DisplayFor(m => m.AccountSummaryPeriodBeginDate) @*@Model.AccountSummaryPeriodBeginDate.Value.ToShortDateString()*@ thru @Html.DisplayFor(m => m.AccountSummaryPeriodEndDate) @*@Model.AccountSummaryPeriodEndDate.Value.ToShortDateString()*@</h3>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="row">
+                <div class="col-sm-12 col-md-12">
+                    <div class="row">
+                        <div class="col-xs-10">
+                            <div class="row">
+                                <text id="billingaddresssummaryheader">
+                                    This bill was mailed to:
+                                    @Html.DisplayFor(m => m.BillingAddress, new { id = "billingaddresssummaryheader" })
+                                </text>
+                            </div>
+                        </div>
+                        <div class="col-xs-2 text-xs-right">
+                            <div class="row">
+                                @if (!string.IsNullOrWhiteSpace(Model.CurrentBillTransactionId))
+                                {
+                                    <h3 style="margin-bottom: 0px;"><a class="text-ul sublink" href="@Url.Action("DownloadBill", "BillingHistory", new { transactionId = Model.CurrentBillTransactionId })">(View Bill in PDF)</a></h3>
+                                }
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*<div class="hidden-xs visible-sm hidden-md hidden-lg col-sm-6">
+                    <h2>Amount Due:</h2>
+                </div>*@
+                @*<div class="hidden-xs visible-sm hidden-md hidden-lg col-sm-6 text-sm-right">
+                    <h2>@Model.AccountSummaryTotalDue.Value.ToString("c")</h2>
+                </div>*@
+                @*<div class="hidden-xs hidden-sm visible-md visible-lg col-xs-12 col-md-5">
+                    <h2 class="text-xs-right" style="float: right;">Amount Due: @Model.AccountSummaryTotalDue.Value.ToString("c")</h2>
+                </div>*@
+                @*<div class="visible-xs hidden-sm hidden-md hidden-lg col-xs-12 col-md-5">
+                    <h2 class="text-xs-left" style="float: left;">Amount Due:</h2>
+                    <h2 class="text-xs-right" style="float: right;">@Model.AccountSummaryTotalDue.Value.ToString("c")</h2>
+                </div>*@
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-xs-12">
+                <div class="box-grey" style="font-family: Courier New, Courier, monospace; font-size: 16px;">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-7">
+                            &nbsp;
+                            Previous Balance:
+                        </div>
+                        <div class="col-xs-12 col-sm-5 text-xs-right">
+                            @Model.AccountSummaryPreviousBalance.ToString("c")
+                            &nbsp;
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-7">
+                            &nbsp;
+                            Any Payments:
+                        </div>
+                        <div class="col-xs-12 col-sm-5 text-xs-right">
+                            @if (Model.AccountSummaryAnyPayments < 0)
+                            {
+                                <text>@Model.AccountSummaryAnyPayments.ToString("c")</text>
+                            }
+                            else
+                            {
+                                <text>@Math.Abs(Model.AccountSummaryAnyPayments).ToString("c")&nbsp;</text>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-7">
+                            &nbsp;
+                            Any Adjustments:
+                        </div>
+                        <div class="col-xs-12 col-sm-5 text-xs-right">
+                            @if (Model.AccountSummaryAnyAdjustments >= 0)
+                            {
+                                <text>@Model.AccountSummaryAnyAdjustments.ToString("c")&nbsp;</text>
+                            }
+                            else
+                            {
+                                <text>(@Math.Abs(Model.AccountSummaryAnyAdjustments).ToString("c"))</text>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-7">
+                            &nbsp;
+                            New Charges:
+                        </div>
+                        <div class="col-xs-12 col-sm-5 text-xs-right">
+                            @if (Model.AccountSummaryNewCharges >= 0)
+                            {
+                                <text>@Model.AccountSummaryNewCharges.ToString("c")&nbsp;</text>
+                            }
+                            else
+                            {
+                                <text>(@Math.Abs(Model.AccountSummaryNewCharges).ToString("c"))</text>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <hr style="border-bottom: 1px double #344479; margin: 10px -12px 10px -12px;" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-7">
+                            Total Due by @Model.AccountSummaryDueDate.ToShortDateString()
+                        </div>
+                        <div class="col-xs-12 col-sm-5 text-xs-right">
+                            @if (Model.AccountSummaryTotalDue >= 0)
+                            {
+                                <text>@Model.AccountSummaryTotalDue.ToString("c")&nbsp;</text>
+                            }
+                            else
+                            {
+                                <text>(@Math.Abs(Model.AccountSummaryTotalDue).ToString("c"))</text>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-xs-12">
+                <table id="transactions" class="table table-striped" cellspacing="0" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Add Date Time</th>
+                            <th>Activity</th>
+                            <th>Transaction Amount</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,312 @@
+﻿@model SW.InternalWeb.Models.CustomerServiceAddress.ServiceAddressMasterViewModel
+@using SW.InternalWeb.Extensions
+@{
+    ViewBag.Title = "Customer Service Address";
+    ViewBag.faTitleClass = "wrench";
+    ViewBag.ATitle = "Customer Maintenance : " + Model.FullName + "   Account#" + Model.ServiceAddress.CustomerId;
+}
+
+@await Component.InvokeAsync("CustomerAlerts", new { customerId = Model.ServiceAddress.CustomerId })
+
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li class=""><a href="@Url.Action("Index", "Customer", new { customerID = Model.ServiceAddress.CustomerId })">Customer Information</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerBillingAddress", new { customerID = Model.ServiceAddress.CustomerId })">Billing Address</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerPhoneNumber", new { customerID = Model.ServiceAddress.CustomerId })">Phone Number</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerEmail", new { customerID = Model.ServiceAddress.CustomerId })">Email</a></li>
+        <li class="active"><a href="@Url.Action("Index", "CustomerServiceAddress", new { customerID = Model.ServiceAddress.CustomerId })">Service Address</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerTransactionHistory", new { customerID = Model.ServiceAddress.CustomerId })">Transaction History</a></li>
+    </ul>
+    <div class="panel panel-default">
+        @using (Html.BeginForm("Action", "Controller", FormMethod.Post))
+        {
+            <div class="panel-body">
+                <partial name="ServiceAddress">
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function loadBillingSizes() {
+            var $billingSelect = $("#Container_BillingSize");
+            var postData = {
+                containerCodeId: $("#Container_ContainerCodeId").val(),
+                containerSubtypeId: $("#Container_ContainerSubtypeID").val(),
+                dayCount: $("input.container-size-changer:checked").length,
+                currentValue: $billingSelect.val(),
+                effectiveDate: $("#Container_EffectiveDate").val()
+            };
+            $.post(
+                "@Url.Action("BillingSizeSelect", "CustomerServiceAddress")",
+                postData,
+                function (data) {
+                    //console.log("replacing billing select");
+                    var disable = $billingSelect.prop("disabled");
+
+                    $billingSelect.replaceWith(data);
+
+                    $("#Container_BillingSize").change();
+                    $("#Container_BillingSize").prop("disabled", disable);
+                });
+        }
+
+        function ajaxButton($event, $btn) {
+            $event.preventDefault();
+            var groupName = $btn.data("formGroup");
+            if (groupName) {
+                var $group = $("." + groupName);
+                // requires jquery validator...
+                if (!$group.valid()) {
+                    window.alert("There are field validation errors");
+                    return;
+                } else {
+                    var $d = $group.find("[data-days-of-service]");
+                    if ($d.length) {
+                        var array = $d.data("daysOfService");
+                        var count = $(".checkbox-inline:checked").length;
+                        if(array.indexOf(count) < 0){
+                            window.alert("Invalid number of days");
+                            return;
+                        }
+                    }
+                }
+            }
+
+            let reloadSubtypeList =
+                $btn.data("formAction") == '@Url.Action("PreviousContainer", "CustomerServiceAddress")' ||
+                $btn.data("formAction") == '@Url.Action("NextContainer", "CustomerServiceAddress")';
+
+            $.ajax(
+                $btn.data("formAction"),
+                {
+                    method: "POST",
+                    data: $btn.closest("form").serialize(),
+                    success: function (data) {
+                        var $panel = $btn.closest(".panel-body");
+                        $panel.html(data);
+                        $panel.find("[data-provide='datepicker']").mask("99/99/9999", { placeholder: "mm/dd/yyyy" });
+                        if ($panel.find("#Container_BillingSize").length) {
+                            // container paged
+                            billingSizeChanged(null);
+                            containerSubtypeChanged(null);
+                        }
+                        updatePanelColors();
+
+                        if (reloadSubtypeList)
+                            containerTypeChanged();
+                    },
+                    complete: function (jqXHR, textStatus) {
+                        var message = jqXHR.getResponseHeader("X-Alert-Message");
+                        if (message)
+                            alert(message);
+                    },
+                    error: function () {
+                        alert("There was an error");
+                    }
+                });
+        }
+
+        //function updatePanelColors($event) {
+        //    if ($('#ServiceAddress_CancelDate').val() != '')
+        //    {
+        //        $('#ServiceAddressPanel').addClass('alert-danger');
+        //        if ($('#Container_CancelDate').val() != '') {
+        //            $('#ContainerPanel').removeClass('alert-warning');
+        //            $('#ContainerPanel').addClass('alert-danger');
+        //        }
+        //        else {
+        //            $('#ContainerPanel').removeClass('alert-danger');
+        //            $('#ContainerPanel').addClass('alert-warning');
+        //        }
+        //    }
+        //    else {
+        //        //$('#ServiceAddressPanel').removeClass('alert-danger');
+        //        //if ($('#Container_CancelDate').val() {
+        //        //    $('#ContainerPanel').addClass('alert-warning');
+        //        //}
+        //        //else {
+        //        //    $('#ContainerPanel').removeClass('alert-danger');
+        //        //}
+        //        $('#ServiceAddressPanel').removeClass('alert-danger');
+        //        var dateEntered = $('#Container_CancelDate').val()
+        //        var month = dateEntered.substring(0, 2);
+        //        var day = dateEntered.substring(3, 5);
+        //        var year = dateEntered.substring(6, 10);
+
+        //        var coDate = new Date(month - 1, day, year);
+        //        var currentDate = new Date();
+
+        //        if (coDate >= currentDate) {
+        //            alert("Date Entered is equal/greater than Current Date");
+
+        //        }
+        //        else {
+        //            alert("Date Entered is less than Current Date");
+        //        }
+        //    }
+        //}
+        function updatePanelColors($event) {
+            $('#ServiceAddressPanel').removeClass('alert-warning');
+            $('#ServiceAddressPanel').removeClass('alert-danger');
+            $('#ContainerPanel').removeClass('alert-warning');
+            $('#ContainerPanel').removeClass('alert-danger');
+
+            if ($('#ServiceAddress_CancelDate').val() != '')
+            {
+                var saDateEntered = $('#ServiceAddress_CancelDate').val();
+                var now = new Date();
+
+                var saCurrentDate = ((now.getMonth() + 1) < 10 ? '0' : '') + (now.getMonth() + 1) + "/"
+                    + ((now.getDate() < 10 ? '0' : '') + now.getDate()) + "/"
+                    + now.getFullYear();
+
+                if (new Date(saDateEntered) >= new Date(saCurrentDate))
+                {
+                    $('#ServiceAddressPanel').addClass('alert-warning');
+                }
+                else
+                {
+                    $('#ServiceAddressPanel').addClass('alert-danger');
+                }
+            }
+
+            if ($('#Container_CancelDate').val() != '')
+            {
+                var coDateEntered = $('#Container_CancelDate').val();
+                var now = new Date();
+
+                var coCurrentDate = ((now.getMonth() + 1) < 10 ? '0' : '') + (now.getMonth() + 1) + "/"
+                    + ((now.getDate() < 10 ? '0' : '') + now.getDate()) + "/"
+                    + now.getFullYear();
+
+                if (new Date(coDateEntered) >= new Date(coCurrentDate))
+                {
+                    $('#ContainerPanel').addClass('alert-warning');
+                }
+                else
+                {
+                    $('#ContainerPanel').addClass('alert-danger');
+                }
+            }
+        }
+
+        function containerTypeChanged(event) {
+            var postData = {
+                containerSubtypeId: $("#Container_ContainerSubtypeID").val(),
+                containerCodeId: $("#Container_ContainerCodeId").val(),
+                serviceAddressId: $("#ServiceAddress_Id").val()
+            };
+            $.post(
+                "@Url.Action("ContainerTypeChanged", "CustomerServiceAddress")",
+                postData,
+                function (data) {
+                    var $routeLabel = $(".route-number");
+                    $routeLabel.removeClass("route-number-blue route-number-red");
+                    if (data.routeInfo == true) {
+                        if (data.isRed) {
+                            $routeLabel.addClass("route-number-red");
+                        } else if (data.isBlue) {
+                            $routeLabel.addClass("route-number-blue");
+                        }
+                        $("#Container_RouteNumber").val(data.routeNum);
+                        $("#Container_MonService")[0].checked = data.isMon;
+                        $("#Container_TueService")[0].checked = data.isTue;
+                        $("#Container_WedService")[0].checked = data.isWed;
+                        $("#Container_ThuService")[0].checked = data.isThu;
+                        $("#Container_FriService")[0].checked = data.isFri;
+                        $("#Container_SatService")[0].checked = data.isSat;
+                    }
+                    var $subtypeSelect = $("#Container_ContainerSubtypeID");
+                    $subtypeSelect.children().remove();
+                    $subtypeSelect.append(data.optionHtml);
+                    $subtypeSelect.change();
+                });
+        }
+
+        function containerSubtypeChanged(event) {
+            var $subtypes = $("#Container_ContainerSubtypeID");
+            var postData = {
+                containerSubtypeId: $subtypes.val()
+            };
+            $.post(
+                "@Url.Action("ContainerSubtypeChanged", "Common")",
+                postData,
+                function (data) {
+                    $subtypes.data("daysOfService", data.daysOfService);
+                    var $checkboxes = $("input.container-size-changer");
+                    if (data.daysOfService.length == 1 && data.daysOfService[0] == 0)
+                        $checkboxes.prop("checked", false);
+                    if (data.daysOfService.length == 1 && data.daysOfService[0] == 0 && selectedText($subtypes) == "Temporary") {
+                        $checkboxes.prop("disabled", true);
+                    } else {
+                        $checkboxes.prop("disabled", false);
+                    }
+                    $checkboxes.first().change();
+                });
+        }
+        function selectedText($ddl) {
+            var selectedValue = $ddl.val();
+            var ddl = $ddl[0];
+            var index = ddl.selectedIndex;
+            if(index >= 0)
+                return ddl.options[index].text;
+            return null;
+        }
+
+        function billingSizeChanged(event) {
+            var postData = {
+                containerSubtypeId: $("#Container_ContainerSubtypeID").val(),
+                daysOfService: $("input.container-size-changer:checked").length,
+                size: $("#Container_BillingSize").val(),
+                effectiveDate: $("#Container_EffectiveDate").val() //SCMB-243-New-Container-Rates-For-2022
+            };
+            if(event)
+                $("#Container_ActualSize").val(postData.size);
+            $.post(
+                "@Url.Action("ContainerBillingSizeChanged", "Common")",
+                postData,
+                function (data) {
+                    $(".rate-amount").text(data.amount + " " + data.frequency);
+                });
+        }
+
+        $("body").on("click", "button[data-no-val-action]", function (event) {
+            event.preventDefault();
+            var $f = $(this).closest("form");
+            $f.find("input,select").each(function () { $(this).rules("remove"); });
+            $f.attr("action", $(this).data("noValAction"));
+            $f[0].submit();
+        });
+
+        function processSubmit() {
+            alert('test');
+            $('[disabled]').prop('disabled', false);
+        }
+
+        $(function () {
+            $(".mask-phone").mask("(999) 999-9999 ?9999");
+            $("[data-provide='datepicker']").mask("99/99/9999", { placeholder: "mm/dd/yyyy" });
+
+            var $f = $("form");
+            $f.on("click", ".ajax-button", function (event) { ajaxButton(event, $(this)); });
+            $f.on("change", ".container-subtype-changer", containerTypeChanged);
+            $f.on("change", ".container-size-changer", loadBillingSizes);
+            $f.on("change", "#Container_ContainerSubtypeID", containerSubtypeChanged);
+            $f.on("change", "#Container_BillingSize", billingSizeChanged);
+            //$f.on("change", "#Container_EffectiveDate", billingSizeChanged); //SCMB-243-New-Container-Rates-For-2022
+            $f.on("change", "#Container_EffectiveDate", loadBillingSizes); //SCMB-243-New-Container-Rates-For-2022
+
+            $('select#Container_BillingSize').on('change', function () {
+                $('input#Container_BillingSize').val($(this).val());
+            });
+
+            containerTypeChanged(null);
+            //containerSubtypeChanged(null);
+            billingSizeChanged(null);
+            updatePanelColors();
+        });
+    </script>
+}

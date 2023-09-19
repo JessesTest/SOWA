@@ -1,0 +1,35 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+@*<main class="external-section text-center">
+    <h2 class="text-danger mb-5">We're sorry, something unexpectedly went wrong while your request was being processed</h2>
+
+    <p>We automatically log errors like this and a notification will be sent to the team to look into what happened.</p>
+    <p>If this is an emergency and needs a more immediate resolution, contact the Help Desk at extension 5555.</p>
+
+    @if (Model.ShowRequestId)
+    {
+        <p>It may also help us to include the Request ID when you contact us.</p>
+        <p>
+            <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        </p>
+    }
+</main>*@
+<main class="panel panel-default text-center">
+    <div class="panel-body">
+        <h2 class="text-danger margin-top-0 margin-bottom-15">We're sorry, something unexpectedly went wrong while your request was being processed</h2>
+
+        <p>We automatically log errors like this and a notification will be sent to the team to look into what happened.</p>
+        <p>If this is an emergency and needs a more immediate resolution, contact the Help Desk at extension 5555.</p>
+
+        @if (Model.ShowRequestId)
+        {
+            <p>It may also help us to include the Request ID when you contact us.</p>
+            <p>
+                <strong>Request ID:</strong> <code>@Model.RequestId</code>
+            </p>
+        }
+    </div>
+</main>

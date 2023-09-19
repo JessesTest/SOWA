@@ -1,0 +1,42 @@
+﻿@model SW.ExternalWeb.Models.RibbonViewModel
+<div id="xsscreen" class="visible-xs visible-sm hidden-md hidden-lg">
+    <div class="row">
+        <div class="col-xs-12" style="text-align:center">
+            Welcome to the Shawnee County
+            <br />
+            Online Bill Payment System
+            <br />
+            To manage your account, please @Html.ActionLink("Login", "Login", "Account")
+        </div>
+    </div>
+</div>
+
+<div id="upperscreens" class="hidden-xs hidden-sm visible-md visible-lg">
+    @if (Model.CurrentController == "Account" && Model.CurrentAction == "Login")
+    {
+        <div class="row login-screen-banner">
+            <div class="col-xs-12">
+                <div class="row">
+                    <div class="col-xs-12">
+                        Make Payments and Manage Account Online
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row login-screen-banner">
+            <div class="col-xs-12">
+                <div class="row">
+                    <div class="col-xs-7">
+                        Make Payments and Manage Account Online
+                    </div>
+                    <div class="col-xs-5" style="text-align:right">
+                        Return to @Html.ActionLink("Login", "Login", "Account")
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

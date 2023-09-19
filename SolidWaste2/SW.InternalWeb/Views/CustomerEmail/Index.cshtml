@@ -1,0 +1,24 @@
+﻿@model SW.InternalWeb.Models.CustomerEmail.CustomerEmailViewModel
+@{
+    ViewBag.Title = "Customer Email";
+    ViewBag.faTitleClass = "wrench";
+    ViewBag.ATitle = "Customer Maintenance : " + Model.FullName + "   Account#" + Model.CustomerID;
+}
+
+@await Component.InvokeAsync("CustomerAlerts", new { customerId = Model.CustomerID })
+
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li class=""><a href="@Url.Action("Index", "Customer", new { customerID = Model.CustomerID })">Customer Information</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerBillingAddress", new { customerID = Model.CustomerID })">Billing Address</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerPhoneNumber", new { customerID = Model.CustomerID })">Phone Number</a></li>
+        <li class="active"><a href="@Url.Action("Index", "CustomerEmail", new { customerID = Model.CustomerID })">Email</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerServiceAddress", new { customerID = Model.CustomerID })">Service Address</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerTransactionHistory", new { customerID = Model.CustomerID })">Transaction History</a></li>
+    </ul>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <partial name="_CustomerEmail" />
+        </div>
+    </div>
+</div>

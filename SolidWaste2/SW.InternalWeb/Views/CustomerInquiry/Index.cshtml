@@ -1,0 +1,24 @@
+﻿@model SW.InternalWeb.Models.CustomerInquiry.CustomerInquiryParametersViewModel
+@{
+    ViewBag.Title = "Customer Inquiry";
+    ViewBag.ATitle = "Customer Inquiry";
+}
+
+@if (Model.Results != null)
+{
+    <partial name="Results" model="Model.Results" />
+}
+<partial name="Params" />
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#results").DataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
+                "order": [[6, "desc"]]
+            });
+        })
+    </script>
+}

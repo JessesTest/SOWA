@@ -1,0 +1,183 @@
+﻿@model SW.InternalWeb.Models.PendingWork.PendingWorkViewModel
+@{
+    ViewBag.Title = "Pending Work";
+    ViewBag.ATitle = "Pending Work";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table id="PendingWork" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Submit Date</th>
+                            <th>Customer ID</th>
+                            <th>Transaction Code</th>
+                            <th>Transaction Amt</th>
+                            <th>Submitted By</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.TransactionHoldings.Count(); i++)
+                        {
+                            var tran = Model.TransactionHoldings[i];
+
+                            if (tran.Comment != null)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (tran.Status == "Awaiting Payment")
+                                        {
+                                            <div hidden>1</div>
+                                            <a href="@Url.Action("Payment", "Transaction", new { customerID = tran.CustomerID, transactionHoldingID = tran.TransactionHoldingId, })" title="Apply Payment"><i class="fa fa-lg fa-credit-card"></i></a>
+                                            <span>&nbsp;</span>
+                                            <a href="@Url.Action("ForceResolve", "PendingWork", new { transactionHoldingID = tran.TransactionHoldingId })" title="Force Resolve"><i class="fa fa-lg fa-check-square"></i></a>
+
+                                        }
+                                        @if (tran.Status == "Awaiting Verification")
+                                        {
+                                            <div hidden>2</div>
+                                            <a href="#modal-form-reject-@i" title="Reject Transaction" data-toggle="modal"><i class="fa fa-lg fa-thumbs-o-down"></i></a>
+                                            <span>&nbsp;</span>
+                                            <a class="thumbs_up" href="@Url.Action("ApproveTransaction", "PendingWork", new { transactionHoldingID = tran.TransactionHoldingId })" title="Approve Transaction" data-confirm2="Confirm approval?"><i class="fa fa-lg fa-thumbs-o-up"></i></a>
+
+                                        }
+                                        @if (tran.Status != "Awaiting Verification" && tran.Status != "Awaiting Payment")
+                                        {
+                                            <div hidden>3</div>
+                                        }
+                                    </td>
+                                    <td>@tran.AddDateTime?.ToShortDateString()</td>
+                                    <td>
+                                        @tran.CustomerID
+                                        @if (!string.IsNullOrWhiteSpace(tran.Comment))
+                                        {
+                                            <div style="margin-top: 5px; margin-left: 0px; white-space: nowrap; color: steelblue">
+                                                Notes:&nbsp;&nbsp;@tran.Comment.Trim()
+                                            </div>
+                                        }
+                                    </td>
+                                    <td style="max-width: 100px; overflow:hidden; white-space:nowrap;text-overflow:ellipsis;">@tran.TransactionCode</td>
+                                    <td>@tran.TransactionAmt</td>
+                                    <td style="max-width: 100px; overflow:hidden; white-space:nowrap;text-overflow:ellipsis;">@tran.Sender</td>
+                                    <td>@tran.Status</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@for (int i = 0; i < Model.TransactionHoldings.Count(); i++)
+{
+    var tran = Model.TransactionHoldings[i];
+    if (tran.Status == "Awaiting Verification")
+    {
+        using (Html.BeginForm("RejectTransaction", "PendingWork", FormMethod.Post, new { @role = "form" }))
+        {
+            <div class="modal fade" id="modal-form-reject-@i">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <h4 class="modal-title">Reject Transaction</h4>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <div hidden>
+                                <input type="text" id="TransactionHoldingID_@i" name="TransactionHoldingID" value="@Model.TransactionHoldings[i].TransactionHoldingId" />
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label for="Comment" class="control-label font-bold">Reason</label>
+                                    <input class="form-control" type="text" id="Comment_@i" name="Comment" value="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer text-left">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input type="submit" class="btn btn-block btn-primary" value="Reject" />
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="button" class="btn btn-block btn-default" data-dismiss="modal" value="Close" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            table = $('#PendingWork').dataTable({
+                "columnDefs": [{
+                    "targets": 0,
+                    "orderable": false
+                },
+                {
+                    "targets": 1,
+                    "orderable": false
+                },
+                {
+                    "targets": 2,
+                    "orderable": false
+                },
+                {
+                    "targets": 3,
+                    "orderable": false
+                },
+                {
+                    "targets": 4,
+                    "orderable": false
+                }
+                    , {
+                    "targets": 5,
+                    "orderable": false
+                },
+                {
+                    "targets": 6,
+                    "orderable": false
+                }],
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
+                "order": [[0, "asc"], [1, "desc"]],
+                stateSave: true,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            });
+        });
+        $(document).ready(function () {
+            $('[id^="modal-form-reject-"]').on('shown.bs.modal', function () {
+                var id = $(this).prop('id').substring(18);
+                $('#Comment_' + id).focus();
+            })
+
+            $("body").on("click", "a.thumbs_up[data-confirm2]", function (event) {
+
+                if (confirm($(this).attr("data-confirm2"))) {
+                    var url = $(this).attr("href");
+                    var thumbs = $("a.thumbs_up");
+                    thumbs.removeAttr("href");
+                    thumbs.removeAttr("data-confirm2");
+                    if (url)
+                        window.location.href = url;
+                }
+            });
+        });
+    </script>
+}

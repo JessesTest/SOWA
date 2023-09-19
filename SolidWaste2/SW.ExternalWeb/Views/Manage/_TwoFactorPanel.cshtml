@@ -1,0 +1,134 @@
+﻿@model SW.ExternalWeb.Models.Manage.TwoFactorViewModel
+
+@using (Html.BeginForm("TwoFactor", "Manage", FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h3 class="marginless">Manage Two Factor</h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h4>Two Factor Authentication</h4>
+                            @if (Model.TwoFactor)
+                            { <p>Two factor is currently enabled</p> }
+                            else
+                            { <p>Two factor is currently disabled</p>}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 ">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            @if (Model.TwoFactor)
+                            { <input type="button" value="Disable" class="btn btn-block btn-success" redirect="@Url.Action("DisableTFA")" /> }
+                            else
+                            { <input type="button" value="Enable" class="btn btn-block btn-danger" redirect="@Url.Action("EnableTFA")" />}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h4>Remember Browser</h4>
+                            @if (Model.BrowserRemembered)
+                            { <p>Browser is curently remembered for two factor</p> }
+                            else
+                            { <p>Browser is curently not remembered for two factor</p>}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            @if (Model.BrowserRemembered)
+                            { <input type="button" value="Forget Browser" class="btn btn-block btn-success" redirect="@Url.Action("ForgetBrowser")" /> }
+                            else
+                            { <input type="button" value="Remember Browser" class="btn btn-block btn-danger" redirect="@Url.Action("RememberBrowser")" />}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h4>Two Factor Email</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+                    <div class="form-group">
+                        <div class="col-xs-12">
+                            <select class="form-control" asp-for="TwoFactorEmailID" asp-items="Model.EmailsDropDown"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6 col-xs-offset-6">
+                            <input type="submit" value="Confirm" class="btn btn-block btn-primary" data-form-action="@Url.Action("SetTwoFactorEmail", "Manage")" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h4>Two Factor Phone</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+                    <div class="form-group">
+                        <div class="col-xs-12">
+                            <select class="form-control" asp-for="TwoFactorPhoneID" asp-items="Model.PhonesDropDown"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <input type="button" value="Clear" class="btn btn-block btn-default" redirect="@Url.Action("ClearTwoFactorPhone", "Manage")" />
+                        </div>
+                        <div class="col-xs-6">
+                            <input type="submit" value="Confirm" class="btn btn-block btn-primary" data-form-action="@Url.Action("SetTwoFactorPhone", "Manage")" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

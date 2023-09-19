@@ -1,0 +1,43 @@
+name: dev-external - build and trigger Azure to retrieve
+
+on:
+   push:
+     branches:
+       - main
+     paths:
+       - '${{ SOLUTION_NAME }}/Common/**'
+       - '${{ SOLUTION_NAME }}/Common.Web/**'
+       - '${{ SOLUTION_NAME }}/Identity.BL/**'
+       - '${{ SOLUTION_NAME }}/Notify.BL/**'
+       - '${{ SOLUTION_NAME }}/PE.BL/**'
+       - '${{ SOLUTION_NAME }}/SW.BLL/**'
+       - '${{ SOLUTION_NAME }}/${{ EXTERNAL_WEB_PROJECT }}/**'
+   workflow_dispatch:
+
+jobs:
+  restore-build-publish:
+    runs-on: ubuntu-latest
+
+    steps:  
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet_version: '${{ DOTNET_VERSION }}'
+
+      - name: Publish Internal
+        run: dotnet publish ./${{ SOLUTION_NAME }}/${{ EXTERNAL_WEB_PROJECT }}/${{ EXTERNAL_WEB_PROJECT }}.csproj --configuration Release
+
+      - name: Upload Internal Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ SOLUTION_NAME }}-External
+          path: ./${{ SOLUTION_NAME }}/${{ EXTERNAL_WEB_PROJECT }}/bin/Release/net6.0
+
+      - uses: azure/pipelines@v1    
+        with:
+          azure-devops-project-url: '${{ AZURE_DEVOPS_PROJECT_URL }}
+          azure-pipeline-name: External-Dev-Deploy
+          azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}

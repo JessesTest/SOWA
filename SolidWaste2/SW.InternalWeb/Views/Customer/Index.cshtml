@@ -1,0 +1,443 @@
+﻿@model SW.InternalWeb.Models.Customer.CustomerViewModel
+@{
+    ViewBag.Title = "Customer Maintenance";
+    ViewBag.faTitleClass = "wrench";
+    ViewBag.ATitle = "Customer Maintenance : " + Model.FullName + "   Account#" + Model.CustomerID;
+}
+
+@await Component.InvokeAsync("CustomerAlerts", new { customerId = Model.CustomerID })
+
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li class="active"><a href="@Url.Action("Index", "Customer", new { customerID = Model.CustomerID })">Customer Information</a></li>
+        @if (Model.CustomerID == null)
+        {
+            <li class=""><a href="@Url.Action("Index", "Customer")">Billing Address</a></li>
+            <li class=""><a href="@Url.Action("Index", "Customer")">Phone Number</a></li>
+            <li class=""><a href="@Url.Action("Index", "Customer")">Email</a></li>
+            <li class=""><a href="@Url.Action("Index", "Customer")">Service Address</a></li>
+            <li class=""><a href="@Url.Action("Index", "Customer")">Transaction History</a></li>
+        }
+        else
+        {
+            <li class=""><a href="@Url.Action("Index", "CustomerBillingAddress", new { customerID = Model.CustomerID })">Billing Address</a></li>
+            <li class=""><a href="@Url.Action("Index", "CustomerPhoneNumber", new { customerID = Model.CustomerID })">Phone Number</a></li>
+            <li class=""><a href="@Url.Action("Index", "CustomerEmail", new { customerID = Model.CustomerID })">Email</a></li>
+            <li class=""><a href="@Url.Action("Index", "CustomerServiceAddress", new { customerID = Model.CustomerID })">Service Address</a></li>
+            <li class=""><a href="@Url.Action("Index", "CustomerTransactionHistory", new { customerID = Model.CustomerID })">Transaction History</a></li>
+        }
+    </ul>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            @using (Html.BeginForm("Javascript", "Enable", FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                if (Model.PastDueAmount > 0)
+                {
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>Customer is @Model.CustomerType active since @Model.EffectiveDate?.ToShortDateString() and has a past due amount of <strong>@string.Format("{0:c}", Model.PastDueAmount + Model.PastDue30Days + Model.PastDue60Days + Model.PastDue90Days)</strong></p>
+                        </div>
+                    </div>
+                }
+                @Html.HiddenFor(m => m.PastDueAmount)
+                @Html.HiddenFor(m => m.CollectionsBalance)
+                @Html.HiddenFor(m => m.CounselorsBalance)
+                @Html.HiddenFor(m => m.PastDue30Days)
+                @Html.HiddenFor(m => m.PastDue60Days)
+                @Html.HiddenFor(m => m.PastDue90Days)
+                @Html.HiddenFor(m => m.UncollectableBalance)
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                @Html.LabelFor(model => model.CustomerID, new { @class = "font-bold" })
+                                @Html.TextBoxFor(model => model.CustomerID, new { @class = "form-control", @autofocus = "autofocus", @required = "required", @id = "customerIdSearchBox" })
+                                @Html.ValidationMessageFor(model => model.CustomerID, null, new { @class = "text-danger" })
+                            </div>
+                            <div class="col-xs-4">
+                                @Html.LabelFor(model => model.CustomerType, new { @class = "font-bold" })
+                                <input type="text" asp-for="CustomerType" class="form-control" readonly />
+                            </div>
+                            <div class="col-xs-4">
+                                @Html.LabelFor(model => model.EffectiveDate, new { @class = "font-bold" })
+                                @if (Model.CustomerID == null)
+                                {
+                                    <input asp-for="EffectiveDate" asp-format="{0:MM/dd/yyyy}" type="text" data-provide="datepicker" class="form-control" readonly autocomplete="off" />
+                                }
+                                else
+                                {
+                                    <input asp-for="EffectiveDate" asp-format="{0:MM/dd/yyyy}" type="text" data-provide="datepicker" class="form-control" autocomplete="off" />
+                                }
+                                @Html.ValidationMessageFor(model => model.EffectiveDate, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-4">
+                                @Html.LabelFor(model => model.Account)
+                                @Html.TextBoxFor(model => model.Account, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-xs-4">
+                                @Html.LabelFor(model => model.LegacyCustomerID)
+                                @Html.TextBoxFor(model => model.LegacyCustomerID, new { @class = "form-control", @readonly = "readonly", @autocomplete = "off" })
+                            </div>
+                            <div class="col-xs-4">
+                                @Html.LabelFor(model => model.CancelDate, new { @class = "font-bold" })
+                                @if (Model.CustomerID == null)
+                                {
+                                    <input asp-for="CancelDate" asp-format="{0:MM/dd/yyyy}" type="text" data-provide="datepicker" class="form-control" disabled autocomplete="off" />
+                                }
+                                else
+                                {
+                                    <input asp-for="CancelDate" asp-format="{0:MM/dd/yyyy}" type="text" data-provide="datepicker" class="form-control" autocomplete="off" />
+                                }
+                                @Html.ValidationMessageFor(model => model.CancelDate, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <label for="@Html.NameFor(model => model.FullName)" class="font-bold">
+                                    Customer Name * ( @Html.CheckBoxFor(model => model.NameTypeFlag, new { @class = "checkbox-inline" }) Check if Business )
+                                </label>
+                            </div>
+                            @*<div class="col-md-6">
+                                    <label class="font-bold">
+                                    Bad Address (
+                                    <input name="@Html.NameFor(model=> Model.Undeliverable)" value="true" @(Model.Undeliverable.GetValueOrDefault(false) ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
+                                    Check if Undeliverable )
+                                    </label>
+                                </div>*@
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @if (Model.CustomerID == null)
+                                {
+                                    @Html.TextBoxFor(model => model.FullName, new { @class = "form-control", @disabled = "disabled" })
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(model => model.FullName, new { @class = "form-control" })
+                                }
+                                @Html.ValidationMessageFor(model => model.FullName, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @Html.LabelFor(model => model.NameAttn, new { @class = "font-bold" })
+                                @if (Model.CustomerID == null)
+                                {
+                                    @Html.TextBoxFor(model => model.NameAttn, new { @class = "form-control", @disabled = "disabled" })
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(model => model.NameAttn, new { @class = "form-control" })
+                                }
+                                @Html.ValidationMessageFor(model => model.NameAttn, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @Html.LabelFor(model => model.Contact, new { @class = "font-bold" })
+                                @if (Model.CustomerID == null)
+                                {
+                                    @Html.TextBoxFor(model => model.Contact, new { @class = "form-control", @disabled = "disabled" })
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(model => model.Contact, new { @class = "form-control" })
+                                }
+                                @Html.ValidationMessageFor(model => model.Contact, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @Html.LabelFor(model => model.Notes, new { @class = "font-bold" })
+                                @if (Model.CustomerID == null)
+                                {
+                                    @Html.TextAreaFor(model => model.Notes, new { @class = "form-control", @disabled = "disabled" })
+                                }
+                                else
+                                {
+                                    @Html.TextAreaFor(model => model.Notes, new { @class = "form-control" })
+                                }
+                                @Html.ValidationMessageFor(model => model.Notes, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                (* Denotes Required Field)
+                            </div>
+                            @*<div class="col-md-8 text-right">
+                                    <label class="font-bold">
+                                    Check if Using Payment Plan&nbsp;
+                                    <input name="@Html.NameFor(model=> Model.PaymentPlan)" value="true" @(Model.PaymentPlan ? "checked=\"checked\"" : "") type="checkbox" class="checkbox-inline" />
+                                    </label>
+                                </div>*@
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-3">
+                                @Html.LabelFor(model => model.CurrentBalance, new { @class = "font-bold" })
+                                <div class="cash-money text-right">@Html.ActionLink(string.Format("{0:c}", Model.CurrentBalance.GetValueOrDefault()), "Payment", "Transaction", new { customerId = Model.CustomerID }, null)</div>
+                                @if (Model.PastDue90Days > 0)
+                                {
+                                    <div class="font-bold">90 Days Past Due</div>
+                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.PastDue90Days), "Payment", "Transaction", new { customerId = Model.CustomerID }, null)</div>
+                                }
+                                @if (Model.PastDue60Days > 0)
+                                {
+                                    <div class="font-bold">60 Days Past Due</div>
+                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.PastDue60Days), "Payment", "Transaction", new { customerId = Model.CustomerID }, null)</div>
+                                }
+                                @if (Model.PastDue30Days > 0)
+                                {
+                                    <div class="font-bold">30 Days Past Due</div>
+                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.PastDue30Days), "Payment", "Transaction", new { customerId = Model.CustomerID }, null)</div>
+                                }
+                                @if (Model.PastDueAmount > 0)
+                                {
+                                    <div class="font-bold">Past Due</div>
+                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.PastDueAmount), "Payment", "Transaction", new { customerId = Model.CustomerID }, null)</div>
+                                }
+                                @if (Model.CollectionsBalance > 0)
+                                {
+                                    <div class="font-bold">Collections Balance</div>
+                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.CollectionsBalance), "Payment", "Collections", new { customerId = Model.CustomerID, transactionType = "PV" }, null)</div>
+                                }
+                                @if (Model.CounselorsBalance > 0)
+                                {
+                                    <div class="font-bold">Counselors Balance</div>
+                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.CounselorsBalance), "Payment", "Collections", new { customerId = Model.CustomerID, transactionType = "PCC" }, null)</div>
+                                }
+                                @if (Model.UncollectableBalance > 0)
+                                {
+                                    <div class="font-bold">Uncollectable Balance</div>
+                                    <div class="text-right">@Html.ActionLink(string.Format("{0:c}", Model.UncollectableBalance), "Payment", "Collections", new { customerId = Model.CustomerID, transactionType = "PU" }, null)</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-3">
+                                @if (Model.CustomerID == null)
+                                {
+                                    @Html.LabelFor(model => model.ContractCharge)
+                                    @Html.TextBoxFor(model => model.ContractCharge, new { @class = "form-control", @readonly = "readonly" })
+                                }
+                                else
+                                {
+                                    <a href="#modal-form" class="btn btn-success margin-bottom-5" data-toggle="modal">Contract Charge</a>
+
+                                    @if (Model.ActiveImages.Any() && Model.ContractCharge == null)
+                                    {
+                                        <input asp-for="ContractCharge" type="text" class="form-control" />
+                                        <span asp-validation-for="ContractCharge"></span>
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="ContractCharge" type="text" class="form-control" readonly />
+                                    }
+
+                                    @foreach (var image in Model.ActiveImages)
+                                    {
+                                        <div class="text-ellipsis">
+                                            <a asp-action="ImageDownload" asp-controller="MieData" asp-route-id="@image.MieDataId" asp-route-mieDataActive="@image.MieDataActive" asp-route-customerId="@Model.CustomerID" class="text-ul" style="line-height:25px;">@image.MieDataImageFileName</a>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <div class="col-md-3">
+                                @if (Model.CustomerID != null && Model.ActiveImages.Any())
+                                {
+                                    <br />
+                                    <br />
+                                    <br />
+                                    <div class="text-left">
+                                        <a href="@Url.Action("ImageInactive", "MieData", new {id = Model.CustomerID})" data-confirm="Confirm, Contract Image(s), Recycle?"><i title="Contract Image(s), Recycle Bin" class="fa fa-recycle fa-2x text-danger"></i></a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-3">
+                                @Html.LabelFor(model => model.PurchaseOrder)
+                                @if (Model.CustomerID == null)
+                                {
+                                    @Html.TextBoxFor(model => model.PurchaseOrder, new { @class = "form-control", @disabled = "disabled" })
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(model => model.PurchaseOrder, new { @class = "form-control" })
+                                }
+                            </div>
+                        </div>
+                        @if (Model.CustomerID > 0)
+                        {
+                            <div class="form-group">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <a href="#modal-form-billing" class="btn btn-success margin-bottom-5" data-toggle="modal">Billing Summary</a>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-6 col-md-offset-3">
+                                    @Html.ActionLink("Payment Plans", "Index", "PaymentPlan", new { customerId = Model.CustomerID }, new { @class = "btn btn-block btn-success margin-bottom-5" })
+                                </div>
+                            </div>
+                            @if (User.IsInRole("role.write-off") && (Model.PastDue90Days > 0 || Model.CollectionsBalance > 0 || Model.CounselorsBalance > 0 || Model.UncollectableBalance > 0))
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        @Html.ActionLink("Write-off", "Create", "Writeoff", new { customerId = Model.CustomerID }, new { @class = "btn btn-block btn-success margin-bottom-5" })
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <hr />
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input class="btn btn-primary btn-block" type="button" value="Search" id="customerSearchBtn" data-form-action="@Url.Action("Search", "Customer")" />
+                            </div>
+                            @if (Model.CustomerID != null)
+                            {
+                                <div class="col-md-4">
+                                    <input class="btn btn-danger btn-block" id="customerInfoUpdateButton" type="submit" value="Update" data-form-action="@Url.Action("Update", "Customer")" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="modal fade" id="modal-form">
+                @*Contract Charge modal form*@
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-12 b-r">
+                                    <h3 class="m-t-none m-b">File Upload</h3>
+                                    <p>Select a file to upload.</p>
+                                    @using (Html.BeginForm("Edit", "MieData", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                    {
+                                        <input asp-for="CustomerID" type="hidden" />
+                                        <span class="btn btn-default btn-lg btn-block">
+                                            <i class="fa fa-bars pull-right"></i>
+                                            @*<input type="file" name="Image" />*@
+                                            <input type="file" id="files" name="image" style="color:transparent;" />
+                                        </span>
+                                        <br />
+                                        <div id="selectedFiles"></div>
+
+                                        <button type="submit" class="btn btn-success" value="Edit" data-form-action="@Url.Action("Edit", "MieData")">
+                                            <i class="fa fa-cloud-upload text"></i>
+                                            <span class="text">Save Upload</span>
+                                        </button>
+                                        <button type="submit" class="btn btn-danger delete" value="Return" data-form-action="@Url.Action("Return", "MieData", new{ customerId = Model.CustomerID })">
+                                            <i class="icon-trash icon-white"></i>
+                                            <span>Cancel</span>
+                                        </button>
+
+                                        @if (Model.InactiveImages.Any())
+                                        {
+                                            <h3 class="m-t-none m-b text-right">Inactive Contracts</h3>
+                                            @foreach (var image in Model.InactiveImages)
+                                            {
+                                                <p class="text-right">
+                                                    @Html.ActionLink(image.MieDataImageFileName, "ImageDownload", "MieData", new { id = image.MieDataId, mieDataActive = false, customerId = Model.CustomerID }, new { @class = "text-ul", @style = "line-height:15px;" })
+                                                </p>
+                                            }
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*end Contract Charge modal form*@
+            </div>
+
+            @if (Model.CustomerID > 0)
+            {
+                <div class="modal fade" id="modal-form-billing">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $.ajax({
+            url: '@Url.Action("BillingSummary", "Common")',
+            data: {
+                customerId: @(Model.CustomerID ?? 0)
+            },
+            method: 'GET',
+            success: function (response) {
+                $("#modal-form-billing .modal-content").html(response);
+            },
+            error: function (a, b, c){
+                $("#modal-form-billing .modal-content").text("There was an error loading the billing summary");
+            }
+        });
+
+        $(document).ready(function () {
+            $("[data-provide='datepicker']").mask("99/99/9999", { placeholder: "mm/dd/yyyy" });
+        });
+
+        //var selDiv = "";  //logic for Contract Charge file select dialog
+        var selSize = 0;
+        function fileChange(e) {
+            //alert('test');
+            selSize += e.target.files[0].size
+            if (selSize > 3584000)      //   currently set to 3.5Meg, max file size on the server is 4Meg (4096000)
+            {
+                this.value = null;     //reset file upload control, clear the file, that caused, exceeded condition
+                alert('Max file size of (' + selSize + ') has been reached.');
+                $(this).hide();       //hide file upload, Choose File, button
+            }
+            else
+            {
+                var selDiv = $('#selectedFiles');
+                var selText = selDiv.html();
+                selDiv.html(selText + e.target.files[0].name + "<br/>");
+                $(this).hide();
+                //var text = $(this).parent().html();
+                $(this).parent().append('<input type="file" name="image" style="color:transparent;" />');
+                $('[name="image"]').change(fileChange);
+            }
+        }
+        $(function () {
+            //alert("test1");
+            $('[name="image"]').change(fileChange);
+        });                 //end logic for Contract Charge file select dialog
+
+        $('#customerIdSearchBox').change(function()
+        {
+            if ($(this).val() == @(Model.CustomerID ?? 0))
+            {
+                $('#customerInfoUpdateButton').removeAttr('readonly');
+            }
+            else
+            {
+             $('#customerInfoUpdateButton').attr('readonly', 'readonly');
+            }
+        });
+
+        $("#customerSearchBtn").click(function () {
+            var id = $("#customerIdSearchBox").val();
+            var location = '@Url.Action("Index", "Customer")' + '?customerId=' + id;
+            window.location.href = location;
+        });
+    </script>
+}

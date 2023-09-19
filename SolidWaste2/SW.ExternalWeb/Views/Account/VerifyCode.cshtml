@@ -1,0 +1,40 @@
+﻿@model SW.ExternalWeb.Models.Account.VerifyCodeViewModel
+@{
+    ViewBag.Title = "Enter Verification Code";
+}
+
+<h2>@ViewBag.Title.</h2>
+
+@using (Html.BeginForm("VerifyCode", "Account", new { ReturnUrl = Model.ReturnUrl }, FormMethod.Post, true, new { role = "form" })) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    @Html.Hidden("provider", @Model.Provider)
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-5">
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    <h4>@ViewBag.Status</h4>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    @Html.LabelFor(m => m.Code, new { @class = "content-label" })
+                    @Html.TextBoxFor(m => m.Code, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12 checkbox-line">
+                    @Html.CheckBoxFor(m => m.RememberBrowser, new { @class = "checkbox-lg" })
+                    <div class="checkbox-label">
+                        @Html.DisplayNameFor(m => m.RememberBrowser)
+                    </div>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12">
+                    <input type="submit" class="btn btn-primary btn-block btn-lg" value="Submit" />
+                </div>
+            </div>
+        </div>
+    </div>
+}

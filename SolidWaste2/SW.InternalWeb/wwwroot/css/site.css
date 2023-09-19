@@ -1,0 +1,33 @@
+/*html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}*/
+
+/* changes to the base bootstrap.css file */
+.alert-warning {
+    background-color: rgba(255, 213, 97, .8);
+    border-color: #f7c8a9;
+}
+
+.table-scrolling {
+    overflow-x: auto;
+    margin-bottom: .5rem;
+}
+
+    .table-scrolling .table {
+        margin-bottom: 0 !important;
+    }

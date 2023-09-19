@@ -1,0 +1,93 @@
+﻿@model SW.InternalWeb.Models.CustomerServiceAddress.ServiceAddressMasterViewModel
+
+@Html.HiddenFor(m => m.Container.Id)
+@Html.HiddenFor(m => m.ContainerCount)
+@Html.HiddenFor(m => m.ContainerIndex)
+@Html.HiddenFor(m => m.Container.AddToi)
+@Html.HiddenFor(m => m.Container.AddDateTime)
+@Html.HiddenFor(m => m.Container.ChgToi)
+@Html.HiddenFor(m => m.Container.ChgDateTime)
+
+<div class="row">
+    @if ((Model.Container?.Id ?? 0) > 0)
+    {
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-12 control-label font-bold">
+                    Displaying @Model.ContainerIndex of @Model.ContainerCount containers
+                </div>
+                @if (Model.Container.Id > 0)
+                {
+                    if (@Model.Container.ChgToi == null)
+                    {
+                        <div class="col-sm-12 control-label text-xs">
+                            Added By: @Model.Container.AddToi On @Model.Container.AddDateTime.ToShortDateString()
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-sm-12 control-label text-xs">
+                            Added By: @Model.Container.AddToi On @Model.Container.AddDateTime.ToShortDateString()
+                        </div>
+                        <div class="col-sm-12 control-label text-xs">
+                            Changed By: @Model.Container.ChgToi On @Model.Container.ChgDateTime?.ToShortDateString()
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-6 control-label font-bold">New Container</div>
+    }
+    <div class="col-md-6 text-right">
+        <button class="btn btn-sm btn-dark ajax-button" type="submit" data-form-action="@Url.Action("PreviousContainer", "CustomerServiceAddress")">
+            <span class="glyphicon glyphicon-arrow-left"></span>
+        </button>
+        &nbsp;
+        <button class="btn btn-sm btn-dark ajax-button" type="submit" data-form-action="@Url.Action("NextContainer", "CustomerServiceAddress")">
+            <span class="glyphicon glyphicon-arrow-right"></span>
+        </button>
+    </div>
+    <div class="col-md-12">
+        <hr />
+    </div>
+</div>
+
+@if (Model.Container.CancelDate.HasValue && Model.Container.CancelDate.Value < DateTime.Now.Date)
+{
+    <partial name="ContainerCanceled" />
+}
+else
+{
+    <partial name="ContainerActive" />
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <hr />
+    </div>
+    <div class="col-md-12">
+        @if (Model.Container.Id > 0)
+        {
+            <button id="ContainerSubmitButton" type="submit" class="btn btn-danger btn-s-xs ajax-button" data-form-action="@Url.Action("SaveContainer", "CustomerServiceAddress")" data-form-group="container-group">Update</button>
+
+            if (Model.ServiceAddress.CancelDate.HasValue && Model.ServiceAddress.CancelDate.Value < DateTime.Now.Date)
+            {
+                <button type="submit" class="btn btn-info btn-s-xs ajax-button" data-form-action="@Url.Action("ClearContainer", "CustomerServiceAddress")" disabled="disabled">New Container</button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-info btn-s-xs ajax-button" data-form-action="@Url.Action("ClearContainer", "CustomerServiceAddress")">New Container</button>
+            }
+
+            @*<button type="submit" class="btn btn-success ajax-button" data-form-action="@Url.Action("Transaction", "CustomerServiceAddress")" data-form-group="container-group"><i class="fa fa-usd"></i></button>*@
+        }
+        else if (Model.ServiceAddress.Id > 0)
+        {
+            <button type="submit" class="btn btn-danger btn-s-xs ajax-button" data-form-action="@Url.Action("SaveContainer", "CustomerServiceAddress")" data-form-group="container-group">Add Container</button>
+        }
+        <div class="text-right rate-amount asims-not-as-big-money float-right"></div>
+    </div>
+</div>

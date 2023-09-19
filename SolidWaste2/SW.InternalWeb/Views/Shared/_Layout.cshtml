@@ -1,0 +1,241 @@
+﻿@using System.IO;
+@inject Microsoft.Extensions.Configuration.IConfiguration configuration
+@{ 
+    var environment = configuration["ASPNETCORE_ENVIRONMENT"];
+
+    string EnvironmentLabel;
+    string headerClass = "bg-dark";
+    if (environment == "Local" || environment == "Dev" || environment == "UAT")
+    {
+        EnvironmentLabel = "(" + environment + ")";
+        if (environment == "Dev" || environment == "UAT")
+        {
+            EnvironmentLabel += " - Published : " + File.GetLastWriteTime(ViewContext.HttpContext.GetType().Assembly.Location);
+        }
+    }
+    else
+    {
+        EnvironmentLabel = "";
+    }
+    if (environment == "Local")
+    {
+        headerClass = "bg-danger";
+    }
+    else if (environment == "Dev")
+    {
+        headerClass = "bg-warning";
+    }
+    else if (environment == "UAT")
+    {
+        headerClass = "bg-info";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en" class="app">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>@ViewData["Title"] - Solidwaste Billing</title>
+
+    @* Bootstrap 3 *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    @* DataTables *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.10/css/dataTables.bootstrap.min.css" integrity="sha512-hs1f667XhSY60xOFaCeT+8zwrnG/QnsWLiO8e+56a+/vZWWKwBZ/tfXPDPiBl+3/lpuz7KCWmqbAM/cJWF6hAA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    @* Addons *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.1/css/datepicker.min.css" integrity="sha512-DXCdWA+kptZRnpCPCPM6k3+sF//B3EpGLQJZ7Euj0MWf8Z+ImdJO1wcg4nIeFLSH3ChNQrChUNEuR8TUPYrVHA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.1/css/datepicker3.min.css" integrity="sha512-e/VbwhU6ngdCrXrWO4/tPs3rX+tRBGwRpYQR9pcrlYV5tyUAvI+LjZcKMbcgouLtDs+UAV+NxX9GpCFIWSdTtQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.13/daterangepicker.min.css" integrity="sha512-wgBMaQ1LmNkklphLR4+Jy77dyfOKmRBGcOXXwKJW3WiSc9n76BLDwsS/q5XPhVNwdPDzUWiG4XsC7ETVpuoQBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    @* Fonts and Icons *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" integrity="sha512-i8+QythOYyQke6XbStjt9T4yQHhhM+9Y9yTY1fOxoDQwsQpKMEpIoSQZ8mVomtnVCf9PBvoQDnKl06gGOOD19Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/font.css" />
+    @* Local Files *@
+    <link rel="stylesheet" href="~/css/app.css" />
+    <link rel="stylesheet" href="~/css/Old_Site.css" />
+    <link rel="stylesheet" href="~/css/print.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    @RenderSection("Head", required: false)
+</head>
+<body class="">
+    <section class="vbox">
+        <header class="@headerClass dk header navbar navbar-fixed-top-xs">
+            <span class="navbar-brand">Solidwaste Billing @EnvironmentLabel</span>
+            <div class="navbar-header aside-lg">
+                <a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen,open" data-target="#nav,html">
+                    <i class="fa fa-bars"></i>
+                </a>
+                <a href="#" class="navbar-brand" data-toggle="fullscreen">Shawnee County</a>
+            </div>
+        </header>
+        <section>
+            <section class="hbox stretch">
+                <!-- .aside -->
+                <aside class="bg-dark lter aside-lg hidden-print hidden-xs" id="nav">
+                    <section class="vbox">
+                        <section class="w-f scrollable">
+                            <div class="slim-scroll" data-height="auto" data-disable-fade-out="true" data-distance="0" data-size="5px" data-color="#333333">
+                                <!-- System Navigation -->
+                                <nav class="nav-primary hidden-xs">
+                                    <ul class="nav">
+                                        <li @if (ViewBag.ActivePage == "Search") { WriteLiteral("class=\"active\""); }>
+                                            <a href="@Url.Action("Index", "CustomerInquiry")">
+                                                <i class="fa fa-search icon"> <b class="bg-info"></b> </i> <span>Search</span>
+                                            </a>
+                                        </li>
+                                        <li @if (ViewBag.ActivePage == "Customer Maintenance") { WriteLiteral("class=\"active\""); }>
+                                            <a href="@Url.Action("Index", "Customer")">
+                                                <i class="fa fa-user icon"> <b class="bg-success"></b> </i> <span>Customer Maintenance</span>
+                                            </a>
+                                        </li>
+                                        <li @if (ViewBag.ActivePage == "New Customer") { WriteLiteral("class=\"active\""); }>
+                                            <a href="@Url.Action("Index", "NewCustomer")">
+                                                <i class="fa fa-user-plus icon"> <b class="bg-primary"></b> </i> <span>New Customer</span>
+                                            </a>
+                                        </li>
+                                        @if (User.IsInRole("role.admin"))
+                                        {
+                                            <li @if (ViewBag.ActivePage == "Maintenance") { WriteLiteral("class=\"active\""); }>
+                                                <a href="#">
+                                                    <i class="fa fa-gears icon">
+                                                        <b class="bg-danger"></b>
+                                                    </i>
+                                                    <span class="pull-right">
+                                                        <i class="fa fa-angle-down text"></i>
+                                                        <i class="fa fa-angle-up text-active"></i>
+                                                    </span>
+                                                    <span>System Maintenance</span>
+                                                </a>
+                                                <ul class="nav lt">
+                                                    <li><a href="@Url.Action("Index", "ContainerCode")"><i class="fa fa-angle-right"></i><span>Container Codes</span></a></li>
+                                                    <li><a href="@Url.Action("Index", "ContainerRate")"><i class="fa fa-angle-right"></i><span>Container Rates</span></a></li>
+                                                    <li><a href="@Url.Action("Index", "TransactionCode")"><i class="fa fa-angle-right"></i><span>Transaction Codes</span></a></li>
+                                                    <li><a href="@Url.Action("Index", "Support")"><i class="fa fa-angle-right"></i><span>Support Panel</span></a></li>
+                                                </ul>
+                                            </li>
+                                        }
+                                        <li @if (ViewBag.ActivePage == "") { WriteLiteral("class=\"active\""); }>
+                                            <a href="@Url.Action("Personal", "PendingWork")">
+                                                <i class="fa fa-briefcase"><b class="bg-primary"></b></i><span>Pending Work</span>
+                                            </a>
+                                        </li>
+                                        <li @if (ViewBag.ActivePage == "") { WriteLiteral("class=\"active\""); }>
+                                            <a href="#">
+                                                <i class="fa fa-usd icon">
+                                                    <b class="bg-success"></b>
+                                                </i>
+                                                <span class="pull-right">
+                                                    <i class="fa fa-angle-down text"></i>
+                                                    <i class="fa fa-angle-up text-active"></i>
+                                                </span>
+                                                <span>New Transaction</span>
+                                            </a>
+                                            <ul class="nav lt">
+                                                <li><a href="~/Transaction/Adjustment"><i class="fa fa-angle-right"></i><span>Adjustment</span></a></li>
+                                                <li><a href="~/Transaction/Batch"><i class="fa fa-angle-right"></i><span>Batch Payment</span></a></li>
+                                                <li><a href="~/Transaction/Payment"><i class="fa fa-angle-right"></i><span>Payment</span></a></li>
+                                                <li><a href="~/Transaction/Index"><i class="fa fa-angle-right"></i><span>Service Charge</span></a></li>
+                                                @if (User.IsInRole("role.write-off"))
+                                                {
+                                                    <li><a href="~/Writeoff/Index"><i class="fa fa-angle-right"></i><span>Write-off</span></a></li>
+                                                }
+                                                <li><a href="~/Collections/Index"><i class="fa fa-angle-right"></i><span>Collections</span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li @if (ViewBag.ActivePage == "") { WriteLiteral("class=\"active\""); }>
+                                            <a href="#">
+                                                <i class="fa fa-wrench icon">
+                                                    <b class="bg-info"></b>
+                                                </i>
+                                                <span class="pull-right">
+                                                    <i class="fa fa-angle-down text"></i>
+                                                    <i class="fa fa-angle-up text-active"></i>
+                                                </span>
+                                                <span>Work Orders</span>
+                                            </a>
+                                            <ul class="nav lt">
+                                                <li><a href="@Url.Action("Index", "WorkOrderInquiry")"><i class="fa fa-angle-right"></i><span>Work Order Search</span></a></li>
+                                                <li><a href="@Url.Action("Index", "WorkOrder")"><i class="fa fa-angle-right"></i><span>New Work Order</span></a></li>
+                                                <li><a href="@Url.Action("Index", "WorkOrderLegacyInquiry")"><i class="fa fa-angle-right"></i><span>Legacy Work Order Search</span></a></li>
+                                                <li><a href="@Url.Action("Index", "LegacyEquipment")"><i class="fa fa-angle-right"></i><span>Legacy Equipment Search</span></a></li>
+                                                <li><a href="@Url.Action("Index", "RouteType")"><i class="fa fa-angle-right"></i><span>Route Types</span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li @if (ViewBag.ActivePage == "Reports") { WriteLiteral("class=\"active\""); }>
+                                            <a href="@Url.Action("Index", "Reports")">
+                                                <i class="fa fa-file-text icon"> <b class="bg-warning"></b> </i> <span>Reports</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                                <!-- / System Navigation -->
+                            </div>
+                        </section>
+
+                        <footer class="footer lt hidden-xs b-t b-dark">
+                            <a href="#nav" data-toggle="class:nav-xs" class="pull-right btn btn-sm btn-dark btn-icon">
+                                <i class="fa fa-angle-left text"></i>
+                                <i class="fa fa-angle-right text-active"></i>
+                            </a>
+                        </footer>
+                    </section>
+                </aside>
+                <!-- /.aside -->
+                <section id="content">
+                    <section class="vbox">
+                        <header class="header bg-white b-b b-light hidden-print">
+                            <ul class="nav navbar-nav clear">
+                                <li class="navbar-text">
+                                    <i class="fa fa-@ViewBag.faTitleClass">&nbsp;</i><span class="font-semibold">@ViewBag.ATitle</span>
+                                </li>
+                            </ul>
+                            <p class="font-thin right"><partial name="_LoginPartial" /></p>
+                        </header>
+                        <section class="scrollable padder padder-v w-f">
+                            <div class="container container-left">
+                                <div id="alertContainer">
+                                    <partial name="_StatusMessages" />
+                                </div>
+                                @RenderBody()
+                                <footer id="footer-main" class="footer bg-white b-t b-light visible-print">
+                                    <p>&copy; @DateTime.Now.Year - Shawnee County. All Rights Reserved.</p>
+                                </footer>
+                            </div>
+                        </section>
+                        <footer id="footer-main" class="footer bg-white b-t b-light hidden-print">
+                            <p>&copy; @DateTime.Now.Year - Shawnee County. All Rights Reserved.</p>
+                        </footer>
+                    </section>
+                </section>
+            </section>
+        </section>
+    </section>
+
+    @* jQuery *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js" integrity="sha512-AFwxAkWdvxRd9qhYYp1qbeRZj6/iTNmJ2GFwcxsMOzwwTaRwz2a/2TX225Ebcj3whXte1WGQb38cXE5j7ZQw3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    @* jQuery Validate and Validate Unobstrusive *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.14.0/jquery.validate.min.js" integrity="sha512-2ZFPcPxv4xOvt+Sz1JMGyoliB3tccdckAJXlEz13o1byNrevFuyDoLs9tZfi+hTHz/h5o/XealriXyhyzGYrGg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.14.0/additional-methods.min.js" integrity="sha512-2h6/rhjXlDmrPBfrUc/d9+pCXTECJr9kepVWup8PFMVftzzDdKOWGj/Ycmeh1PoFflFlfxwlW9Pyb54TGRaOXg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.5/jquery.validate.unobtrusive.min.js" integrity="sha512-4eTR3rgIKXdJ52SUjVzNcotua2LLsTHUFErZAHeeOvc7ANYOVy/KETI7QUdFc5GtuKxHxc8LvtIPR1yuXoGKdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    @* DataTables *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.10/js/jquery.dataTables.min.js" integrity="sha512-Wdh8pTxAPpFPIMNSMGsM/TY1HOfGTswr68AnM9x0ZvemoEBUpQtg7ImSlBRuNO+WMtxwRknJUyb4gM8hSt8EVw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.10/js/dataTables.bootstrap.min.js" integrity="sha512-P5XKL3IqmH4ESKKM8F7517jtIMT3myOFMgRajIQi1KHIfyUXyKqgrUe71QTSp64Dpw7Nli8peEsMJy6Bu7ijsQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    @* Bootstrap 3 *@
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    @* Addons *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.0/respond.min.js" integrity="sha512-rwFDsWNUFt58nSVLxtda5ROXfZuGqa28h/URvglRSUxP9nvtH/c0bmzOhK+hkloER6afjadFhKeRKoMXwhQYaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.1/js/bootstrap-datepicker.min.js" integrity="sha512-YD3Dj60zNZO5CHgEkDxrgA8P9p58Iuvl5eiO3RkoGOJQ6IWuU+AmQ0ZRK0/xoFS4ji+7CrLnY1RXSMbSaS4f+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js" integrity="sha512-Nc/kbBzoeUiDyBdm5txc/5t+nTxRSrVV6LVkZpFnBgzi29MtKX6lGVr1tYAbH5TXpjaukCv2W6XYw7rPYA4QBQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.13/daterangepicker.min.js" integrity="sha512-4jEYGmcjLHQ3gcpV0xbpm4OsUBlPnCfCPHPZdde0ofNWCScQpNRZQtD3vYmZRSyVVjl2Tt5t8voZFaWVuugAwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-slimScroll/1.3.0/jquery.slimscroll.min.js" integrity="sha512-5dkhw5GqkRmpzbc0JaxoqcR3yeAza1uU2DiAsSHD33GIwS/rDnyvRyL2ayZrtSNbR//c7vG9wB1SFjeK1DHykA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js" integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.0/jquery.maskedinput.min.js" integrity="sha512-1zmQwacqGvIrUi5txs7SgG2FYyZrZtx5l275m0p/pfShg1829kaaaY4J37BhkfQIlAZpGCvggjKmLam2Z62Jlw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    @* Local Files *@
+    <script src="~/js/app.js"></script>
+    <script src="~/js/app.plugin.js"></script>
+    <script src="~/js/custom.js"></script>
+    <script src="~/js/Layout_Scripts.js"></script>
+    <script src="~/js/snco.js"></script>
+    <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

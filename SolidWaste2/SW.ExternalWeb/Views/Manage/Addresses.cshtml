@@ -1,0 +1,127 @@
+﻿@model SW.ExternalWeb.Models.Manage.AddressesViewModel
+@{
+    ViewBag.Title = "Manage Your Addresses";
+}
+
+<div class="col-xs-12">
+    <div class="row">
+        <h2>Manage Billing Addresses</h2>
+        <div class="col-xs-12 manageaccountcontainer">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 manageaccountbody">
+                    @for (int i = 0; i < Model.Addresses.Count; i++)
+                    {
+                        @Html.HiddenFor(m => m.Addresses[i].AddressID)
+                        @Html.HiddenFor(m => m.Addresses[i].IsDefault)
+                        @Html.HiddenFor(m => m.Addresses[i].Line1)
+                        @Html.HiddenFor(m => m.Addresses[i].Line2)
+                        if (Model.Addresses[i].IsDefault)
+                        {
+                            var hasRun = false;
+                            if (hasRun == false)
+                            {
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <h3>Primary Address</h3>
+                                    </div>
+                                </div>
+                                hasRun = true;
+                            }
+                            <div class="col-xs-12">
+                                <hr class="col-xs-margin-top-0" />
+                            </div>
+
+                            <div class="col-xs-12">
+                                <div class="row form-group">
+                                    <div class="col-xs-12 address-text">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                @Model.Addresses[i].Line1
+                                            </div>
+                                            <div class="col-xs-12">
+                                                @Model.Addresses[i].Line2
+                                            </div>
+                                            <div class="col-xs-12">
+                                                <input class="btn-link" type="button" value="Edit" redirect="@Url.Action("ChangeAddress", new { id = Model.Addresses[i].AddressID })" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <hr class="col-xs-margin-top-0" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    @if (Model.Addresses.Count > 1)
+                    {
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h3>Other Addresses</h3>
+                            </div>
+                        </div>
+                    }
+                    @for (int j = 0; j < Model.Addresses.Count; j++)
+                    {
+                        @Html.HiddenFor(m => m.Addresses[j].AddressID)
+                        @Html.HiddenFor(m => m.Addresses[j].IsDefault)
+                        @Html.HiddenFor(m => m.Addresses[j].Line1)
+                        @Html.HiddenFor(m => m.Addresses[j].Line2)
+                        if (Model.Addresses[j].IsDefault == false)
+                        {
+
+                            <div class="col-xs-12">
+                                <hr class="col-xs-margin-top-0" />
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="row form-group">
+                                    <div class="col-xs-12 address-text">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                @Model.Addresses[j].Line1
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-8">
+                                                @Model.Addresses[j].Line2
+                                            </div>
+                                            <div class="col-xs-4">
+                                                @if (Model.Addresses[j].IsDefault != true)
+                                                {
+                                                    <input class="btn-link" type="button" value="Set to Primary" redirect="@Url.Action("SetDefaultAddress", "Manage", new { id = Model.Addresses[j].AddressID })" />
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <input class="btn-link" type="button" value="Edit" redirect="@Url.Action("ChangeAddress", new { id = Model.Addresses[j].AddressID })" /> |
+                                                <input class="btn-link" type="button" value="Remove" data-confirm="Confirm delete?" redirect="@Url.Action("RemoveAddress", new { id = Model.Addresses[j].AddressID })" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <hr class="col-xs-margin-top-0" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    <div class="row form-group">
+                        <div class="col-xs-6 halfpad-xs-right">
+                            <input class="btn btn-block btn-default btn-lg" type="button" value="Cancel" redirect="@Url.Action("Index", "Manage")" />
+                        </div>
+                        <div class="col-xs-6 halfpad-xs-left">
+                            <input class="btn btn-block btn-success btn-lg" type="button" value="Add Address" redirect="@Url.Action("AddAddress")" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

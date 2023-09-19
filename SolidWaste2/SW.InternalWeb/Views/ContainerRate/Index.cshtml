@@ -1,0 +1,75 @@
+﻿@model ICollection<SW.BLL.Services.ContainerRateListing>
+@{
+    ViewBag.Title = "Container Rate Maintenance";
+    ViewBag.ATitle = "Container Rate Maintenance";
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table id="ContainerRateList" class="table table-striped table-bordered" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>Container Code | Description</th>
+                    <th>Subtype</th>
+                    <th>Bill Size</th>
+                    <th>Days Svc</th>
+                    <th>Rate Description</th>
+                    <th>Rate Amt</th>
+                    <th>Pull Charge</th>
+                    <th>Effective Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Edit", "ContainerRate", new { id = item.ContainerRateId })" title="Edit"><i class="fa fa-pencil-square fa-2x"></i></a>
+                            &nbsp;
+                            <a href="@Url.Action("Delete", "ContainerRate", new { id = item.ContainerRateId })" title="Remove"><i class="fa fa-minus-square fa-2x"></i></a>
+                        </td>
+                        <td>
+                            @item.TypeCode - @item.TypeDescription
+                        </td>
+                        <td>
+                            @item.SubtypeFrequency - @item.SubtypeDescription
+                        </td>
+                        <td>
+                            @item.BillingSize.ToString("0.0")
+                        </td>
+                        <td>
+                            @item.NumDaysService
+                        </td>
+                        <td>
+                            @item.Description
+                        </td>
+                        <td>
+                            @item.Amount.ToString("0.00")
+                        </td>
+                        <td>
+                            @item.PullCharge.ToString("0.00")
+                        </td>
+                        <td>
+                            @item.EffectiveDate.ToShortDateString()
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <a asp-action="Add" class="btn btn-success">Add New Container Rate</a>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            table = $('#ContainerRateList').dataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
+                "order": [[1, "asc"]],
+                stateSave: true
+            });
+        });
+    </script>
+}

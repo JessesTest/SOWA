@@ -1,0 +1,99 @@
+﻿@model SW.InternalWeb.Models.CustomerPhone.CustomerPhoneNumberViewModel
+@using SW.InternalWeb.Extensions
+
+@using (Html.BeginForm("Update", "CustomerPhoneNumber", FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.HiddenFor(model => model.CustomerType)
+    @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.FullName)
+    @Html.HiddenFor(model => model.CurrentIndex)
+    @Html.HiddenFor(model => model.MaxIndex)
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-9">
+                    @if (Model.Id.HasValue)
+                    {
+                        <label class="control-label font-bold">Displaying @Model.CurrentIndex of @Model.MaxIndex Phone Number</label>
+                    }
+                    else
+                    {
+                        <label class="control-label font-bold">Phone Number</label>
+                    }
+                </div>
+                <div class="col-md-3 text-right">
+                    <button class="btn btn-dark" type="submit" data-form-action="@Url.Action("Previous", "CustomerPhoneNumber")">
+                        <span class="glyphicon glyphicon-arrow-left"></span>
+                    </button>
+                    &nbsp;
+                    <button class="btn btn-dark" type="submit" data-form-action="@Url.Action("Next", "CustomerPhoneNumber")">
+                        <span class="glyphicon glyphicon-arrow-right"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <hr />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Type, new { @class = "control-label font-bold" })
+                </div>
+                <div class="col-md-9">
+                    <select asp-for="Type" asp-items="Helpers.PhoneTypes" class="form-control"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.PhoneNumber, new { @class = "control-label font-bold" }) *
+                </div>
+                <div class="col-md-9">
+                    @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control", @mask = "phone" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.Status, new { @class = "control-label font-bold" })
+                </div>
+                <div class="col-md-9">
+                    <select asp-for="Status" asp-items="Helpers.PhoneStatuses" class="form-control"></select>
+                </div>
+            </div>
+            <br />
+            <div class="col-md-12">
+                <div class="form-group">
+                    (* Denotes Required Field)
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <hr />
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                @if (Model.Id.HasValue)
+                {
+                    <div class="col-md-4">
+                        <input class="btn btn-block btn-danger" type="submit" value="Update" data-form-action="@Url.Action("Update", "CustomerPhoneNumber")" />
+                    </div>
+                    <div class="col-md-4">
+                        <input class="btn btn-block btn-info col-md-4" type="submit" value="New" data-form-action="@Url.Action("Clear", "CustomerPhoneNumber")" />
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-4">
+                        <input class="btn btn-block btn-danger" type="submit" value="Add New Phone" data-form-action="@Url.Action("Add", "CustomerPhoneNumber")" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

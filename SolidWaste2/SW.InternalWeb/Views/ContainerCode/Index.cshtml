@@ -1,0 +1,52 @@
+﻿@model IEnumerable<SW.InternalWeb.Models.ContainerCodes.ContainerCodeListViewModel>
+@{
+    ViewBag.Title = "Container Code Maintenance";
+    ViewBag.ATitle = "Container Code Maintenance";
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table id="ContainerCodeList" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Type)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Description)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Edit", "ContainerCode", new { id = item.ContainerCodeID })" title="Edit"><i class="fa fa-pencil-square fa-2x"></i></a>
+                            &nbsp;
+                            <a href="@Url.Action("Delete", "ContainerCode", new { id = item.ContainerCodeID })" title="Remove"><i class="fa fa-minus-square fa-2x"></i></a>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => item.Type)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => item.Description)
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        </table>
+        <a asp-action="Add" class="btn btn-success">Add New Container Code</a>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            table = $('#ContainerCodeList').dataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
+                "order": [[1, "asc"]],
+                stateSave: true
+            });
+        });
+    </script>
+}

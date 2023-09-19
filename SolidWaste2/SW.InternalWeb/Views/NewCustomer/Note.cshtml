@@ -1,0 +1,65 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.NoteViewModel
+@{
+    ViewBag.Title = "New Customer";
+    ViewBag.ATitle = "New Customer : Service Address : Note";
+}
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li><a>Customer Information</a></li>
+        <li><a>Billing Address</a></li>
+        <li><a>Phone Number</a></li>
+        <li><a>Email</a></li>
+        <li class="active">@Html.ActionLink("Service Address", "ServiceAddress", "NewCustomer")</li>
+        <li><a>Summary</a></li>
+    </ul>
+    <div class="panel panel-default">
+        <div class="panel-body default-click-parent">
+            <div class="row">
+                <div class="col-md-4" id="ServiceAddressSummary2Target"></div>
+                <div class="col-md-8">
+                    @using (Html.BeginForm("SaveNote", "NewCustomer", FormMethod.Post, new { @class = "form-horizontal" }))
+                    {
+                        @Html.HiddenFor(m => m.ServiceAddressId)
+                        @Html.HiddenFor(m => m.Id)
+                        <div class="row">
+                            <div class="col-md-12">
+                                @Html.LabelFor(m => m.Note, new { @class = "control-label font-bold" })
+                                @Html.TextAreaFor(m => m.Note, new { @class = "form-control", rows = 6 })
+                                @Html.ValidationMessageFor(m => m.Note, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <hr />
+                            </div>
+                            <div class="col-md-12">
+                                @Html.ActionLink("Cancel", "ServiceAddress", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
+                                <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".default-click-parent input").keypress(function ($event) {
+                if ($event.which == 13) {
+                    $event.preventDefault();
+                    $(this).closest(".default-click-parent").find(".default-click").click();
+                }
+            });
+        });
+        $.ajax({
+            url: '@Url.Action("ServiceAddressSummary2", "NewCustomer")',
+            success: function (result) {
+                $("#ServiceAddressSummary2Target").html(result);
+            }
+        });
+    </script>
+}

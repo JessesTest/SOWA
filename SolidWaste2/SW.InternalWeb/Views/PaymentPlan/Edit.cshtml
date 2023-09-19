@@ -1,0 +1,81 @@
+﻿@model SW.InternalWeb.Models.PaymentPlans.PaymentPlanViewModel
+@{
+    ViewBag.Title = "Edit Payment Plan";
+    ViewBag.ATitle = "Edit Payment Plan";
+}
+
+@using (Html.BeginForm("Edit", "PaymentPlan", FormMethod.Post))
+{
+   @* <input asp-for="Id" type="hidden" />*@
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="row form-group">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.CustomerType)
+                    @Html.TextBoxFor(m => m.CustomerType, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.CustomerId)
+                    @Html.TextBoxFor(m => m.CustomerId, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-6">
+                    @Html.LabelFor(m => m.FullName)
+                    @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row form-group">
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.FirstPaymentDate)
+                    @Html.HiddenFor(m => m.FirstPaymentDate)
+                    @Html.TextBoxFor(m => m.FirstPaymentDate, "{0:d}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.Months)
+                    @Html.TextBoxFor(m => m.Months, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.MonthlyPayment)
+                    @Html.HiddenFor(m => m.MonthlyPayment)
+                    @Html.TextBoxFor(m => m.MonthlyPayment, "{0:c}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.MonthlyTotal)
+                    @Html.HiddenFor(m => m.MonthlyTotal)
+                    @Html.TextBoxFor(m => m.MonthlyTotal, "{0:c}", new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.Status)
+                    @Html.TextBoxFor(m => m.Status, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.LabelFor(m => m.Canceled)
+                    @if (Model.Canceled)
+                    {
+                        @Html.CheckBoxFor(m => m.Canceled, new { @class = "form-control", disabled = "disabled" })
+                    }
+                    else
+                    {
+                        @Html.CheckBoxFor(m => m.Canceled, new { @class = "form-control" })
+                    }
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2">
+                    @if (!Model.Canceled)
+                    {
+                        <!-- IDKY -->
+                        <button type="submit" class="btn btn-block btn-primary" onclick="$(this).closest('form')[0].submit()">Update</button>
+                    }
+                </div>
+                <div class="col-xs-2">
+                    @Html.ActionLink("Back", "Index", "PaymentPlan", new { customerId = Model.CustomerId }, new { @class = "btn btn-block btn-info" })
+                </div>
+                <div class="col-xs-2">
+                    @Html.ActionLink("Agreement", "PaymentPlanAgreement", "Reports", new { paymentPlanId = Model.Id }, new { @class = "btn btn-block btn-info" })
+                </div>
+            </div>
+        </div>
+    </div>
+}

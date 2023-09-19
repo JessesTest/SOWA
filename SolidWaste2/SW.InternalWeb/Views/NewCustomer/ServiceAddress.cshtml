@@ -1,0 +1,275 @@
+﻿@model SW.InternalWeb.Models.NewCustomer.ServiceAddressViewModel
+@{
+    ViewBag.Title = "New Customer";
+    ViewBag.ATitle = "New Customer : Service Address : Address";
+}
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li><a>Customer Information</a></li>
+        <li><a>Billing Address</a></li>
+        <li><a>Phone Number</a></li>
+        <li><a>Email</a></li>
+        <li class="active">@Html.ActionLink("Service Address", "ServiceAddress", "NewCustomer")</li>
+        <li><a>Summary</a></li>
+    </ul>
+    <div class="panel panel-default">
+        <div class="panel-body default-click-parent">
+            <div class="row">
+                <div class="col-md-4" id="ServiceAddressSummary2Target"></div>
+                <div class="col-md-8">
+                    @if (Model.Addresses != null)
+                    {
+                        using (Html.BeginForm("SelectAddress", "NewCustomer", FormMethod.Post, new { @class = "form-horizontal" }))
+                        {
+                            <div class="row">
+                                <div class="col-md-8">
+                                    @Html.HiddenFor(m => m.EffectiveDate)
+                                    @Html.HiddenFor(m => m.Email)
+                                    @Html.HiddenFor(m => m.Id)
+                                    @Html.HiddenFor(m => m.LocationContact)
+                                    @Html.HiddenFor(m => m.LocationName)
+                                    @Html.HiddenFor(m => m.Phone)
+                                    @*@Html.HiddenFor(m => m.RouteNumber)*@
+                                    @Html.HiddenFor(m => m.AddressLine1)
+                                    @Html.HiddenFor(m => m.AddressLine2)
+                                    @Html.HiddenFor(m => m.City)
+                                    @Html.HiddenFor(m => m.State)
+                                    @Html.HiddenFor(m => m.Zip)
+                                    <select name="AddressesIndex" class="form-control">
+                                        @for (int i = 0; i < Model.Addresses.Count(); i++)
+                                        {
+                                            var a = Model.Addresses.ElementAt(i);
+                                            <option value="@i">@a.AddressLine1 @a.AddressLine2 @a.City @a.State @a.Zip</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-block btn-primary">Select Address</button>
+                                </div>
+                                <div class="col-md-12">
+                                    <hr />
+                                </div>
+                            </div>
+                        }
+                    }
+                    @using (Html.BeginForm("SaveAddress", "NewCustomer", FormMethod.Post, new { @class = "form-horizontal" }))
+                    {
+                        @Html.HiddenFor(m => m.Id)
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.LocationName, new { @class = "control-label font-bold" }) *
+                            </div>
+                            <div class="col-md-9">
+                                @Html.TextBoxFor(m => m.LocationName, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.LocationName, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.EffectiveDate, new { @class = "control-label font-bold" }) *
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="EffectiveDate" type="text" data-provide="datepicker" class="form-control" asp-format="{0:MM/dd/yyyy}" />
+                                @Html.ValidationMessageFor(m => m.EffectiveDate, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.LocationContact, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.TextBoxFor(m => m.LocationContact, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.LocationContact, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.AddressLine1, new { @class = "control-label font-bold" }) &nbsp;*
+                                <label id="AddressCheckLabel" class="control-label font-bold"></label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    @Html.TextBoxFor(m => m.AddressLine1, new { @class = "form-control", @placeholder = "STREET ADDRESS (# AND NAME REQUIRED)" })
+                                    <span class="input-group-btn">
+                                        <button type="button" id="billingAddress" class="btn btn-success">Use Billing</button>
+                                    </span>
+                                </div>
+                                @Html.ValidationMessageFor(m => m.AddressLine1, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.AddressLine2, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.TextBoxFor(m => m.AddressLine2, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.AddressLine2, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.Override, new { @class = "control-label font-bold" }) &nbsp;
+                                @Html.CheckBoxFor(m => m.Override, new { @class = "checkbox-inline" })
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.City, new { @class = "form-control", @placeholder = "CITY" })
+                                    </div>
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.State, new { @class = "form-control", @placeholder = "ST" })
+                                    </div>
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(m => m.Zip, new { @class = "form-control", @placeholder = "ZIP" })
+                                    </div>
+                                </div>
+                                @Html.ValidationMessageFor(m => m.City, null, new { @class = "text-danger" })
+                                @Html.ValidationMessageFor(m => m.State, null, new { @class = "text-danger" })
+                                @Html.ValidationMessageFor(m => m.Zip, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.Phone, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    @Html.TextBoxFor(m => m.Phone, new { @class = "form-control mask-phone" })
+                                    <span class="input-group-btn">
+                                        <button type="button" id="billingPhone" class="btn btn-success">Use Billing</button>
+                                    </span>
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Phone, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.LabelFor(m => m.Email, new { @class = "control-label font-bold" })
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                                    <span class="input-group-btn">
+                                        <button type="button" id="billingEmail" class="btn btn-success form-control">Use Billing</button>
+                                    </span>
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Email, null, new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                (* Denotes Required Field)
+                            </div>
+                            <div class="col-md-12">
+                                <hr />
+                            </div>
+                            <div class="col-md-12">
+                                @Html.ActionLink("Cancel", "ServiceAddress", "NewCustomer", null, new { @class = "btn btn-primary btn-s-xs" })
+                                <button type="submit" class="btn btn-primary btn-s-xs default-click">Next</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".mask-phone").mask("(999) 999-9999 ?9999");
+            $("[data-provide='datepicker']").mask("99/99/9999", { placeholder: "mm/dd/yyyy" });
+            $(".default-click-parent input").keypress(function ($event) {
+                if ($event.which == 13) {
+                    $event.preventDefault();
+                    $(this).closest(".default-click-parent").find(".default-click").click();
+                }
+            });
+        });
+
+        (function () {
+            function updateAddress(data) {
+                $("#Override").prop("checked", data.override);
+                $("#AddressLine1").val(data.addressLine1);
+                $("#AddressLine2").val(data.addressLine2);
+                $("#City").val(data.city);
+                $("#State").val(data.state);
+                $("#Zip").val(data.zip).change();
+            }
+            function updateEmail(data) {
+                $("#Email").val(data.email);
+            }
+            function updatePhone(data) {
+                $("#Phone").val(data.phone);
+            }
+            function updateCheck(data) {
+                if (data.msg == 'Unique') {
+                    $('#AddressCheckLabel').removeClass('text-danger');
+                    $('#AddressCheckLabel').addClass('text-primary');
+                }
+                else {
+                    $('#AddressCheckLabel').removeClass('text-primary');
+                    $('#AddressCheckLabel').addClass('text-danger');
+                }
+                $('#AddressCheckLabel').text(data.msg.toString());
+            }
+            $("#billingAddress").click(function ($event) {
+                $.ajax({
+                    dataType: 'json',
+                    url: '@Url.Action("BillingAddress", "NewCustomer", null)',
+                    data: null,
+                    success: updateAddress,
+                    cache: false
+                });
+                $event.preventDefault();
+            });
+            $("#billingEmail").click(function ($event) {
+                $.ajax({
+                    dataType: 'json',
+                    url: '@Url.Action("BillingEmail", "NewCustomer", null)',
+                    data: null,
+                    success: updateEmail,
+                    cache: false
+                });
+                $event.preventDefault();
+            });
+            $("#billingPhone").click(function ($event) {
+                $.ajax({
+                    dataType: 'json',
+                    url: '@Url.Action("BillingPhone", "NewCustomer", null)',
+                    data: null,
+                    success: updatePhone,
+                    cache: false
+                });
+                $event.preventDefault();
+            });
+            @*$('#AddressLine1, #City, #State, #Zip').on('change', function ($event) {
+                var data = {
+                addressLine: $('#AddressLine1').val(),
+                city: $('#City').val(),
+                state: $('#State').val(),
+                zip: $('#Zip').val()
+                }
+                $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '@Url.Action("CheckAddress", "NewCustomer")',
+                data: data,
+                success: updateCheck,
+                cache: false
+                });
+                $event.preventDefault();
+            });*@
+        })();
+
+        $.ajax({
+            url: '@Url.Action("ServiceAddressSummary2", "NewCustomer")',
+            success: function(result)
+            {
+                $("#ServiceAddressSummary2Target").html(result);
+            }
+        });
+    </script>
+}

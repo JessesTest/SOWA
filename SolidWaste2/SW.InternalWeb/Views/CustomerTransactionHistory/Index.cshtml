@@ -1,0 +1,224 @@
+﻿@model SW.InternalWeb.Models.CustomerTransactionHistory.CustomerTransactionHistoryViewModel
+@using System.Configuration;
+@using SW.InternalWeb.Extensions
+@{
+    ViewBag.Title = "Customer Transaction History";
+    ViewBag.faTitleClass = "wrench";
+    ViewBag.ATitle = "Customer Maintenance : " + TempData["FullName"] + "   Account#" + Model.CustomerID;
+}
+
+@await Component.InvokeAsync("CustomerAlerts", new { customerId = Model.CustomerID })
+
+<div id="crumbs">
+    <ul class="v-bottom">
+        <li class=""><a href="@Url.Action("Index", "Customer", new { customerID = Model.CustomerID })">Customer Information</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerBillingAddress", new { customerID = Model.CustomerID })">Billing Address</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerPhoneNumber", new { customerID = Model.CustomerID })">Phone Number</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerEmail", new { customerID = Model.CustomerID })">Email</a></li>
+        <li class=""><a href="@Url.Action("Index", "CustomerServiceAddress", new { customerID = Model.CustomerID })">Service Address</a></li>
+        <li class="active"><a href="@Url.Action("Index", "CustomerTransactionHistory", new { customerID = Model.CustomerID })">Transaction History</a></li>
+    </ul>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                <table id="transactions" class="table table-striped table-bordered" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Add Date Time</th>
+                            <th>Transaction Code | Description</th>
+                            <th>Check Number</th>
+                            <th>Amount</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <a class="btn btn block btn-success" href="@Url.Action("Index", "Transaction", new { customerID = Model.CustomerID })">Additional Service Charge</a>
+            </div>
+            <div class="col-xs-12">
+                <hr />
+            </div>
+            <div class="col-xs-12">
+                @using (Html.BeginForm("TransactionsbyDateRange", "Reports"))
+                {
+                    @Html.HiddenFor(m => m.CustomerID)
+                    <div class="row">
+                        <div class="col-xs-3">
+                            @Html.LabelFor(m => m.StartDate)
+                            @Html.TextBoxFor(m => m.StartDate, "{0:d}", new { @class = "form-control datepicker-input" })
+                        </div>
+                        <div class="col-xs-3">
+                            @Html.LabelFor(m => m.EndDate)
+                            @Html.TextBoxFor(m => m.EndDate, "{0:d}", new { @class = "form-control datepicker-input" })
+                        </div>
+                        <div class="col-xs-2">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-success">Print Transactions</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        /* Formatting function for row details - modify as you need */
+        function format(d) {
+            console.log({ "action": format, d: d });
+
+            var s = '<div class="slider">' +
+                '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px; width:100%">' +
+                '<tr>' +
+                '<td class="font-bold" colspan="2">Transaction Amt:</td>' +
+                '<td class="text-right">' + d.transactionAmount + '</td>' +
+                '<td class="font-bold" colspan="2">Counselors Amt:</td>' +
+                '<td class="text-right">' + d.counselorsAmount + '</td>' +
+                '<td class="font-bold" colspan="2">Collections Amt:</td>' +
+                '<td class="text-right">' + d.collectionsAmount + '</td>' +
+                '<td class="font-bold" colspan="2">Uncollectable Amt:</td>' +
+                '<td class="text-right">' + d.uncollectableAmount + '</td>' +
+                '</tr>' +
+                '<tr style="border-bottom-style: double; border-bottom-color: grey;">' +
+                '<td class="font-bold" colspan="2">Transaction Bal:</td>' +
+                '<td class="text-right">' + d.transactionBalance + '</td>' +
+                '<td class="font-bold" colspan="2">Counselors Bal:</td>' +
+                '<td class="text-right">' + d.counselorsBalance + '</td>' +
+                '<td class="font-bold" colspan="2">Collections Bal:</td>' +
+                '<td class="text-right">' + d.collectionsBalance + '</td>' +
+                '<td class="font-bold" colspan="2">Uncollectable Bal:</td>' +
+                '<td class="text-right">' + d.uncollectableBalance + '</td>' +
+                '</tr>';
+            if (d.billMaster == null) {
+                //`d` is the original data object for the row
+                s +=
+                    '<tr>' +
+                    '<td class="font-bold" colspan="2">User ID:</td>' +
+                    '<td class="text-right" colspan="2">' + d.userID + '</td>' +
+                    '<td class="font-bold" colspan="2">Batch ID:</td>' +
+                    '<td class="text-right" colspan="2">' + d.batchID + '</td>' +
+                    '<td class="font-bold" colspan="2">Purchase Order:</td>' +
+                    '<td class="text-right" colspan="2">' + d.workOrder + '</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td class="font-bold" colspan="12">Comments:</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td colspan="12">' + d.comments + '</td>' +
+                    '</tr>' +
+                    '</table>';
+            } else {
+                s += '</table>';
+                s += '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px; width:100%">';
+                s += '<td><a href="@Url.Action("DownloadBill", "CustomerTransactionHistory")?transactionId=' + d.billMaster.transactionID + '">View Paper Bill</a></td>';
+
+                if (d.billMaster.contractCharge != '') {
+                    s +=
+                        '<td></td><td></td><td></td>'
+                        + '<th>Contract Charge </th>'
+                        + '<td class="text-right">' + d.billMaster.contractCharge + '</td>';
+                }
+
+                for (i = 0; i < d.billMaster.billServiceAddress.length; i++) {
+                    s +=
+                        '<tr>'
+                        + '<th>' + d.billMaster.billServiceAddress[i].serviceAddressName + '</th>'
+                        + '<th>' + d.billMaster.billServiceAddress[i].serviceAddressStreet + '</th>'
+                        + '<td></td><td></td><td></td>' +
+                        '</tr>';
+                    for (j = 0; j < d.billMaster.billServiceAddress[i].billContainers.length; j++) {
+                        s +=
+                            '<tr>'
+                            + '<td></td>'
+                            + '<td>'
+                            + d.billMaster.billServiceAddress[i].billContainers[j].containerType
+                            + ' - '
+                            + d.billMaster.billServiceAddress[i].billContainers[j].containerDescription
+                            + '</td>'
+                            + '<td>' + d.billMaster.billServiceAddress[i].billContainers[j].daysProratedMessage + '</td>'
+                            + '<td>' + d.billMaster.billServiceAddress[i].billContainers[j].daysService + '</td>'
+                            + '<td class="text-right">' + d.billMaster.billServiceAddress[i].billContainers[j].containerCharge + '</td>' +
+                            '</tr>';
+                    }
+                }
+                s +=
+                    '</table>'
+                    + '</div>';
+            }
+            s += '</div>';
+            return s;
+        }
+
+        $(document).ready(function () {
+            var table = $('#transactions').DataTable({
+                'ajax': '@Url.Action("IndexJson", "CustomerTransactionHistory", new { customerID = Model.CustomerID })',
+                'columnDefs': [
+                    {
+                        'targets': 0,
+                        'data': null,
+                        'class': 'details-control',
+                        'defaultContent': ''
+                    },
+                    {
+                        'targets': 1,
+                        'data': "addDateTime",
+                        'sClass': 'text-left',
+                        'render': function (data, type, row, meta) {
+                            return '<div hidden="hidden">' + row.addDateTime + ' ' + String('0000' + row.sequence).slice(-4) + '</div>' + data;
+                        }
+                    },
+                    {
+                        'targets': 2,
+                        'data': 'description',
+                        'sClass': 'text-left'
+                    },
+                    {
+                        'targets': 3,
+                        'data': 'checkNumber',
+                        'sClass': 'text-right'
+                    },
+                    {
+                        'targets': 4,
+                        'data': 'transactionAmount',
+                        'sClass': 'text-right'
+                    },
+                    {
+                        'targets': 5,
+                        'data': 'transactionBalance',
+                        'sClass': 'text-right'
+                    }
+                ],
+                'order': [[1, 'desc']]
+            });
+
+            // Add event listener for opening and closing details
+            $('#transactions tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    $('div.slider', row.child()).slideUp(function () {
+                        row.child.hide();
+                        tr.removeClass('shown');
+                    });
+                }
+                else {
+                    // Open this row
+                    row.child(format(row.data()), 'no-padding').show();
+                    tr.addClass('shown');
+
+                    $('div.slider', row.child()).slideDown();
+                }
+            });
+        });
+    </script>
+}

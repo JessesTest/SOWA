@@ -1,0 +1,159 @@
+﻿@model SW.InternalWeb.Models.ContainerRates.ContainerRateEditViewModel
+@inject SW.BLL.Services.IContainerCodeService containerTypeService
+@inject SW.BLL.Services.IContainerSubtypeService containerSubtypeService
+@{
+    ViewBag.Title = "Edit Container Rate";
+    ViewBag.ATitle = "Edit Container Rate";
+
+    var containerTypes = (await containerTypeService.GetAll())
+        .Select(t => new SelectListItem { Text = t.Description, Value = t.ContainerCodeId.ToString() })
+        .ToList();
+    var containerSubtypes = (await containerSubtypeService.GetByContainerType(Model.ContainerType))
+        .Select(t => new SelectListItem { Text = t.Description, Value = t.ContainerSubtypeId.ToString() })
+        .ToList();
+    var numDaysOfServcie = new[]
+    {
+        new SelectListItem{ Text = "", Value = ""},
+        new SelectListItem{ Text = "1", Value = "1"},
+        new SelectListItem{ Text = "2", Value = "2"},
+        new SelectListItem{ Text = "3", Value = "3"},
+        new SelectListItem{ Text = "4", Value = "4"},
+        new SelectListItem{ Text = "5", Value = "5"},
+        new SelectListItem{ Text = "6", Value = "6"},
+        new SelectListItem{ Text = "7", Value = "7"}
+    };
+}
+
+@using (Html.BeginForm("Edit", "ContainerRate", FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    <div class="panel panel-default">
+        <div class="panel-body">
+            @Html.HiddenFor(model => model.ContainerRateID)
+            <div class="row">
+                <div class="col-md-9 col-lg-6">
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            <label class="control-label ">Container Code</label>
+                        </div>
+                        <div class="col-md-8" id="Container_ContainerCodeId">
+                            <select asp-for="ContainerType" asp-items="containerTypes" class="form-control"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            <label class="control-label ">Subtype</label>
+                        </div>
+                        <div class="col-md-8" id="Container_ContainerSubtypeID">
+                            <select asp-for="ContainerSubtype" asp-items="containerSubtypes" class="form-control"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.BillingSize, new { @class = "control-label" }) *
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.BillingSize, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.BillingSize, null, new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            <label class="control-label ">Days Service *</label>
+                        </div>
+                        <div class="col-md-8">
+                            <select asp-for="NumDaysService" asp-items="numDaysOfServcie" class="form-control"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.RateDescription, new { @class = "control-label" })*
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.RateDescription, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.RateDescription, null, new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            <label class="control-label ">Rate Amount *</label>
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.RateAmount, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.RateAmount, null, new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            <label class="control-label ">Pull Charge *</label>
+                        </div>
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.PullCharge, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.PullCharge, null, new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.LabelFor(model => model.EffectiveDate, new { @class = "control-label" }) *
+                        </div>
+                        <div class="col-md-8">
+                            <input asp-for="EffectiveDate" type="text" data-provide="datepicker" class="form-control" asp-format="{0:MM/dd/yyyy}" />
+                            @Html.ValidationMessageFor(model => model.EffectiveDate, null, new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <br />
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            (* Denotes Required Field)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input class="btn btn-block btn-info" type="submit" value="Update" data-form-action="@Url.Action("Edit", "ContainerRate")" />
+                                </div>
+                                <div class="col-md-4">
+                                    <a asp-action="Index" class="btn btn-block btn-danger">Back</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        function changeSubtypes($event) {
+            $.post(
+                "@Url.Action("ContainerTypeChanged", "ContainerRate")",
+                {
+                    containerCodeId: $("#ContainerType").val(),
+                },
+                function (data) {
+                    var $subtypeSelect = $("#ContainerSubtype");
+
+                    if ($event != null) {
+                        $subtypeSelect.children().remove();
+                        $subtypeSelect.append(data.optionHtml);
+                    }
+
+                    $subtypeSelect.change();
+                });
+        }
+
+        $(document).ready(function () {
+            $("#ContainerType").on("change", changeSubtypes);
+
+            $("[data-provide='datepicker']").mask("99/99/9999", { placeholder: "mm/dd/yyyy" });
+        });
+    </script>
+}

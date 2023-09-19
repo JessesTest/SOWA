@@ -1,0 +1,65 @@
+﻿@model SW.InternalWeb.Models.WorkOrderLegacyInquiry.WorkOrderLegacyInquiryViewModel
+
+@{
+    ViewBag.Title = "Search Results";
+    ViewBag.ATitle = "Search Results Legacy Work Orders";
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="Results" class="table table-condensed table-bordered">
+                    <thead>
+                        <tr class="bg-dark">
+                            <th>Action</th>
+                            <th>Origin</th>
+                            <th>@Html.DisplayNameFor(m => m.BreakdownLocation)</th>
+                            <th>@Html.DisplayNameFor(m => m.Route)</th>
+                            <th>@Html.DisplayNameFor(m => m.TransDate)</th>
+                            <th>@Html.DisplayNameFor(m => m.Driver)</th>
+                            <th>@Html.DisplayNameFor(m => m.EquipmentNumber)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Results.Count(); i++)
+                        {
+                            var item = Model.Results.ElementAt(i);
+                            var rowBG = item.RecType == "B" ? "alert-success" : "alert-info";
+                            <tr class="@rowBG">
+                                <td class="v-middle text-center">
+                                    @if (item.RecType == "B")
+                                    {
+                                        <button type="button" class="btn btn-block btn-sm btn-primary" onclick="location.href='@Url.Action("Breakdown", "Legacy", new { id = item.WorkOrderLegacyId })'">View</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-block btn-sm btn-primary" onclick="location.href='@Url.Action("WorkOrder", "Legacy", new { id = item.WorkOrderLegacyId })'">View</button>
+                                    }
+                                </td>
+                                <td class="v-middle text-center">@(item.RecType == "B" ? "BreakDown" : "WorkOrder")</td>
+                                <td>@Html.DisplayFor(m => item.BreakdownLocation)</td>
+                                <td>@Html.DisplayFor(m => item.Route)</td>
+                                <td>@item.TransDate.ToShortDateString()</td>
+                                <td>@Html.DisplayFor(m => item.Driver)</td>
+                                <td>@Html.DisplayFor(m => item.EquipmentNumber)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            $('#Results').dataTable({
+                "dom": '<"row"<"col-xs-6"l><"col-xs-6"f>><"row"<"col-xs-12 col-xs-margin-top-5"<"table-scrolling"t>>>r<"row"<"col-xs-5"i><"col-xs-7"p>>',
+                'order' : [[2, 'asc']]
+            });
+        });
+    </script>
+}

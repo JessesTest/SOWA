@@ -1,0 +1,120 @@
+﻿@model SW.ExternalWeb.Models.Manage.PhonesViewModel
+@{
+    ViewBag.Title = "Manage Your Phone Numbers";
+}
+
+<div class="col-xs-12">
+    <div class="row">
+        <h2>Manage Phone Numbers</h2>
+        <div class="col-xs-12 manageaccountcontainer">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 manageaccountbody">
+                    @for (int i = 0; i < Model.Phones.Count; i++)
+                    {
+                        @Html.HiddenFor(m => m.Phones[i].PhoneID)
+                        @Html.HiddenFor(m => m.Phones[i].TypeDescription)
+                        @Html.HiddenFor(m => m.Phones[i].Number)
+                        @Html.HiddenFor(m => m.Phones[i].IsDefault)
+                        if (Model.Phones[i].IsDefault)
+                        {
+                            var hasRun = false;
+                            if (hasRun == false)
+                            {
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <h3>Primary Phone</h3>
+                                    </div>
+                                </div>
+                                hasRun = true;
+                            }
+                            <div class="col-xs-12">
+                                <hr class="col-xs-margin-top-0" />
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="row form-group">
+                                    <div class="col-xs-12 address-text">
+                                        <div class="row">
+                                            <div class="col-xs-2">
+                                                @Model.Phones[i].TypeDescription
+                                            </div>
+                                            <div class="col-xs-5">
+                                                @Model.Phones[i].Number
+                                            </div>
+                                            <div class="col-xs-12 col-xs-offset-2">
+                                                <input class="btn-link" type="button" value="Edit" redirect="@Url.Action("ChangePhoneNumber", new { id = Model.Phones[i].PhoneID })" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <hr class="col-xs-margin-top-0" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    @if (Model.Phones.Count > 1)
+                    {
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h3>Other Phones</h3>
+                            </div>
+                        </div>
+                    }
+
+                    @for (int j = 0; j < Model.Phones.Count; j++)
+                    {
+                        @Html.HiddenFor(m => m.Phones[j].PhoneID)
+                        @Html.HiddenFor(m => m.Phones[j].TypeDescription)
+                        @Html.HiddenFor(m => m.Phones[j].Number)
+                        @Html.HiddenFor(m => m.Phones[j].IsDefault)
+                        if (Model.Phones[j].IsDefault == false)
+                        {
+                            <div class="col-xs-12">
+                                <hr class="col-xs-margin-top-0" />
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="row form-group">
+                                    <div class="col-xs-12 address-text">
+                                        <div class="row">
+                                            <div class="col-xs-2">
+                                                @Model.Phones[j].TypeDescription
+                                            </div>
+                                            <div class="col-xs-5">
+                                                @Model.Phones[j].Number
+                                            </div>
+                                            <div class="col-xs-5">
+                                                @if (Model.Phones[j].IsDefault != true)
+                                                {
+                                                    <input class="btn-link" type="button" value="Set to Primary" redirect="@Url.Action("SetDefaultPhone", "Manage", new { id = Model.Phones[j].PhoneID })" />
+                                                }
+                                            </div>
+                                            <div class="col-xs-12 col-xs-offset-2">
+                                                <input class="btn-link" type="button" value="Edit" redirect="@Url.Action("ChangePhoneNumber", new { id = Model.Phones[j].PhoneID })" /> |
+                                                <input class="btn-link" type="button" value="Remove" data-confirm="Confirm delete?" redirect="@Url.Action("RemovePhoneNumber", new { id = Model.Phones[j].PhoneID })" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <hr class="col-xs-margin-top-0" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    <div class="row form-group">
+                        <div class="col-xs-6 halfpad-xs-right">
+                            <input class="btn btn-block btn-default btn-lg" type="button" value="Cancel" redirect="@Url.Action("Index")" />
+                        </div>
+                        <div class="col-xs-6 halfpad-xs-left">
+                            <input class="btn btn-block btn-success btn-lg" type="button" value="Add Phone" redirect="@Url.Action("AddPhoneNumber")" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

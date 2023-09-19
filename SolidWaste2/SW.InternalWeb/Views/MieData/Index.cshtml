@@ -1,0 +1,36 @@
+﻿@model SW.InternalWeb.Models.MieData.MieDataListViewModel
+@{
+    ViewBag.ATitle = "Customer Maintenance";
+    ViewBag.faTitleClass = "wrench";
+    ViewBag.ATitle = "Customer Maintenance : Image Upload";
+}
+@using (Html.BeginForm("Edit", "MieData", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <input asp-for="CustomerId" type="hidden" />
+    <div class="row fileupload-buttonbar padder">
+        <div class="span7">
+            <!-- The fileinput-button span is used to style the file input field as button -->
+            <span class="btn btn-success fileinput-button">
+                <input type="file" name="Image" />
+            </span>
+            <div class="row fileupload-buttonbar padder">
+                <button type="submit" class="btn btn-primary start" value="Edit" data-form-action="@Url.Action("Edit", "MieData")">
+                    <i class="icon-upload icon-white"></i>
+                    <span>Save upload</span>
+                </button>
+                <button type="reset" class="btn btn-warning cancel">
+                    <i class="icon-ban-circle icon-white"></i>
+                    <span>Cancel upload</span>
+                </button>
+                @*<button type="button" class="btn btn-danger delete">
+            <i class="icon-trash icon-white"></i>
+            <span>@Html.ActionLink("Return", "Index", "Customer")</span>
+            </button>*@
+                <button type="submit" class="btn btn-danger delete" value="Return" data-form-action="@Url.Action("Return", "MieData")">
+                    <i class="icon-trash icon-white"></i>
+                    <span>Return</span>
+                </button>
+            </div>
+        </div>
+    </div>
+}
