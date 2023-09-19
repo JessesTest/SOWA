@@ -27,10 +27,10 @@ jobs:
         with:
           dotnet_version: '${{ vars.DOTNET_VERSION }}'
 
-      - name: Publish Internal
+      - name: Publish External
         run: dotnet publish ./${{ vars.SOLUTION_NAME }}/${{ vars.EXTERNAL_WEB_PROJECT }}/${{ vars.EXTERNAL_WEB_PROJECT }}.csproj --configuration Release
 
-      - name: Upload Internal Artifact
+      - name: Upload External Artifact
         uses: actions/upload-artifact@v2
         with:
           name: ${{ vars.SOLUTION_NAME }}-External
