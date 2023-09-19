@@ -5,13 +5,13 @@ on:
      branches:
        - main
      paths:
-       - '${{ vars.SOLUTION_NAME }}/Common/**'
-       - '${{ vars.SOLUTION_NAME }}/Common.Web/**'
-       - '${{ vars.SOLUTION_NAME }}/Identity.BL/**'
-       - '${{ vars.SOLUTION_NAME }}/Notify.BL/**'
-       - '${{ vars.SOLUTION_NAME }}/PE.BL/**'
-       - '${{ vars.SOLUTION_NAME }}/SW.BLL/**'
-       - '${{ vars.SOLUTION_NAME }}/${{ EXTERNAL_WEB_PROJECT }}/**'
+       - '**/Common/**'
+       - '**/Common.Web/**'
+       - '**/Identity.BL/**'
+       - '**/Notify.BL/**'
+       - '**/PE.BL/**'
+       - '**/SW.BLL/**'
+       - '**/External.Web/**'
    workflow_dispatch:
 
 jobs:
