@@ -25,7 +25,7 @@ jobs:
               }
             }
           variables: |
-            owner: ${{ github.event.repository.name }}
+            owner: ${{ github.event.repository.owner }}
             repo: ${{ github.event.repository.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}         
