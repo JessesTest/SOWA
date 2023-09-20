@@ -42,32 +42,32 @@ jobs:
           base: ${{ steps.previous_release.outputs.tagName }}
           filters: |
             Shared:
-            - '${{ var.SOLUTION_NAME }}/Common/**'
-            - '${{ var.SOLUTION_NAME }}/Common.Web/**'
-            - '${{ var.SOLUTION_NAME }}/Identity.BL/**'
-            - '${{ var.SOLUTION_NAME }}/Notify.BL/**'
-            - '${{ var.SOLUTION_NAME }}/PE.BL/**'
-            - '${{ var.SOLUTION_NAME }}/SW.BLL/**'                      
+            - '${{ vars.SOLUTION_NAME }}/Common/**'
+            - '${{ vars.SOLUTION_NAME }}/Common.Web/**'
+            - '${{ vars.SOLUTION_NAME }}/Identity.BL/**'
+            - '${{ vars.SOLUTION_NAME }}/Notify.BL/**'
+            - '${{ vars.SOLUTION_NAME }}/PE.BL/**'
+            - '${{ vars.SOLUTION_NAME }}/SW.BLL/**'                      
             External:
-            - '${{ var.SOLUTION_NAME }}/${{ var.EXTERNAL_WEB_PROJECT }}/**'
+            - '${{ vars.SOLUTION_NAME }}/${{ vars.EXTERNAL_WEB_PROJECT }}/**'
             Internal:
-            - '${{ var.SOLUTION_NAME }}/${{ var.INTERNAL_WEB_PROJECT }}/**'
+            - '${{ vars.SOLUTION_NAME }}/${{ vars.INTERNAL_WEB_PROJECT }}/**'
 
       - name: Publish Internal
         if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')
-        run: dotnet publish ./${{ var.SOLUTION_NAME }}/${{ var.INTERNAL_WEB_PROJECT }}/${{ var.INTERNAL_WEB_PROJECT }}.csproj --configuration Release
+        run: dotnet publish ./${{ vars.SOLUTION_NAME }}/${{ vars.INTERNAL_WEB_PROJECT }}/${{ vars.INTERNAL_WEB_PROJECT }}.csproj --configuration Release
 
       - name: Upload Internal Artifact
         if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ var.SOLUTION_NAME }}-Internal
-          path: ./${{ var.SOLUTION_NAME }}/${{ var.INTERNAL_WEB_PROJECT }}/bin/Release/net6.0
+          name: ${{ vars.SOLUTION_NAME }}-Internal
+          path: ./${{ vars.SOLUTION_NAME }}/${{ vars.INTERNAL_WEB_PROJECT }}/bin/Release/net6.0
 
       - uses: azure/pipelines@v1
         if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')      
         with:
-          azure-devops-project-url: ${{ var.AZURE_DEVOPS_PROJECT_URL }}
+          azure-devops-project-url: ${{ vars.AZURE_DEVOPS_PROJECT_URL }}
           azure-pipeline-name: Internal-Release-Deploy
           azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
 
@@ -75,18 +75,18 @@ jobs:
 
       - name: Publish External
         if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')
-        run: dotnet publish ./${{ var.SOLUTION_NAME }}/${{ var.EXTERNAL_WEB_PROJECT }}/${{ var.EXTERNAL_WEB_PROJECT }}.csproj --configuration Release
+        run: dotnet publish ./${{ vars.SOLUTION_NAME }}/${{ vars.EXTERNAL_WEB_PROJECT }}/${{ vars.EXTERNAL_WEB_PROJECT }}.csproj --configuration Release
 
       - name: Upload External Artifact
         if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ var.SOLUTION_NAME }}-External
-          path: ./${{ var.SOLUTION_NAME }}/${{ var.EXTERNAL_WEB_PROJECT }}/bin/Release/net6.0
+          name: ${{ vars.SOLUTION_NAME }}-External
+          path: ./${{ vars.SOLUTION_NAME }}/${{ vars.EXTERNAL_WEB_PROJECT }}/bin/Release/net6.0
 
       - uses: azure/pipelines@v1
         if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')      
         with:
-          azure-devops-project-url: ${{ var.AZURE_DEVOPS_PROJECT_URL }}
+          azure-devops-project-url: ${{ vars.AZURE_DEVOPS_PROJECT_URL }}
           azure-pipeline-name: External-Release-Deploy
           azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}            
