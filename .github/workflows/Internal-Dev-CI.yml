@@ -25,7 +25,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet_version: '${{ vars.DOTNET_VERSION }}'
+          dotnet-version: '${{ vars.DOTNET_VERSION }}'
 
       - name: Publish Internal
         run: dotnet publish ./${{ vars.SOLUTION_NAME }}/${{ vars.INTERNAL_WEB_PROJECT }}/${{ vars.INTERNAL_WEB_PROJECT }}.csproj --configuration Release
