@@ -9,7 +9,7 @@ public static class UserExtensions
     public static string GetUserId(this ClaimsPrincipal user)
     {
         // uid
-        // these are different in azure ad (but not b2c ?)
+        // these are different in azure ad (but not in b2c ?)
         // http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier
         // http://schemas.microsoft.com/identity/claims/objectidentifier
 
