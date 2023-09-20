@@ -36,17 +36,17 @@ try
     var environment = builder.Environment;
     configuration.AddEnvironmentVariables();    // for sendgrid
 
-    builder.Services.AddRazorPages().AddNewtonsoftJson();
+    builder.Services.AddRazorPages()/*.AddNewtonsoftJson()*/;
     builder.Services.AddControllers();
     builder.Services.AddMvc();
-    builder.Services.TryAddSingleton<IReportServiceConfiguration>(sp => new ReportServiceConfiguration
-    {
-	    ReportingEngineConfiguration = sp.GetService<IConfiguration>(),
-	    HostAppId = "Html5ReportViewerDemo",
-	    Storage = new FileStorage(),
-	    ReportSourceResolver = new UriReportSourceResolver(
-		    System.IO.Path.Combine(GetReportsDir(sp)))
-    });
+    //builder.Services.TryAddSingleton<IReportServiceConfiguration>(sp => new ReportServiceConfiguration
+    //{
+	   // ReportingEngineConfiguration = sp.GetService<IConfiguration>(),
+	   // HostAppId = "Html5ReportViewerDemo",
+	   // Storage = new FileStorage(),
+	   // ReportSourceResolver = new UriReportSourceResolver(
+		  //  System.IO.Path.Combine(GetReportsDir(sp)))
+    //});
 
     //var configuration = builder.Configuration;
     //var environment = builder.Environment;
