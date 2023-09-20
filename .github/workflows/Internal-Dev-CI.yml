@@ -5,13 +5,13 @@ on:
      branches:
        - main
      paths:
-       - '${{ SOLUTION_NAME }}/Common/**'
-       - '${{ SOLUTION_NAME }}/Common.Web/**'
-       - '${{ SOLUTION_NAME }}/Identity.BL/**'
-       - '${{ SOLUTION_NAME }}/Notify.BL/**'
-       - '${{ SOLUTION_NAME }}/PE.BL/**'
-       - '${{ SOLUTION_NAME }}/SW.BLL/**'
-       - '${{ SOLUTION_NAME }}/${{ INTERNAL_WEB_PROJECT }}/**'
+       - '**/Common/**'
+       - '**/Common.Web/**'
+       - '**/Identity.BL/**'
+       - '**/Notify.BL/**'
+       - '**/PE.BL/**'
+       - '**/SW.BLL/**'
+       - '**/Internal.Web/**'
    workflow_dispatch:
 
 jobs:
@@ -25,19 +25,19 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet_version: '${{ DOTNET_VERSION }}'
+          dotnet_version: '${{ vars.DOTNET_VERSION }}'
 
       - name: Publish Internal
-        run: dotnet publish ./${{ SOLUTION_NAME }}/${{ INTERNAL_WEB_PROJECT }}/${{ INTERNAL_WEB_PROJECT }}.csproj --configuration Release
+        run: dotnet publish ./${{ vars.SOLUTION_NAME }}/${{ vars.INTERNAL_WEB_PROJECT }}/${{ vars.INTERNAL_WEB_PROJECT }}.csproj --configuration Release
 
       - name: Upload Internal Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ SOLUTION_NAME }}-Internal
-          path: ./${{ SOLUTION_NAME }}/${{ INTERNAL_WEB_PROJECT }}/bin/Release/net6.0
+          name: ${{ vars.SOLUTION_NAME }}-Internal
+          path: ./${{ vars.SOLUTION_NAME }}/${{ vars.INTERNAL_WEB_PROJECT }}/bin/Release/net6.0
 
       - uses: azure/pipelines@v1    
         with:
-          azure-devops-project-url: ${{ AZURE_DEVOPS_PROJECT_URL }}
+          azure-devops-project-url: ${{ vars.AZURE_DEVOPS_PROJECT_URL }}
           azure-pipeline-name: Internal-Dev-Deploy
           azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
