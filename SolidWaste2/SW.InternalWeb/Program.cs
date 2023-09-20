@@ -1,5 +1,3 @@
-using Telerik.Reporting.Cache.File;
-using Telerik.Reporting.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.IO;
