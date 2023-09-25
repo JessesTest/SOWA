@@ -3,12 +3,9 @@ changelog:
     - title: Bugfixes
       labels:
         - bug
-    - title: Features
+    - title: New Features and Changes
       labels:
         - enhancement
-    - title: Reports
+    - title: Updates
       labels:
-        - reports
-    - title: Other Changes
-      labels:
-        - "*"
+        - chore
