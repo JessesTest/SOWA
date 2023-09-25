@@ -1,0 +1,49 @@
+name: Add Labels From Issue to PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  retrieve-issue-labels:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      checks: write
+      contents: read
+      deployments: read
+      id-token: write
+      issues: read 
+      packages: write      
+      pull-requests: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Extract issue number
+      id: extract-issue
+      run: |
+        branch_name=${{ github.event.pull_request.head.ref }}
+        issue_number=$(echo "$branch_name" | grep -oP '^\d+')
+        echo "issue_number=$issue_number" >> $GITHUB_OUTPUT
+
+    - name: Retrieve Issue Labels
+      id: retrieve-issue-labels
+      run: |
+        issue_number=${{ steps.extract-issue.outputs.issue_number }}
+        issue_url="https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$issue_number"
+        headers="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+        issue_data=$(curl -sSL -H "${headers}" "${issue_url}")
+        issue_labels=$(echo "$issue_data" | jq -r '.labels[].name')
+        echo "$issue_labels"
+        echo "issue_labels=$issue_labels" >> $GITHUB_OUTPUT
+        
+    - name: Testing Output
+      run: echo "${{ steps.retrieve-issue-labels.outputs.issue_labels }}"
+    
+    - name: Add labels
+      uses: actions-ecosystem/action-add-labels@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        labels: "${{ steps.retrieve-issue-labels.outputs.issue_labels }}"
+        number: ${{ github.event.pull_request.number }}
