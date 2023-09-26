@@ -1,8 +1,7 @@
 name: SonarCloud-check
 on:
   pull_request:
-    types:
-      -opened
+    types: [opened, synchronize, reopened]
 
 jobs:
   SonarCloud-Check:
