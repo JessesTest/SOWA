@@ -8,10 +8,19 @@ on:
        - '**/Common/**'
        - '**/Common.Web/**'
        - '**/Identity.BL/**'
+       - '**/Identity.DAL/**'
+       - '**/Identity.DM/**'
        - '**/Notify.BL/**'
+       - '**/Notify.DAL/**'       
+       - '**/Notify.DM/**'       
        - '**/PE.BL/**'
+       - '**/PE.DAL/**'       
+       - '**/PE.DM/**'       
        - '**/SW.BLL/**'
-       - '**/Internal.Web/**'
+       - '**/SW.BLL.KanPay/**'
+       - '**/SW.DAL/**'
+       - '**/SW.DM/**'
+       - '**/SW.InternalWeb/**'
    workflow_dispatch:
 
 jobs:
