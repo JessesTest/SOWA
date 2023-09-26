@@ -130,7 +130,7 @@ public class WorkOrderService : IWorkOrderService
         if (string.IsNullOrWhiteSpace(workOrder.CustomerType))
             throw new ArgumentException("[CustomerType] required");
 
-        // Make sure CustomerType is valid
+        // Verify CustomerType is valid
         if (!"$C$ $H$ $R$".Contains(string.Format("${0}$", workOrder.CustomerType)))
             throw new ArgumentException("[CustomerType] invalid");
 
