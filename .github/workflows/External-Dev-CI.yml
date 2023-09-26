@@ -5,21 +5,7 @@ on:
      branches:
        - main
      paths:
-       - '**/Common/**'
-       - '**/Common.Web/**'
-       - '**/Identity.BL/**'
-       - '**/Identity.DAL/**'
-       - '**/Identity.DM/**'
-       - '**/Notify.BL/**'
-       - '**/Notify.DAL/**'       
-       - '**/Notify.DM/**'       
-       - '**/PE.BL/**'
-       - '**/PE.DAL/**'       
-       - '**/PE.DM/**'       
-       - '**/SW.BLL/**'
-       - '**/SW.BLL.KanPay/**'
-       - '**/SW.DAL/**'
-       - '**/SW.DM/**'
+       - ${{ vars.SHARED_PROJECTS }}
        - '**/SW.ExternalWeb/**'
    workflow_dispatch:
 
