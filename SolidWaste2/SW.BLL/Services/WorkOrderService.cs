@@ -126,7 +126,7 @@ public class WorkOrderService : IWorkOrderService
     {
         using var db = dbFactory.CreateDbContext();
 
-        // Make sure CustomerType is provided
+        // Verify CustomerType is provided
         if (string.IsNullOrWhiteSpace(workOrder.CustomerType))
             throw new ArgumentException("[CustomerType] required");
 
