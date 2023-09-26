@@ -1,8 +1,7 @@
 name: gitleaks
 on:
   pull_request:
-    types:
-      -opened
+    types: [opened, synchronize, reopened]
       
 jobs:
   GitLeaks-Scan:
