@@ -1,0 +1,22 @@
+name: Snyk Check
+on:
+  workflow_dispatch:
+jobs:
+  SnykCheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@master
+        with:
+          dotnet-version: '${{ vars.DOTNET_VERSION }}'        
+                
+      - run: dotnet build
+        
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/dotnet@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_API }}
+        with:
+          args: --all-projects
