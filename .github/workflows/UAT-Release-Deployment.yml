@@ -42,12 +42,21 @@ jobs:
           base: ${{ steps.previous_release.outputs.tagName }}
           filters: |
             Shared:
-            - '${{ vars.SOLUTION_NAME }}/Common/**'
-            - '${{ vars.SOLUTION_NAME }}/Common.Web/**'
-            - '${{ vars.SOLUTION_NAME }}/Identity.BL/**'
-            - '${{ vars.SOLUTION_NAME }}/Notify.BL/**'
-            - '${{ vars.SOLUTION_NAME }}/PE.BL/**'
-            - '${{ vars.SOLUTION_NAME }}/SW.BLL/**'                      
+            - '**/Common/**'
+            - '**/Common.Web/**'
+            - '**/Identity.BL/**'
+            - '**/Identity.DAL/**'
+            - '**/Identity.DM/**'
+            - '**/Notify.BL/**'
+            - '**/Notify.DAL/**'       
+            - '**/Notify.DM/**'       
+            - '**/PE.BL/**'
+            - '**/PE.DAL/**'       
+            - '**/PE.DM/**'       
+            - '**/SW.BLL/**'
+            - '**/SW.BLL.KanPay/**'
+            - '**/SW.DAL/**'
+            - '**/SW.DM/**'                
             External:
             - '${{ vars.SOLUTION_NAME }}/${{ vars.EXTERNAL_WEB_PROJECT }}/**'
             Internal:
