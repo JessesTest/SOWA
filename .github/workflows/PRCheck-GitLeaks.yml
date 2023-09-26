@@ -1,7 +1,10 @@
 name: gitleaks
 on:
   workflow_dispatch:
-
+  pull_request:
+    types:
+      -opened
+      
 jobs:
   GitLeaks-Scan:
     name: gitleaks
