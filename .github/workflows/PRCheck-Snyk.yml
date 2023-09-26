@@ -1,8 +1,7 @@
 name: Snyk Check
 on:
   pull_request:
-    types:
-      -opened
+    types: [opened, synchronize, reopened]
       
 jobs:
   SnykCheck:
