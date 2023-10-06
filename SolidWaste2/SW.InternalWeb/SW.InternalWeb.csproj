@@ -16,7 +16,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.SqlServer" Version="6.0.19" />
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="2.12.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NLog" Version="5.2.0" />
     <PackageReference Include="NLog.Targets.Stackify" Version="2.1.7" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.0" />
