@@ -10,6 +10,7 @@ jobs:
   build:
     name: Checkout and Scan
     runs-on: ubuntu-20.04
+    permissions: write-all
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
