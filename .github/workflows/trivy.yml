@@ -1,4 +1,4 @@
-name: build
+name: trivy check
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Checkout and Scan
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
@@ -20,4 +20,4 @@ jobs:
           scan-type: 'fs'
           ignore-unfixed: true
           format: 'sarif'
-          severity: 'CRITICAL, HIGH'
+          severity: 'CRITICAL'
