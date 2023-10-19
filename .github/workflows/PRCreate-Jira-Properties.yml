@@ -32,6 +32,6 @@ jobs:
 
     - name: Determine Label
       run: |
-        issue_type=fromJson(steps.issue.outputs.json).fields.issuetype.name
+        issue_type=fromJSON(steps.issue.outputs.json).fields.issuetype.name
         echo "$issue_type"
         
