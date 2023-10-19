@@ -29,6 +29,8 @@ jobs:
 
     - name: Print Output
       run: |
-        issue_type=$(echo "${{steps.issue.outputs.json}}" | jq -r '.fields.issuetype.name')
-        echo "$issue_type"
-        
+        issue_type_local=$(echo "${{steps.issue.outputs.json}}" | jq -r '.fields.issuetype.name')
+        echo "$issue_type_local"
+        echo "issue_type=$issue_type_local" >> "$GITHUB_ENV"
+
+    - run: echo "$issue_type"
