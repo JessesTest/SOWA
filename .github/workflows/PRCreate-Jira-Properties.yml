@@ -33,7 +33,7 @@ jobs:
         echo "$issue_type"
 
     - name: Test Output
-      run: echo "${{ $issue_type }}"
+      run: echo "$issue_type"
       
 
     - name: Set Bug Label
