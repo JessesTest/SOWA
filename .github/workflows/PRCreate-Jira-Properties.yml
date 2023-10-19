@@ -29,6 +29,6 @@ jobs:
 
     - name: Print Output
       run: |
-        issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.nam}}
+        issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}
         echo "$issue_type"
         # echo "issue_type=$issue_type_local" >> "$GITHUB_ENV"
