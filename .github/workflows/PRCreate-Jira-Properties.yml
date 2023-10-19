@@ -28,16 +28,17 @@ jobs:
         issue: ${{ steps.get-issue-key.outputs.issue }}
 
     - name: Get Issue Type
+      id: determine-issue-type
       run: |
-        issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}} >> "$GITHUB_ENV"
+        issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}} >> "$GITHUB_OUTPUT"
         echo "$issue_type"
 
     - name: Test Output
-      run: echo "$issue_type"
+      run: echo "${{ steps.determine-issue-type.outputs.issue_type }}"
       
 
     - name: Set Bug Label
-      if: $issue_type == 'Bug'
+      if: ${{ steps.determine-issue-type.outputs.issue_type == 'Bug' }}
       uses: actions-ecosystem/action-add-labels@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
