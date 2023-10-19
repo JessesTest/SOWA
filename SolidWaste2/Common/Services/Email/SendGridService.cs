@@ -29,7 +29,8 @@ public class SendGridService : ISendGridService
     {
         // local, dev, uat, prod have different keys
 
-        var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
         if (string.IsNullOrWhiteSpace(env))
         {
             env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
@@ -66,19 +67,90 @@ public class SendGridService : ISendGridService
     {
         _ = dto ?? throw new ArgumentNullException(nameof(dto));
 
+        #region OldWay
+        //var message = new SendGridMessage();
+
+        //if(dto.Cc != null)
+        //{
+        //    foreach(var cc in dto.Cc)
+        //    {
+        //        message.AddCc(cc.Address, cc.Name);
+        //    }
+        //}
+
+        //if(dto.Bcc != null)
+        //{
+        //    foreach(var bcc in dto.Bcc)
+        //    {
+        //        message.AddBcc(bcc.Address, bcc.Name);
+        //    }
+        //}
+
+        //if (dto.From != null)
+        //    message.SetFrom(dto.From.Address, dto.From.Name);
+        //else
+        //    message.SetFrom(_defaultFrom);
+
+        //if(dto.ReplyTo!= null)
+        //{
+        //    message.SetReplyTo(new EmailAddress(dto.ReplyTo.Address, dto.ReplyTo.Name));
+        //}
+
+        //if (!string.IsNullOrWhiteSpace(dto.Subject))
+        //    message.SetSubject(dto.Subject);
+        //else
+        //    message.SetSubject(_defaultSubject);
+
+        //if (!string.IsNullOrWhiteSpace(dto.TextContent))
+        //    message.AddContent("text/plain", dto.TextContent);
+
+        //if (!string.IsNullOrWhiteSpace(dto.HtmlContent))
+        //    message.AddContent("text/html", dto.HtmlContent);
+
+        //message.AddTos(dto.To.Select(t => new EmailAddress(t.Address, t.Name)).ToList());
+
+        //if (dto.Attachments != null && dto.Attachments.Any())
+        //{
+        //    foreach (var a in dto.Attachments)
+        //    {
+        //        message.AddAttachment(new Attachment
+        //        {
+        //            Content = a.Content,
+        //            ContentId = a.DispositionInline ? a.ContentId : null,
+        //            Disposition = a.DispositionInline ? "inline" : "attachment",
+        //            Filename = a.FileName,
+        //            Type = a.ContentType
+        //        });
+        //    }
+        //}
+        #endregion
+
+        SendGridMessage validatedMessage = ValidateSendEmailDTO(dto);
+
+        SendGridClient client = GetClient(_apiKey);
+        Response response = await client.SendEmailAsync(validatedMessage);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning(JsonSerializer.Serialize(response));
+        }
+    }
+
+    private SendGridMessage ValidateSendEmailDTO(SendEmailDto dto)
+    {
         var message = new SendGridMessage();
 
-        if(dto.Cc != null)
+        if (dto.Cc != null)
         {
-            foreach(var cc in dto.Cc)
+            foreach (var cc in dto.Cc)
             {
                 message.AddCc(cc.Address, cc.Name);
             }
         }
 
-        if(dto.Bcc != null)
+        if (dto.Bcc != null)
         {
-            foreach(var bcc in dto.Bcc)
+            foreach (var bcc in dto.Bcc)
             {
                 message.AddBcc(bcc.Address, bcc.Name);
             }
@@ -89,7 +161,7 @@ public class SendGridService : ISendGridService
         else
             message.SetFrom(_defaultFrom);
 
-        if(dto.ReplyTo!= null)
+        if (dto.ReplyTo != null)
         {
             message.SetReplyTo(new EmailAddress(dto.ReplyTo.Address, dto.ReplyTo.Name));
         }
@@ -123,12 +195,6 @@ public class SendGridService : ISendGridService
         }
         //message.SendAt // UNIX time
 
-        var client = GetClient(_apiKey);
-        var response = await client.SendEmailAsync(message);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogWarning(JsonSerializer.Serialize(response));
-        }
+        return message;
     }
 }
