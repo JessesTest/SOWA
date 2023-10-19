@@ -33,11 +33,11 @@ jobs:
         echo "$issue_type"
 
     - name: Test Output
-      run: echo "${{ env.issue_type }}"
+      run: echo "${{ $issue_type }}"
       
 
     - name: Set Bug Label
-      if: ${{ env.issue_type == 'Bug' }}
+      if: ${{ $issue_type == 'Bug' }}
       uses: actions-ecosystem/action-add-labels@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
