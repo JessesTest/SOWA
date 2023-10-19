@@ -19,7 +19,7 @@ jobs:
       id: get-issue-key
       uses: atlassian/gajira-find-issue-key@v3
       with:
-        string: ${{ GITHUB_HEAD_REF }}
+        string: ${{ github.head_ref }}
 
     - name: Get Issue Properties
       id: issue
