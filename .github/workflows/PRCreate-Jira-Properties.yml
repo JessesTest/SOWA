@@ -32,6 +32,6 @@ jobs:
 
     - name: Determine Label
       run: |
-        issue_type=$(${{steps.issue.outputs.json}}" | jq -r '.fields.issuetype.name')
+        issue_type=$(${{steps.issue.outputs.json}} | jq -r '.fields.issuetype.name')
         echo "$issue_type"
         
