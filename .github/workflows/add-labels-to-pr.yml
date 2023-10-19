@@ -1,8 +1,9 @@
 name: Add Labels From Issue to PR
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  # pull_request:
+    # types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   retrieve-issue-labels:
