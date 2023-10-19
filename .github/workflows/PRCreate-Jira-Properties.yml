@@ -30,5 +30,6 @@ jobs:
     - name: Print Output
       run: |
         echo '${{ steps.issue.outputs.json }}'
-        echo 'fromJSON(steps.issue.outputs.json).fields.issuetype.name'
+        issue_type=$(echo "${{steps.issue.outputs.jso}}" | jq -r '.fields.issuetype.name')
+        echo "$issue_type"
         
