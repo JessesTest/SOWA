@@ -29,7 +29,6 @@ jobs:
 
     - name: Print Output
       run: |
-        echo '${{ steps.issue.outputs.json }}'
         issue_type=$(echo "${{steps.issue.outputs.jso}}" | jq -r '.fields.issuetype.name')
         echo "$issue_type"
         
