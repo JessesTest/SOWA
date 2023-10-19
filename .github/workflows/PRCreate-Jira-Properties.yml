@@ -19,7 +19,7 @@ jobs:
       id: get-issue-key
       uses: atlassian/gajira-find-issue-key@v3
       with:
-        from: branch
+        string: ${{ GITHUB_HEAD_REF }}
 
     - name: Get Issue Properties
       id: issue
@@ -32,6 +32,6 @@ jobs:
 
     - name: Determine Label
       run: |
-        issue_type=$(echo "${{steps.issue.outputs.json}}" | jq -r '.fields.issuetype.name')
+        issue_type=$(${{steps.issue.outputs.json}}" | jq -r '.fields.issuetype.name')
         echo "$issue_type"
         
