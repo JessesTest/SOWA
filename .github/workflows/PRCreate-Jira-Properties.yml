@@ -27,8 +27,15 @@ jobs:
       with:
         issue: ${{ steps.get-issue-key.outputs.issue }}
 
-    - name: Print Output
+    - name: Get Issue Type
       run: |
-        issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}
+        issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}} >> "$GITHUB_ENV"
         echo "$issue_type"
-        # echo "issue_type=$issue_type_local" >> "$GITHUB_ENV"
+
+    - name: Set Bug Label
+      if: ${{ env.issue_type == "Bug" }}
+      uses: actions-ecosystem/action-add-labels@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        labels: "bug"
+        number: ${{ github.event.pull_request.number }}
