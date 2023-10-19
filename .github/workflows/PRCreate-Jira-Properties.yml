@@ -1,0 +1,31 @@
+name: PRCreate-Jira-Properties
+on:
+  pull_request:
+    types: [opened, synchronize, reopened],
+  workflow_dispatch:
+
+jobs:
+  get-jira-properties:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Login
+      uses: atlassian/gajira-login@master
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+    - name: Get Issue Key From Branch
+      id: get-issue-key
+      uses: atlassian/gajira-find-issue-key@v3
+      with:
+        from: branch
+
+    - name: Get Issue Properties
+      id: issue
+      uses: frieder/jira-issue-info@v1
+      with:
+        issue: ${{ steps.get-issue-key.outputs.issue }}
+
+    - name: Print Output
+      run: echo '${{ steps.issue.outputs.json }}'
