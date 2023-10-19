@@ -30,7 +30,7 @@ jobs:
     - name: Get Issue Type
       id: determine-issue-type
       run: |
-        issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}} >> "$GITHUB_OUTPUT"
+        echo "issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}" >> "$GITHUB_OUTPUT"
         echo "$issue_type"
 
     - name: Test Output
