@@ -28,10 +28,7 @@ jobs:
         issue: ${{ steps.get-issue-key.outputs.issue }}
 
     - name: Print Output
-      run: echo '${{ steps.issue.outputs.json }}'
-
-    - name: Determine Label
       run: |
-        issue_type=fromJSON(steps.issue.outputs.json).fields.issuetype.name
-        echo "$issue_type"
+        echo '${{ steps.issue.outputs.json }}'
+        echo 'fromJSON(steps.issue.outputs.json).fields.issuetype.name'
         
