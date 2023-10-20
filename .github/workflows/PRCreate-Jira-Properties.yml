@@ -36,9 +36,6 @@ jobs:
       with:
         issue: ${{ steps.get-issue-key.outputs.issue }}
 
-    # - name: Test Output
-      # run: echo "${{ steps.issue.outputs.json }}"
-
     - name: Get Issue Type
       id: determine-issue-type
       run: echo "issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}" >> "$GITHUB_OUTPUT"  
@@ -69,6 +66,9 @@ jobs:
         else
           story_label="chore" >> "$GITHUB_OUTPUT"
         fi
+
+    - name: Test Output
+      run: echo "${{ steps.determine-story-label.outputs.story_label }}"
 
     - name: Set Story Label
       if: ${{ (steps.determine-issue-type.outputs.issue_type == 'Story') }}
