@@ -66,9 +66,9 @@ jobs:
       run: |
         story_label = ""
         if [ '${{ steps.determine-story-type.outputs.story_type }}' == 'Feature' ]; then
-          story_label = "enhancement" >> "$GITHUB_OUTPUT"
+          story_label="enhancement" >> "$GITHUB_OUTPUT"
         else
-          story_label = "chore" >> "$GITHUB_OUTPUT"
+          story_label="chore" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Set Story Label
