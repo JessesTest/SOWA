@@ -64,8 +64,7 @@ jobs:
       if: ${{ (steps.determine-issue-type.outputs.issue_type == 'Story') }}
       shell: bash
       run: |
-        story_label = ""
-        if [ '${{ steps.determine-story-type.outputs.story_type }}' == 'Feature' ]; then
+        if [ "${{ steps.determine-story-type.outputs.story_type }}" == "Feature" ]; then
           story_label="enhancement" >> "$GITHUB_OUTPUT"
         else
           story_label="chore" >> "$GITHUB_OUTPUT"
