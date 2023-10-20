@@ -36,8 +36,8 @@ jobs:
       with:
         issue: ${{ steps.get-issue-key.outputs.issue }}
 
-    - name: Test Output
-      run: echo "${{ steps.issue.outputs.json }}"
+    # - name: Test Output
+      # run: echo "${{ steps.issue.outputs.json }}"
 
     - name: Get Issue Type
       id: determine-issue-type
