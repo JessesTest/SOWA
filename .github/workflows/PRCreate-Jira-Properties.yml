@@ -36,15 +36,14 @@ jobs:
       with:
         issue: ${{ steps.get-issue-key.outputs.issue }}
 
+    - name: Test Output
+      run: echo "${{ steps.issue.outputs.json }}"
+
     - name: Get Issue Type
       id: determine-issue-type
       run: |
         echo "issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}" >> "$GITHUB_OUTPUT"
-        echo "$issue_type"
-
-    - name: Test Output
-      run: echo "${{ steps.determine-issue-type.outputs.issue_type }}"
-      
+        echo "$issue_type"    
 
     - name: Set Bug Label
       if: ${{ steps.determine-issue-type.outputs.issue_type == 'Bug' }}
