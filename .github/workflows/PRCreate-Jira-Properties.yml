@@ -60,12 +60,15 @@ jobs:
         echo "story_type=${{fromJSON(steps.issue.outputs.json).customfield_10035.value}}" >> "$GITHUB_OUTPUT"
         echo "$story_type"  
 
+    - name: Test Output
+      run: echo "${{ steps.determine-story-type.outputs.story_type }}"
+
     - name: Determine Story Label
       id: determine-story-label
       if: ${{ (steps.determine-issue-type.outputs.issue_type == 'Story') }}
       shell: bash
       run: |
-        if [${{ steps.determine-story-type.outputs.story_type }} == 'Feature' ]; then
+        if [ ${{ steps.determine-story-type.outputs.story_type }} == 'Feature' ]; then
           story_label = "enhancement" >> "$GITHUB_OUTPUT"
         else
           story_label = "chore" >> "$GITHUB_OUTPUT"
