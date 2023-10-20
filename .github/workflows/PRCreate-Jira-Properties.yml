@@ -63,12 +63,13 @@ jobs:
     - name: Determine Story Label
       id: determine-story-label
       if: ${{ (steps.determine-issue-type.outputs.issue_type == 'Story') }}
+      shell: bash
       run: |
-        if [${{ steps.determine-story-type.outputs.issue_type == 'Feature' }}]
-        then
+        if [${{ steps.determine-story-type.outputs.issue_type }} == 'Feature' ]; then
           story_label = "enhancement" >> "$GITHUB_OUTPUT"
         else
           story_label = "chore" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Set Story Label
       if: ${{ (steps.determine-issue-type.outputs.issue_type == 'Story') }}
