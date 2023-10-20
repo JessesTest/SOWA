@@ -34,10 +34,7 @@ jobs:
       id: issue
       uses: frieder/jira-issue-info@v1
       with:
-        issue: ${{ steps.get-issue-key.outputs.issue }}
-
-    - name: Test Output
-      run: echo "${{ steps.issue.outputs.json }}"     
+        issue: ${{ steps.get-issue-key.outputs.issue }} 
 
     - name: Get Issue Type
       id: determine-issue-type
@@ -51,13 +48,25 @@ jobs:
         labels: "bug"
         number: ${{ github.event.pull_request.number }}
 
+
+    - name: If Subtask Get Parent
+      id: subtask-parent
+      if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
+      run: echo "key=${{fromJSON(steps.issue.outputs.json).fields.parent.key}}" >> "$GITHUB_OUTPUT"
+
+    - name: Get Parent Issue Properties
+      id: parent-issue
+      uses: frieder/jira-issue-info@v1
+      with:
+        issue: ${{ steps.subtask-parent.outputs.key }} 
+
+    - name: Test Output
+      run: echo "${{ steps.parent-issue.outputs.json }}"        
+
     - name: Determine Story Type
       if: ${{ steps.determine-issue-type.outputs.issue_type == 'Story' }}
       id: determine-story-type
       run: echo "story_type=${{fromJSON(steps.issue.outputs.json).fields.customfield_10035.value}}" >> "$GITHUB_OUTPUT"
-
-    - name: Test Output
-      run: echo "${{ steps.determine-story-type.outputs.story_type }}"
 
     - name: Determine Story Label
       id: determine-story-label
