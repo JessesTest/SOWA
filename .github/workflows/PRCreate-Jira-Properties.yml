@@ -57,7 +57,7 @@ jobs:
       if: ${{ steps.determine-issue-type.outputs.issue_type == 'Story' }}
       id: determine-story-type
       run: |
-        echo "story_type=${{fromJSON(steps.issue.outputs.json).customfield_10035.value.}}" >> "$GITHUB_OUTPUT"
+        echo "story_type=${{fromJSON(steps.issue.outputs.json).customfield_10035.value}}" >> "$GITHUB_OUTPUT"
         echo "$story_type"  
 
     - name: Determine Story Label
