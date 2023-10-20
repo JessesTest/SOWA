@@ -62,9 +62,9 @@ jobs:
       shell: bash
       run: |
         if [ "${{ steps.determine-story-type.outputs.story_type }}" == "Feature" ]; then
-          story_label="enhancement" >> "$GITHUB_OUTPUT"
+          echo "story_label=enhancement" >> "$GITHUB_OUTPUT"
         else
-          story_label="chore" >> "$GITHUB_OUTPUT"
+          echo "story_label=chore" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Test Output
