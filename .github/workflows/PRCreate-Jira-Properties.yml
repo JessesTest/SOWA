@@ -49,42 +49,21 @@ jobs:
         number: ${{ github.event.pull_request.number }}
 
 
-    - name: If Subtask Get Parent
-      id: subtask-parent
-      if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
-      run: echo "key=${{fromJSON(steps.issue.outputs.json).fields.parent.key}}" >> "$GITHUB_OUTPUT"
-
-    - name: Get Parent Issue Properties
-      id: parent-issue
-      uses: frieder/jira-issue-info@v1
+    - name: Set Task Label
+      if: ${{ steps.determine-issue-type.outputs.issue_type == 'Task' }}
+      uses: actions-ecosystem/action-add-labels@v1
       with:
-        issue: ${{ steps.subtask-parent.outputs.key }} 
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        labels: "chore"
+        number: ${{ github.event.pull_request.number }}
 
-    - name: Test Output
-      run: echo "${{ steps.parent-issue.outputs.json }}"        
-
-    - name: Determine Story Type
-      if: ${{ steps.determine-issue-type.outputs.issue_type == 'Story' }}
-      id: determine-story-type
-      run: echo "story_type=${{fromJSON(steps.issue.outputs.json).fields.customfield_10035.value}}" >> "$GITHUB_OUTPUT"
-
-    - name: Determine Story Label
-      id: determine-story-label
-      if: ${{ (steps.determine-issue-type.outputs.issue_type == 'Story') }}
-      shell: bash
-      run: |
-        if [ "${{ steps.determine-story-type.outputs.story_type }}" == "Feature" ]; then
-          echo "story_label=enhancement" >> "$GITHUB_OUTPUT"
-        else
-          echo "story_label=chore" >> "$GITHUB_OUTPUT"
-        fi
 
     - name: Set Story Label
       if: ${{ (steps.determine-issue-type.outputs.issue_type == 'Story') }}
       uses: actions-ecosystem/action-add-labels@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        labels: "${{ steps.determine-story-label.outputs.story_label }}"
+        labels: "enhancement"
         number: ${{ github.event.pull_request.number }}
           
       
