@@ -9,3 +9,4 @@ changelog:
     - title: Technical Details
       labels:
         - chore
+  change-template: '- $TITLE'
