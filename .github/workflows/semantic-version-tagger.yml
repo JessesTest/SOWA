@@ -27,7 +27,7 @@ jobs:
       
       - name: Increment Version
         id: increment-version
-        uses: JesseBroxterman/semantic-version-increment@v2.0.4
+        uses: JesseBroxterman/semantic-version-increment@v2.0.5
         with:
           current_version: ${{ env.CURRENT_VERSION }}
           pr_labels: ${{ env.PR_LABELS_STRING }}
