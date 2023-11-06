@@ -6,6 +6,6 @@ changelog:
     - title: New Features and Changes
       labels:
         - enhancement
-    - title: Updates
+    - title: Technical Details
       labels:
         - chore
