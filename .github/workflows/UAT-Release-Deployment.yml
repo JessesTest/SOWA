@@ -34,6 +34,10 @@ jobs:
         id: previous_release
         run: echo "tagName=${{ fromJson(steps.get_latest_releases.outputs.data).repository.releases.nodes[1].tagName }}" >> $GITHUB_OUTPUT
 
+      - name: Get Tag Name of Previous Release
+        id: current_release
+        run: echo "tagName=${{ fromJson(steps.get_latest_releases.outputs.data).repository.releases.nodes[0].tagName }}" >> $GITHUB_OUTPUT        
+
       - uses: actions/checkout@v3
 
       - uses: dorny/paths-filter@v2
@@ -70,7 +74,7 @@ jobs:
         if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ vars.SOLUTION_NAME }}-Internal
+          name: ${{ vars.SOLUTION_NAME }}-Internal-${{ steps.current_release.outputs.tagName }}
           path: ./${{ vars.SOLUTION_NAME }}/${{ vars.INTERNAL_WEB_PROJECT }}/bin/Release/net6.0
 
       - uses: azure/pipelines@v1
@@ -90,7 +94,7 @@ jobs:
         if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ vars.SOLUTION_NAME }}-External
+          name: ${{ vars.SOLUTION_NAME }}-External-${{ steps.current_release.outputs.tagName }}
           path: ./${{ vars.SOLUTION_NAME }}/${{ vars.EXTERNAL_WEB_PROJECT }}/bin/Release/net6.0
 
       - uses: azure/pipelines@v1
