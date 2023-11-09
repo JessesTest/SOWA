@@ -77,13 +77,21 @@ jobs:
           name: ${{ vars.SOLUTION_NAME }}-Internal-${{ steps.current_release.outputs.tagName }}
           path: ./${{ vars.SOLUTION_NAME }}/${{ vars.INTERNAL_WEB_PROJECT }}/bin/Release/net6.0
 
-      - uses: azure/pipelines@v1
+      - name: Trigger Azure UAT Internal Deployment Pipeline
+        uses: azure/pipelines@v1
         if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')      
         with:
           azure-devops-project-url: ${{ vars.AZURE_DEVOPS_PROJECT_URL }}
           azure-pipeline-name: Internal-UAT-Deploy
           azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
 
+      - name: Trigger Azure Prod Internal Deployment Pipeline
+        uses: azure/pipelines@v1
+        if: (steps.changes.outputs.Internal == 'true' || steps.changes.outputs.Shared == 'true')      
+        with:
+          azure-devops-project-url: ${{ vars.AZURE_DEVOPS_PROJECT_URL }}
+          azure-pipeline-name: Internal-Prod-Deploy
+          azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
 
 
       - name: Publish External
@@ -97,9 +105,18 @@ jobs:
           name: ${{ vars.SOLUTION_NAME }}-External-${{ steps.current_release.outputs.tagName }}
           path: ./${{ vars.SOLUTION_NAME }}/${{ vars.EXTERNAL_WEB_PROJECT }}/bin/Release/net6.0
 
-      - uses: azure/pipelines@v1
+      - name: Trigger Azure UAT External Deployment Pipeline
+        uses: azure/pipelines@v1
         if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')      
         with:
           azure-devops-project-url: ${{ vars.AZURE_DEVOPS_PROJECT_URL }}
           azure-pipeline-name: External-UAT-Deploy
           azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}            
+
+      - name: Trigger Azure UAT External Deployment Pipeline
+        uses: azure/pipelines@v1
+        if: (steps.changes.outputs.External == 'true' || steps.changes.outputs.Shared == 'true')      
+        with:
+          azure-devops-project-url: ${{ vars.AZURE_DEVOPS_PROJECT_URL }}
+          azure-pipeline-name: External-Prod-Deploy
+          azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}             
