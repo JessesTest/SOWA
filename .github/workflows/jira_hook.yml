@@ -51,9 +51,9 @@ jobs:
           fi
 
     - name: All Subtasks Done
-      if: ${{ (steps.parent_check.outputs.all_done == 'true') }}
+      if: ${{ ({steps.parent_issue.outputs.json | jq '(.fields.subtasks | map(.fields.status.name == "Done") | all) == 'true') }}
       run: echo "All subtasks are done"
 
     - name: All Subtasks Not Done
-      if: ${{ (steps.parent_check.outputs.all_done == 'false') }}
+      if: ${{ ({steps.parent_issue.outputs.json | jq '(.fields.subtasks | map(.fields.status.name == "Done") | all) == 'false') }}
       run: echo "All subtasks are not done"
