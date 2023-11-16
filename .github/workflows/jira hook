@@ -1,0 +1,38 @@
+name: jira hook
+
+on:
+   workflow_dispatch:
+
+jobs:
+  get-jira-properties:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      checks: write
+      contents: read
+      deployments: read
+      id-token: write
+      issues: read 
+      packages: write      
+      pull-requests: write    
+
+    steps:
+    - name: Login
+      uses: atlassian/gajira-login@master
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+    - name: Get Issue Properties
+      id: issue
+      uses: frieder/jira-issue-info@v1
+      with:
+        issue: FLEX-9
+
+    - name: Get Issue Type
+      id: determine-issue-type
+      run: echo "issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}" >> "$GITHUB_OUTPUT" 
+
+    - name: Output Properties
+      run: echo "${{steps.issue.outputs.json}}"
