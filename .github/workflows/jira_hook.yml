@@ -41,5 +41,19 @@ jobs:
       with:
         issue: ${{fromJSON(steps.issue.outputs.json).fields.parent.key}}
 
-    - name: Output Parent Properties
-      run: echo "${{steps.parent_issue.outputs.json}}"
+    - name: Determine If All Subtasks Are Done
+      id: parent_check
+      run: |
+          if echo "${{steps.parent_issue.outputs.json}}" | jq -e '.fields.subtasks | all(.fields.status.name == "Done")'; then
+            echo "all_done=true" >> $GITHUB_OUTPUT
+          else
+            echo "all_done=false" >> $GITHUB_OUTPUT
+          fi
+
+    - name: All Subtasks Done
+      if: ${{ (steps.parent_check.outputs.all_done == 'true') }}
+      run: echo "All subtasks are done"
+
+    - name: All Subtasks Not Done
+      if: ${{ (steps.parent_check.outputs.all_done == 'false') }}
+      run: echo "All subtasks are not done"
