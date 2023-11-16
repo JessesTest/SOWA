@@ -44,6 +44,8 @@ jobs:
     - name: Determine If All Subtasks Are Done
       id: parent_check
       run: |
+          echo "${{steps.parent_issue.outputs.json}}" | jq '(.fields.subtasks)"
+          echo "${{steps.parent_issue.outputs.json}}" | jq '(.fields.subtasks | map(.fields.status.name == "Done"))
           if echo "${{steps.parent_issue.outputs.json}}" | jq '(.fields.subtasks | map(.fields.status.name == "Done") | all)'; then
             echo "all_done=true" >> $GITHUB_OUTPUT
           else
@@ -51,9 +53,9 @@ jobs:
           fi
 
     - name: All Subtasks Done
-      if: ${{ (steps.parent_issue.outputs.json | jq '(.fields.subtasks | map(.fields.status.name == "Done") | all) == 'true') }}
+      if: ${{ (steps.parent_check.outputs.all_done  == 'true') }}
       run: echo "All subtasks are done"
 
     - name: All Subtasks Not Done
-      if: ${{ (steps.parent_issue.outputs.json | jq '(.fields.subtasks | map(.fields.status.name == "Done") | all) == 'false') }}
+      if: ${{ (steps.parent_check.outputs.all_done  == 'false') }}
       run: echo "All subtasks are not done"
