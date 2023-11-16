@@ -34,5 +34,12 @@ jobs:
       id: determine-issue-type
       run: echo "issue_type=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}" >> "$GITHUB_OUTPUT" 
 
-    - name: Output Properties
-      run: echo "${{steps.issue.outputs.json}}"
+    - name: Get Parent Issue
+      if: ${{ (steps.determine-issue-type.outputs.issue_type == 'Subtask') }}
+      id: parent_issue
+      uses: frieder/jira-issue-info@v1
+      with:
+        issue: ${{fromJSON(steps.issue.outputs.json).fields.parent.key}}
+
+    - name: Output Parent Properties
+      run: echo "${{steps.parent_issue.outputs.json}}"
