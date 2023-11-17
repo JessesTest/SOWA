@@ -42,7 +42,7 @@ jobs:
         issue: ${{fromJSON(steps.issue.outputs.json).fields.parent.key}}
 
     - name: Check Output of 1st Step
-      run: echo "${{fromJSON(steps.parent_issue.outputs.json)}}" | jq '(.fields.subtasks)'
+      run: echo "subtasks=${{fromJSON(steps.parent_issue.outputs.json).fields.subtasks}}" >> $GITHUB_OUTPUT
 
     - name: Check Output of 2nd Step
       run: echo "${{steps.parent_issue.outputs.json}}" | jq '(.fields.subtasks | map(.fields.status.name == "Done"))'
