@@ -44,7 +44,7 @@ jobs:
     - name: Check Output of 1st Step
       run: |
         subtasks=${{fromJSON(steps.parent_issue.outputs.json).fields.subtasks}}"
-        subtasks_string=${{ join(subtasks, ', ') }}
+        subtasks_string=${{ join(${subtasks}, ', ') }}
         echo "$subtasks_string"
 
     - name: Check Output of 2nd Step
