@@ -43,8 +43,9 @@ jobs:
 
     - name: Check Output of 1st Step
       run: |
-        echo "subtasks=${{fromJSON(steps.parent_issue.outputs.json).fields.subtasks}}" >> $GITHUB_OUTPUT
-        echo "${{ join($subtasks, ', ') }}"
+        subtasks=${{fromJSON(steps.parent_issue.outputs.json).fields.subtasks}}"
+        subtasks_string=${{ join(subtasks, ', ') }}
+        echo "$subtasks_string"
 
     - name: Check Output of 2nd Step
       run: echo "${{steps.parent_issue.outputs.json}}" | jq '(.fields.subtasks | map(.fields.status.name == "Done"))'
