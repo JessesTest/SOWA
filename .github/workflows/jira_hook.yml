@@ -52,6 +52,9 @@ jobs:
             echo "all_done=false" >> $GITHUB_OUTPUT
           fi
 
+    - name: Check All Done Output
+      run: echo "${{ steps.parent_check.outputs.all_done }}"
+
     - name: All Subtasks Done
       if: ${{ (steps.parent_check.outputs.all_done  == 'true') }}
       run: echo "All subtasks are done"
