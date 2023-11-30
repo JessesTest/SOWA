@@ -51,7 +51,7 @@ jobs:
       id: parent_check
       run: | 
         subtasks=${{ fromJSON(steps.parent_issue.outputs.json).fields.subtasks }}
-        if echo "${{ fromJSON($subtasks) }}" | jq '( map(.fields.status.name == "Done") | all)' ; then
+        if echo "${{ fromJSON(subtasks) }}" | jq '( map(.fields.status.name == "Done") | all)' ; then
           echo "all_done=true" >> $GITHUB_OUTPUT
         else
           echo "all_done=false" >> $GITHUB_OUTPUT
