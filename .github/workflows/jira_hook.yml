@@ -47,14 +47,26 @@ jobs:
       with:
         issue: ${{ fromJSON(steps.issue.outputs.json).fields.parent.key }}
 
-    - name: Get All Subtasks Statuses
-      id: subtasks_statuses
-      if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
+    - name: Story Is Done
+      if: |
+        ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' &&
+        ( contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'To Do') ||
+          contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Progress') ||
+          contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Code Review')
+        ) }}
       run: |
-        statuses_array=${{ toJSON(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name) }} >> "$GITHUB_OUTPUT"
-        for status in "${statuses_array[@]}"; do
-         echo "Status: $status"
-        done
+        echo "Everything is done, increment major sem ver value."
+
+    - name: Story Is Not Done
+      if: |
+        ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' &&
+        !( contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'To Do') ||
+          contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Progress') ||
+          contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Code Review')
+        ) }}
+      run: |
+        echo "Everything isn't done, increment minor sem ver value."
+
 
 
 
