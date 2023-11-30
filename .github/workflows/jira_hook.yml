@@ -52,6 +52,12 @@ jobs:
       if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
       run: echo "subtasks=${{ fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name }}" >> "$GITHUB_OUTPUT" 
 
+    - name: View Array Contents
+      run: |
+        for element in "${{ fromJSON(steps.format_subtasks.outputs.subtasks) }}"; do
+          echo "$element"
+        done
+
     - name: Determine If All Subtasks Are Done
       id: parent_check
       run: |        
