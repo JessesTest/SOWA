@@ -47,29 +47,13 @@ jobs:
       with:
         issue: ${{ fromJSON(steps.issue.outputs.json).fields.parent.key }}
 
-    - name: Format Subtasks
-      id: format_subtasks
+    - name: Get All Subtasks Statuses
+      id: subtasks_statuses
       if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
-      run: echo "subtasks=${{ fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name }}" >> "$GITHUB_OUTPUT" 
+      run: echo "statuses_array=${{ fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name }}" >> "$GITHUB_OUTPUT" 
 
-    - name: Determine If All Subtasks Are Done
-      id: parent_check
-      run: |        
-       subtasks=("${{ fromJSON(steps.format_subtasks.outputs.subtasks) }}")    
-       if [[ " ${subtasks[@]} " =~ " In Progress " && " ${subtasks[@]} " =~ " In Code Review " && " ${subtasks[@]} " =~ " To Do " ]]; then
-         echo "all_done=false" >> $GITHUB_OUTPUT
-       else
-         echo "all_done=true" >> $GITHUB_OUTPUT
-       fi
 
     - name: Check 
-      run: echo "${{ steps.parent_check.outputs.all_done }}"
+      run: echo "${{ steps.subtasks_statuses.outputs.statuses_array }}"
 
-    - name: If All Done
-      if: ${{ steps.parent_check.outputs.all_done == 'true' }}
-      run: echo "They're all done"
-
-    - name: If Not All Done
-      if: ${{ steps.parent_check.outputs.all_done != 'true' }}
-      run: echo "They're not all done"
 
