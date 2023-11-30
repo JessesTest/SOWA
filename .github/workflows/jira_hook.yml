@@ -55,17 +55,17 @@ jobs:
           contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Code Review')
         ) }}
       run: |
-        echo "Everything is done, increment major sem ver value."
+        echo "Everything is not done, increment minor sem ver value."
 
     - name: Story Is Not Done
       if: |
         ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' &&
-        !( contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'To Do') ||
-          contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Progress') ||
+        !( contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'To Do') &&
+          contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Progress') &&
           contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Code Review')
         ) }}
       run: |
-        echo "Everything isn't done, increment minor sem ver value."
+        echo "Everything isn't done, increment major sem ver value."
 
 
 
