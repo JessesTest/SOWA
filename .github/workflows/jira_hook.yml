@@ -50,7 +50,7 @@ jobs:
     - name: Format Subtasks
       id: format_subtasks
       if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
-      run: echo "subtasks=${{ fromJSON(steps.parent_issue.outputs.json).fields.subtasks }}" >> "$GITHUB_OUTPUT" 
+      run: echo "subtasks=${{ toJSON(fromJSON(steps.parent_issue.outputs.json).fields.subtasks) }}" >> "$GITHUB_OUTPUT" 
 
     - name: Determine If All Subtasks Are Done
       id: parent_check
