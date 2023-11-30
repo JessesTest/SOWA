@@ -50,10 +50,10 @@ jobs:
     - name: Get All Subtasks Statuses
       id: subtasks_statuses
       if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
-      run: echo "statuses_array=${{ fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name }}" >> "$GITHUB_OUTPUT" 
+      run: echo "statuses_array=${{ toJSON(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name) }}" >> "$GITHUB_OUTPUT" 
 
 
     - name: Check 
-      run: echo "${{ toJSON(steps.subtasks_statuses.outputs.statuses_array) }}"
+      run: echo "${{ fromJSON(steps.subtasks_statuses.outputs.statuses_array) }}"
 
 
