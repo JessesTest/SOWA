@@ -54,6 +54,6 @@ jobs:
 
 
     - name: Check 
-      run: echo "${{ steps.subtasks_statuses.outputs.statuses_array }}"
+      run: echo "${{ toJSON(steps.subtasks_statuses.outputs.statuses_array) }}"
 
 
