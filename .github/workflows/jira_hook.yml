@@ -46,4 +46,4 @@ jobs:
       run: echo "array=${{fromJSON(steps.issue.outputs.json).fields.subtasks}}" >> "$GITHUB_OUTPUT"
 
     - name: Show Subtasks
-      run: echo "${{ fromJson(steps.subtasks.outputs.array) }}"
+      run: echo "${{ fromJSON(steps.subtasks.outputs.array) }}"
