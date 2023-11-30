@@ -57,9 +57,9 @@ jobs:
       run: |        
        subtasks=("${{ fromJSON(steps.format_subtasks.outputs.subtasks) }}")    
        if [[ " ${subtasks[@]} " =~ " In Progress " && " ${subtasks[@]} " =~ " In Code Review " && " ${subtasks[@]} " =~ " To Do " ]]; then
-         echo "all_done=true" >> $GITHUB_OUTPUT
-       else
          echo "all_done=false" >> $GITHUB_OUTPUT
+       else
+         echo "all_done=true" >> $GITHUB_OUTPUT
        fi
 
     - name: Check 
