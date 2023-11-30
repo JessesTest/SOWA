@@ -49,12 +49,13 @@ jobs:
 
     - name: Determine If All Subtasks Are Done
       id: parent_check
-      run: |
-          if echo "${{ toJSON(fromJSON(steps.parent_issue.outputs.json).fields.subtasks) }}" | jq '( map(.fields.status.name == "Done") | all)' ; then
-            echo "all_done=true" >> $GITHUB_OUTPUT
-          else
-            echo "all_done=false" >> $GITHUB_OUTPUT
-          fi
+      run: | 
+        subtasks=${{ toJSON(fromJSON(steps.parent_issue.outputs.json).fields.subtasks) }}
+        if echo "${{ $subtasks }}" | jq '( map(.fields.status.name == "Done") | all)' ; then
+          echo "all_done=true" >> $GITHUB_OUTPUT
+        else
+          echo "all_done=false" >> $GITHUB_OUTPUT
+        fi
 
     - name: Check 
       run: echo "${{ steps.parent_check.outputs.all_done }}"
