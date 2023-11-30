@@ -55,7 +55,7 @@ jobs:
     - name: Determine If All Subtasks Are Done
       id: parent_check
       run: |        
-        if echo "${{ contains(steps.format_subtasks.outputs.subtasks, 'In Progress') }}" ; then
+        if "${{ fromJSON(contains(steps.format_subtasks.outputs.subtasks, 'In Progress')) }}" ; then
           echo "all_done=true" >> $GITHUB_OUTPUT
         else
           echo "all_done=false" >> $GITHUB_OUTPUT
