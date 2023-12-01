@@ -47,7 +47,7 @@ jobs:
       with:
         issue: ${{ fromJSON(steps.issue.outputs.json).fields.parent.key }}
 
-    - name: Story Is Done
+    - name: Story Is Not Done
       if: |
         ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' &&
         ( contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'To Do') ||
@@ -57,13 +57,13 @@ jobs:
       run: |
         echo "Everything is not done, increment minor sem ver value."
 
-    - name: Story Is Not Done
+    - name: Story Is Done
       if: |
         ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' &&
-        !( contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'To Do') &&
-          contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Progress') &&
-          contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Code Review')
-        ) }}
+        !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'To Do') &&
+        !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Progress') &&
+        !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.status.name, 'In Code Review')
+        }}
       run: |
         echo "Everything isn't done, increment major sem ver value."
 
