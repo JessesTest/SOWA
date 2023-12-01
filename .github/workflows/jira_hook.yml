@@ -30,7 +30,7 @@ jobs:
       id: get-issue-id
       run: |
         branch_name=${{ github.event.pull_request.head.ref }}
-        issue_id=$(echo $branch_name | sed -n 's/-//2p') >> "$GITHUB_OUTPUT"
+        issue_id=$(echo $branch_name | cut -d '-' -f 1-2) >> "$GITHUB_OUTPUT"
         echo "$issue_id"
         
     - name: Transition issue
