@@ -32,7 +32,10 @@ jobs:
         branch_name=${{ github.event.pull_request.head.ref }}
         issue_id=$(echo $branch_name | cut -d '-' -f 1-2) >> "$GITHUB_OUTPUT"
         echo "$issue_id"
-        
+
+    - name: Show Id
+      run: echo "${{ steps.get-issue-id.outputs.issue_id }}"
+
     - name: Transition issue
       uses: atlassian/gajira-transition@master
       with:
