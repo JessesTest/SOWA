@@ -29,8 +29,9 @@ jobs:
     - name: Get Jira Issue
       id: get-issue-id
       run: |
-        branch_name=github.event.pull_request.head.ref
-        issue_id=${branch_name%%-*} >> "$GITHUB_OUTPUT" 
+        branch_name=${{ github.event.pull_request.head.ref }}
+        issue_id=${branch_name%%-*} >> "$GITHUB_OUTPUT"
+        echo "$issue_id"
         
     - name: Transition issue
       uses: atlassian/gajira-transition@master
