@@ -48,7 +48,7 @@ jobs:
         issue: ${{ fromJSON(steps.issue.outputs.json).fields.parent.key }}
 
     - name: Display Parent Data
-      run: echo "${{ steps.parent_issue.outputs.json }}"
+      run: echo "${{ fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name }}"
 
     - name: Story Is Not Done
       if: |
