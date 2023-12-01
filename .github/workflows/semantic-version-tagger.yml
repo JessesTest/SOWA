@@ -14,27 +14,53 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
+      - name: Jira Login
+        uses: atlassian/gajira-login@master
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          
+      - name: Get Issue Key From Branch
+        id: get-issue-key
+        uses: atlassian/gajira-find-issue-key@v3
+        with:
+          string: ${{ github.event.pull_request.head.ref }}
+
+      - name: Transition issue
+        uses: atlassian/gajira-transition@master
+        with:
+          issue: ${{ steps.get-issue-key.outputs.issue }}
+          transition: "Done"
+
+      - name: Get Issue Properties
+        id: issue
+        uses: frieder/jira-issue-info@v1
+        with:
+          issue: ${{ steps.get-issue-key.outputs.issue }}
+        
       - name: Get Set Inputs
         run: |
           echo "CURRENT_VERSION=$(git describe --tags --abbrev=0)" >> "$GITHUB_ENV"
-          echo "PR_LABELS_STRING=${{ join(github.event.pull_request.labels.*.name) }}" >> "$GITHUB_ENV"
-          
-      - name: Check Inputs
-        run: |
-          echo "$CURRENT_VERSION"
-          echo "$PR_LABELS_STRING"
+          echo "ISSUE_TYPE=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}" >> "$GITHUB_ENV"
+
+      - name: If All Other Subtasks Are Done
+        if: |
+          steps.determine-issue-type.outputs.issue_type == 'Subtask' &&
+          !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'To Do') &&
+          !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'In Progress') &&
+          !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'In Code Review')
+        run: echo "ISSUE_TYPE=Story >> "$GITHUB_ENV"
+        
       
       - name: Increment Version
         id: increment-version
-        uses: JesseBroxterman/semantic-version-increment@v2.0.5
+        uses: JesseBroxterman/semantic-version-increment@v2.0.6
         with:
           current_version: ${{ env.CURRENT_VERSION }}
-          pr_labels: ${{ env.PR_LABELS_STRING }}
-          
-      - name: Check Output
-        run: echo "${{ steps.increment-version.outputs.new_version }}"
-        
+          issue_type: ${{ env.ISSUE_TYPE }}
+                 
       - name: Add New Tag
         uses: actions/github-script@v6
         with:
