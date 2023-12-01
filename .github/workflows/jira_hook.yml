@@ -1,7 +1,9 @@
 name: jira hook
 
 on:
-   workflow_dispatch:
+  pull_request:
+    types:
+      - closed  
 
 jobs:
   get-jira-properties:
@@ -23,18 +25,24 @@ jobs:
         JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
         JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
         JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+    - name: Get Jira Issue
+      id: get-issue-id
+      run: |
+        branch_name=github.event.pull_request.head.ref
+        issue_id=${branch_name%%-*} >> "$GITHUB_OUTPUT" 
         
     - name: Transition issue
       uses: atlassian/gajira-transition@master
       with:
-        issue: FLEX-9
+        issue: ${{ steps.get-issue-id.outputs.issue_id }}
         transition: "Done"
         
     - name: Get Issue Properties
       id: issue
       uses: frieder/jira-issue-info@v1
       with:
-        issue: FLEX-9
+        issue: ${{ steps.get-issue-id.outputs.issue_id }}
 
     - name: Get Issue Type
       id: determine-issue-type
