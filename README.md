@@ -5,7 +5,7 @@ Rewrite of the original solid waste billing system: SW-Email-ConsoleApplication:
 
 <summary>List of the scheduled jobs</summary>
 
-  | Schedule | Title | Details |
+  | Schadule | Title | Details |
   | --- | --- | --- |
   | 7:00 AM Daily | Container Status | **Delivered.trdp**, Generates an exception report <br /> Recipients:  Deanna, Angie, Debbie George, @Jon Miller and Kyle McDonald |
   | 7:00 AM Daily | Work Order | **WorkOrderException.trdp**, Generates an exception report <br /> Recipients: Deanna, Angie, Debbie George, @Jon Miller and Kyle McDonald |
