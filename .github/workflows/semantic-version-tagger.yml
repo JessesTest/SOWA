@@ -58,7 +58,7 @@ jobs:
           !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'To Do') &&
           !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'In Progress') &&
           !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'In Code Review')
-        run: echo "ISSUE_TYPE=Story >> "$GITHUB_ENV"
+        run: echo "ISSUE_TYPE=Story" >> "$GITHUB_ENV"
         
       
       - name: Increment Version
