@@ -3,7 +3,7 @@ Rewrite of the original solid waste billing system: SW-Email-ConsoleApplication:
 
 <details>
 
-<summary>List of scheduled jobs</summary>
+<summary>List of the scheduled jobs</summary>
 
   | Schadule | Title | Details |
   | --- | --- | --- |
