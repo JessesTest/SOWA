@@ -1,8 +1,9 @@
 name: Snyk Check
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-      
+  # pull_request:
+    # types: [opened, synchronize, reopened]
+  workflow_dispatch
+  
 jobs:
   SnykCheck:
     runs-on: ubuntu-latest
