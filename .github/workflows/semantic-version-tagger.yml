@@ -45,6 +45,13 @@ jobs:
           echo "CURRENT_VERSION=$(git describe --tags --abbrev=0)" >> "$GITHUB_ENV"
           echo "ISSUE_TYPE=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}" >> "$GITHUB_ENV"
 
+      - name: If Subtask Get Parent Issue
+        if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
+        id: parent_issue
+        uses: frieder/jira-issue-info@v1
+        with:
+          issue: ${{ fromJSON(steps.issue.outputs.json).fields.parent.key }}
+
       - name: If All Other Subtasks Are Done
         if: |
           steps.determine-issue-type.outputs.issue_type == 'Subtask' &&
