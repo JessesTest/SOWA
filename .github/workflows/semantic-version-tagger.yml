@@ -46,7 +46,7 @@ jobs:
           echo "ISSUE_TYPE=${{fromJSON(steps.issue.outputs.json).fields.issuetype.name}}" >> "$GITHUB_ENV"
 
       - name: If Subtask Get Parent Issue
-        if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
+        if: ${{ fromJSON(steps.issue.outputs.json).fields.issuetype.name == 'Subtask' }}
         id: parent_issue
         uses: frieder/jira-issue-info@v1
         with:
@@ -54,7 +54,7 @@ jobs:
 
       - name: If All Other Subtasks Are Done
         if: |
-          steps.determine-issue-type.outputs.issue_type == 'Subtask' &&
+          fromJSON(steps.issue.outputs.json).fields.issuetype.name == 'Subtask' &&
           !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'To Do') &&
           !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'In Progress') &&
           !contains(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, 'In Code Review')
