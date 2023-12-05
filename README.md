@@ -1,4 +1,4 @@
-# SOWA2.0
+# SOWA 2.0
 Rewrite of the original solidwaste billing systemSW-Email-ConsoleApplication:
 
 <details>
