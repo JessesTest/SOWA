@@ -2,7 +2,7 @@ name: Flag Tag as Release
 on:
   release:
     types:
-      - published  
+      - created  
 jobs:
   flag-tag:   
     permissions:
