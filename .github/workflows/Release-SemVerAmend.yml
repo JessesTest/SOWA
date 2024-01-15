@@ -15,4 +15,4 @@ jobs:
           git tag -f ${{ github.event.release.tag_name }}.r ${{ github.sha }}
           git push origin --force ${{ github.event.release.tag_name }}.r
           git tag -d ${{ github.event.release.tag_name }}
-          git push origin --force ${{ github.event.release.tag_name }}
+          git push origin --force HEAD:main
