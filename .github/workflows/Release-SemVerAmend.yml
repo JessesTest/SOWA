@@ -1,0 +1,15 @@
+name: Flag Tag as Release
+on:
+  release:
+    types:
+      - published  
+jobs:
+  flag-tag:   
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:       
+      - name: Amend tag
+        run: |
+          git tag -f ${{ github.event.release.tag_name }}-r ${{ github.sha }}
+          git push origin --force ${{ steps.get_tag.outputs.tag }}-r
