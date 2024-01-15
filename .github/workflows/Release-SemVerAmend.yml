@@ -10,7 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:       
       - uses: actions/checkout@v3
-      - name: Amend tag
-        run: |
-          git tag -f ${{ github.event.release.tag_name }}-r ${{ github.sha }}
-          git push origin --force ${{ steps.get_tag.outputs.tag }}-r
+      - name: Update Tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.updateRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ github.event.release.tag_name }}-r',
+              sha: context.sha
+            })            
