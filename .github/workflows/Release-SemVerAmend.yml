@@ -13,4 +13,4 @@ jobs:
       - name: Amend tag
         run: |
           git tag -f ${{ github.event.release.tag_name }}.r ${{ github.sha }}
-          git push origin HEAD:main --force
+          git push origin --force ${{ github.event.release.tag_name }}.r
