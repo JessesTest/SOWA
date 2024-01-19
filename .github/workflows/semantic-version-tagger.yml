@@ -26,7 +26,8 @@ jobs:
         id: get-issue-key
         uses: atlassian/gajira-find-issue-key@v3
         with:
-          string: ${{ github.event.pull_request.head.ref }}
+          string: FLEX-2
+          # string: ${{ github.event.pull_request.head.ref }}
 
       - name: Transition issue
         uses: atlassian/gajira-transition@master
