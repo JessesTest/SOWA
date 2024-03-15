@@ -47,7 +47,7 @@ jobs:
         issue: ${{ steps.get-issue-key.outputs.issue }}
 
     - name: Display Issue Data
-      run: echo "${{ fromJSON(steps.issue.outputs.json) }}"      
+      run: echo "${{ steps.issue.outputs.json }}"      
 
     - name: Get Issue Type
       id: determine-issue-type
