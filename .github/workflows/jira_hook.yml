@@ -33,11 +33,11 @@ jobs:
       with:
         string: ${{ github.event.pull_request.head.ref }}
 
-    - name: Transition issue
-      uses: atlassian/gajira-transition@master
-      with:
-        issue: ${{ steps.get-issue-key.outputs.issue }}
-        transition: "Done"
+    # - name: Transition issue
+    #   uses: atlassian/gajira-transition@master
+    #   with:
+    #     issue: ${{ steps.get-issue-key.outputs.issue }}
+    #     transition: "Done"
         
     - name: Get Issue Properties
       id: issue
