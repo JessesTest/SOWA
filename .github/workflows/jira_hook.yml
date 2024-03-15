@@ -47,7 +47,7 @@ jobs:
         issue: ${{ steps.get-issue-key.outputs.issue }}
 
     - name: Display Issue Data
-      run: echo "${{ join(fromJSON(steps.issue.outputs.json).fields.subtasks.*.fields.status.name, ', ') }}"      
+      run: echo "${{ fromJSON(steps.issue.outputs.json) }}"      
 
     - name: Get Issue Type
       id: determine-issue-type
@@ -61,6 +61,7 @@ jobs:
         issue: ${{ fromJSON(steps.issue.outputs.json).fields.parent.key }}
 
     - name: Display Parent Data
+      if: ${{ steps.determine-issue-type.outputs.issue_type == 'Subtask' }}
       run: echo "${{ join(fromJSON(steps.parent_issue.outputs.json).fields.subtasks.*.fields.status.name, ', ') }}"
 
     - name: Story Is Not Done
