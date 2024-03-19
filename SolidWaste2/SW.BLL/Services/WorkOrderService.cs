@@ -25,8 +25,7 @@ public class WorkOrderService : IWorkOrderService
         return await db.WorkOrders
             .Where(e => e.WorkOrderId == id)
             .AsNoTracking()
-            .FirstOrDefaultAsync();
-        //shouldn't this be Single or Default?
+            .SingleOrDefaultAsync();
     }
 
     public async Task Add(WorkOrder workOrder)
