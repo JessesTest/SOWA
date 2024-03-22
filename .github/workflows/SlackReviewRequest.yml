@@ -1,0 +1,12 @@
+name: Slack - Review Request
+on:
+  pull_request:
+    types: [ review_requested ]
+      
+jobs:
+  SendSlackReviewRequest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print info
+        run: |
+          echo "Action: ${{ github.event.action }}"
