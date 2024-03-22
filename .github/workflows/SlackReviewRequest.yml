@@ -7,6 +7,8 @@ jobs:
   SendSlackReviewRequest:
     runs-on: ubuntu-latest
     steps:
-      - name: Print info
-        run: |
-          echo "Action: ${{ github.event.action }}"
+     - name: Dump GitHub context
+       env:
+         GITHUB_CONTEXT: ${{ toJson(github) }}
+       run: |
+         echo "$GITHUB_CONTEXT"
