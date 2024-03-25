@@ -12,3 +12,4 @@ jobs:
          GITHUB_CONTEXT: ${{ toJson(github) }}
        run: |
          echo "$GITHUB_CONTEXT"
+         echo ${{ github.event.requested_reviewers[-1].id }}
