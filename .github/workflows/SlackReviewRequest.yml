@@ -8,8 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
      - name: Dump GitHub context
+       id: first
        env:
          GITHUB_CONTEXT: ${{ toJson(github) }}
        run: |
          echo "$GITHUB_CONTEXT"
-         echo ${{ github.event.pull_request.requested_reviewers[-1].id }}
+         echo "userID=${{ fromJson( github.event.pull_request.requested_reviewers[-1].id }}" >> $GITHUB_OUTPUT
+
+     - name: Check ID
+       run: echo "${{ steps.first.outputs.userID }}"
