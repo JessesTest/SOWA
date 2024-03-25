@@ -13,7 +13,7 @@ jobs:
          GITHUB_CONTEXT: ${{ toJson(github) }}
        run: |
          echo "$GITHUB_CONTEXT"
-         echo "userID=${{ fromJson( github.event.pull_request.requested_reviewers[-1].id ) }}" >> $GITHUB_ENV
+         echo "userID=${{ github.event.pull_request.requested_reviewers[-1].id }}" >> $GITHUB_ENV
 
      - name: Check ID
        run: |
