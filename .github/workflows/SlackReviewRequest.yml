@@ -22,7 +22,7 @@ jobs:
          
      - name: Parse JSON for Channel ID
        run: |
-         value=${{ fromJson(env.jsonChannels).[env.userID] }}
+         value="${{ fromJson(env.jsonChannels).[env.userID] }}"
          echo "channelID=$value" >> $GITHUB_ENV
 
          
