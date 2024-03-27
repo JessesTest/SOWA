@@ -18,12 +18,12 @@ jobs:
 
      - name: Download JSON file
        run: |
-         echo "jsonChannels='cat ./slack-channels.json'" >> >> $GITHUB_ENV
+         echo "jsonChannels='cat ./slack-channels.json'"
          
      - name: Parse JSON for Channel ID
        run: |
-         value="${{ fromJson(env.jsonChannels).(env.userID) }}"
-         echo "channelID=$value" >> $GITHUB_ENV
+         channel=$(jq -r '."${{ env.userID }}"' ./slack-channels.json)
+         echo "channelID: $channel"  >> $GITHUB_ENV
 
          
      - name: Check Channel ID
