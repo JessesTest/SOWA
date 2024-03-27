@@ -23,7 +23,7 @@ jobs:
      - name: Parse JSON for Channel ID
        run: |
          channel=$(jq -r '."${{ env.userID }}"' ./slack-channels.json)
-         echo "channelID: $channel"  >> $GITHUB_ENV
+         echo "channelID=$channel"  >> $GITHUB_ENV
 
          
      - name: Check Channel ID
