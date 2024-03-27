@@ -23,9 +23,14 @@ jobs:
 
      - name: Download and parse JSON file
        run: |
-         value=$(jq -r '.${{ env.userID }}' ./slack-channels.json)
+         json='cat ./slack-channels.json'
+         value=${{ fromJson(json).${{ env.userID }} }}
          echo "channelID=$value" >> $GITHUB_ENV
-
+         
+     - name: Check Channel ID
+       run: |
+         echo "${{ env.channelID }}"
+         
      - name: Post to a Slack channel
        id: slack
        uses: slackapi/slack-github-action@v1.25.0
