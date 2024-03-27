@@ -7,13 +7,8 @@ jobs:
   SendSlackReviewRequest:
     runs-on: ubuntu-latest
     steps:
-     - name: Dump GitHub context
-       id: first
-       env:
-         GITHUB_CONTEXT: ${{ toJson(github) }}
-       run: |
-         echo "$GITHUB_CONTEXT"
-         echo "userID=${{ github.event.pull_request.requested_reviewers[0].id }}" >> $GITHUB_ENV
+     - name: Get UserID
+       run: echo "userID=${{ github.event.pull_request.requested_reviewers[0].id }}" >> $GITHUB_ENV
 
      - name: Check ID
        run: |
@@ -21,10 +16,13 @@ jobs:
 
      - uses: actions/checkout@v3
 
-     - name: Download and parse JSON file
+     - name: Download JSON file
        run: |
-         json='cat ./slack-channels.json'
-         value=${{ fromJson($json).[env.userID] }}
+         echo "jsonChannels='cat ./slack-channels.json'" >> >> $GITHUB_ENV
+         
+     - name: Parse JSON for Channel ID
+       run: |
+         value=${{ fromJson(env.jsonChannels).[env.userID] }}
          echo "channelID=$value" >> $GITHUB_ENV
 
          
