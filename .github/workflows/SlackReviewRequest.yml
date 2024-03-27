@@ -19,6 +19,11 @@ jobs:
        run: |
          echo "${{ env.userID }}"
 
+     - name: Download and parse JSON file
+       run: |
+         value=$(jq -r '.${{ env.userID }}' ./slack-channels.json)
+         echo "channelID=$value" >> $GITHUB_ENV
+
      - name: Post to a Slack channel
        id: slack
        uses: slackapi/slack-github-action@v1.25.0
@@ -26,7 +31,7 @@ jobs:
          # Slack channel id, channel name, or user id to post message.
          # See also: https://api.slack.com/methods/chat.postMessage#channels
          # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
-         channel-id: 'C06R40DRKMF'
+         channel-id: '${{ env.channelID }}'
          # For posting a simple plain text message
          slack-message: "Test"
        env:
