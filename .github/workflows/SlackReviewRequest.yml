@@ -39,6 +39,6 @@ jobs:
          # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
          channel-id: '${{ env.channelID }}'
          # For posting a simple plain text message
-         slack-message: "You've been requested as reviewer for a pull request: ${{ github.event.pull_request.html.href }}."
+         slack-message: "You've been requested as reviewer for a pull request: ${{ github.event.pull_request._links.html.href }}."
        env:
          SLACK_BOT_TOKEN: ${{ secrets.SLACKBOT_REVIEW_REQUEST_TOKEN }}
